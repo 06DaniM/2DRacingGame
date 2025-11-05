@@ -4,9 +4,9 @@
 AICar::AICar() {}
 AICar::~AICar() {}
 
-void AICar::Start()
+void AICar::Start(Vector2 spawnPoint)
 {
-    Car::Start();
+    Car::Start(spawnPoint);
     LOG("AI Car Start");
 }
 
@@ -22,5 +22,5 @@ void AICar::CleanUp()
 
 void AICar::Draw()
 {
-    DrawRectangle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 20, 20, RED);
+    DrawRectangle(position.x, position.y, width, height, RED);
 }

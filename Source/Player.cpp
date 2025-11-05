@@ -4,9 +4,9 @@
 Player::Player() {}
 Player::~Player() {}
 
-void Player::Start()
+void Player::Start(Vector2 spawnPoint)
 {
-    Car::Start();
+    Car::Start(spawnPoint);
     LOG("Player Start");
 }
 
@@ -22,5 +22,5 @@ void Player::CleanUp()
 
 void Player::Draw()
 {
-    DrawRectangle(SCREEN_WIDTH / 2 - 50, SCREEN_HEIGHT / 2, 20, 20, GREEN);
+    DrawRectangle(position.x, position.y, width, height, GREEN);
 }

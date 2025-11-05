@@ -15,12 +15,12 @@ ModuleGame::~ModuleGame()
 
 bool ModuleGame::Start()
 {
-    player.Start();
+    player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
 
     for (int i = 0; i < 3; ++i)
     {
         AICar* ai = new AICar();
-        ai->Start();
+        ai->Start({ (float)SCREEN_WIDTH / 2 + i * 60, SCREEN_HEIGHT / 2 });
         aiCars.push_back(ai);
     }
 

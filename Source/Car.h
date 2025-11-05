@@ -10,8 +10,14 @@ public:
     Car();
     virtual ~Car();
 
-    virtual void Start();
+    virtual void Start(Vector2 spawnPoint);
     virtual void Update(float dt);
     virtual void CleanUp();
     virtual void Draw();
+
+public:
+    PhysBody* body = nullptr;
+    Vector2 position;
+    float width = 40.0f;
+    float height = 20.0f;
 };

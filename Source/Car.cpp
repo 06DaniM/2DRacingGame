@@ -5,8 +5,9 @@ Car::Car() {}
 
 Car::~Car() {}
 
-void Car::Start()
+void Car::Start(Vector2 spawnPoint)
 {
+    position = spawnPoint;
     LOG("Car Start");
 }
 
