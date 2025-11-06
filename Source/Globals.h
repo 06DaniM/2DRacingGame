@@ -17,6 +17,12 @@ void log(const char file[], int line, const char* format, ...);
 #define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
 #define TO_BOOL( a )  ( (a != 0) ? true : false )
 
+#define PIXELS_PER_METER 50.0f
+#define METER_PER_PIXEL  (1.0f / PIXELS_PER_METER)
+
+#define METERS_TO_PIXELS(m) ((int) ((m) * PIXELS_PER_METER))
+#define PIXELS_TO_METERS(p) ((float) (p) * METER_PER_PIXEL)
+
 typedef unsigned int uint;
 typedef unsigned __int32 uint32;
 typedef unsigned __int64 uint64;
@@ -39,3 +45,6 @@ enum update_status
 #define WIN_FULLSCREEN_DESKTOP false
 #define VSYNC				true
 #define TITLE "Physics 2D Playground"
+
+class Application;
+extern Application* App;

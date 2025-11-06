@@ -23,6 +23,9 @@ public:
 	update_status Update();
 	bool CleanUp();
 
+	void OnCollision(PhysBody* physA, PhysBody* physB) override;
+	void EndCollision(PhysBody* physA, PhysBody* physB) override;
+
 private:
 	Player player;
 	std::vector<AICar*> aiCars;

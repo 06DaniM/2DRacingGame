@@ -8,6 +8,8 @@
 
 #include "Application.h"
 
+Application* App = nullptr;
+
 Application::Application()
 {
 	window = new ModuleWindow(this);

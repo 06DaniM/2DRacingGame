@@ -1,7 +1,8 @@
 #pragma once
 #include "Car.h"
+#include "Listener.h"
 
-class Player : public Car
+class Player : public Car, public Listener
 {
 public:
     Player();
@@ -11,4 +12,7 @@ public:
     void Update(float dt) override;
     void CleanUp() override;
     void Draw() override;
+
+    void OnCollision(PhysBody* physA, PhysBody* physB) override;
+    void EndCollision(PhysBody* physA, PhysBody* physB) override;
 };

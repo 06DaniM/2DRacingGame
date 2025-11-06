@@ -78,6 +78,9 @@
     <ClInclude Include="Source\Car.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Listener.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">

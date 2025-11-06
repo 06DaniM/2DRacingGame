@@ -55,3 +55,10 @@ bool ModuleGame::CleanUp()
     return true;
 }
 
+void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
+{
+}
+
+void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
+{
+}

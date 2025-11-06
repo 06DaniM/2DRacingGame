@@ -1,7 +1,6 @@
 #pragma once
 #include "Globals.h"
 #include "p2Point.h"
-#include "Application.h"
 #include "ModulePhysics.h"
 
 class Car
@@ -14,6 +13,9 @@ public:
     virtual void Update(float dt);
     virtual void CleanUp();
     virtual void Draw();
+
+    virtual void OnCollision(PhysBody* physA, PhysBody* physB) {}
+    virtual void EndCollision(PhysBody* physA, PhysBody* physB) {}
 
 public:
     PhysBody* body = nullptr;

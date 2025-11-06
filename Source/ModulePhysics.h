@@ -2,26 +2,116 @@
 
 #include "Module.h"
 #include "Globals.h"
+#include "Listener.h"
+#include "box2d/box2d.h"
 
-#include "box2d\box2d.h"
+enum bodyType {
+    DYNAMIC,
+    STATIC,
+    KINEMATIC
+};
 
+enum class ColliderType {
+    PLAYER,
+    AICAR,
+    UNKNOWN
+};
 
-// Module --------------------------------------
-class ModulePhysics : public Module, public b2ContactListener // TODO
+class PhysBody
 {
 public:
-	ModulePhysics(Application* app, bool start_enabled = true);
-	~ModulePhysics();
+    PhysBody() : body(nullptr), listener(nullptr), ctype(ColliderType::UNKNOWN) {}
+    ~PhysBody() {}
 
-	bool Start();
-	update_status PreUpdate();
-	update_status PostUpdate();
-	bool CleanUp();
+    void GetPosition(int& x, int& y) const
+    {
+        if (body)
+        {
+            b2Vec2 pos = body->GetPosition();
+            x = METERS_TO_PIXELS(pos.x);
+            y = METERS_TO_PIXELS(pos.y);
+        }
+    }
 
-	
+    float GetRotation() const
+    {
+        return body ? RADTODEG * body->GetAngle() : 0.0f;
+    }
+
+    bool Contains(int x, int y) const
+    {
+        if (!body) return false;
+
+        for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext())
+        {
+            if (f->GetShape()->TestPoint(body->GetTransform(), b2Vec2(PIXELS_TO_METERS(x), PIXELS_TO_METERS(y))))
+                return true;
+        }
+        return false;
+    }
+
+    void SetSensor(bool isSensor)
+    {
+        if (!body) return;
+
+        for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext())
+        {
+            f->SetSensor(isSensor);
+        }
+    }
+
+    void Draw(int width, int height, Color color) const
+    {
+        if (!body) return;
+
+        int x, y;
+        GetPosition(x, y);
+
+        float rotation = GetRotation();
+
+        DrawRectanglePro(
+            { (float)x, (float)y, (float)width, (float)height },
+            { (float)width / 2, (float)height / 2 },
+            rotation,
+            color
+        );
+    }
+
+public:
+    b2Body* body = nullptr;
+    ColliderType ctype;
+    bodyType btype;
+    Listener* listener;
+    int itemScore;
+    int isActive = true;
+};
+
+// Module --------------------------------------
+class ModulePhysics : public Module, public b2ContactListener
+{
+public:
+    ModulePhysics(Application* app, bool start_enabled = true);
+    ~ModulePhysics();
+
+    bool Start() override;
+    update_status PreUpdate() override;
+    update_status PostUpdate() override;
+    bool CleanUp() override;
+
+    PhysBody* CreateRectangle(int x, int y, int width, int height, bool isSensor, Listener* listener, ColliderType ctype, bodyType type);
+    PhysBody* CreateCircle(int x, int y, int radius, bool isSensor, Listener* listener, ColliderType ctype = ColliderType::UNKNOWN, bodyType type = bodyType::DYNAMIC);
+    PhysBody* CreateChain(int x, int y, int* points, int size, bool isSensor, Listener* listener, ColliderType ctype = ColliderType::UNKNOWN, bodyType type = bodyType::STATIC);
+
+    void SetBodyPosition(PhysBody* pbody, int x, int y, bool resetRotation);
+
+    void BeginContact(b2Contact* contact);
+    void EndContact(b2Contact* contact);
+
+    b2World* world = nullptr;
 
 private:
-
-	bool debug;
-	
+    bool debug = false;
+    b2Body* ground = nullptr;
+    b2Body* mouseSelect = nullptr;
+    b2MouseJoint* mouse_joint = nullptr;
 };
