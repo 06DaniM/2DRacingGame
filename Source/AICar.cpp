@@ -8,7 +8,7 @@ AICar::~AICar() {}
 void AICar::Start(Vector2 spawnPoint)
 {
     Car::Start(spawnPoint);
-    body = App->physics->CreateRectangle(spawnPoint.x, spawnPoint.y, width, height, false, this, ColliderType::AICAR, DYNAMIC);
+
     LOG("AI Car Start");
 }
 

@@ -160,6 +160,49 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size, bool i
 	return pbody;
 }
 
+PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, float wheelRadius)
+{
+	// Create the chassis
+	PhysBody* chassis = CreateRectangle(x, y, width, height, false, nullptr, ColliderType::UNKNOWN, DYNAMIC);
+	chassis->body->SetAngularDamping(3.0f);
+	chassis->body->SetLinearDamping(0.8f);
+
+	// Calculate the positions of the wheels
+	float offsetX = width * 0.4f;
+	float offsetY = height * 0.5f;
+
+	// Front wheels
+	PhysBody* wheelFrontLeft = CreateCircle(x - offsetX, y - offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+	PhysBody* wheelFrontRight = CreateCircle(x + offsetX, y - offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+
+	// Rears wheels
+	PhysBody* wheelBackLeft = CreateCircle(x - offsetX, y + offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+	PhysBody* wheelBackRight = CreateCircle(x + offsetX, y + offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+
+	// Joints
+	b2RevoluteJointDef jointDef;
+	jointDef.enableMotor = false;
+	jointDef.enableLimit = true;
+	jointDef.lowerAngle = 0;
+	jointDef.upperAngle = 0;
+
+	auto createJoint = [&](PhysBody* wheel)
+		{
+			jointDef.Initialize(chassis->body, wheel->body, wheel->body->GetWorldCenter());
+			App->physics->world->CreateJoint(&jointDef);
+		};
+
+	// Creates the joints
+	createJoint(wheelFrontLeft);
+	createJoint(wheelFrontRight);
+	createJoint(wheelBackLeft);
+	createJoint(wheelBackRight);
+
+	LOG("Car created successfully with 4 wheels and chassis");
+
+	return chassis;
+}
+
 void ModulePhysics::SetBodyPosition(PhysBody* pbody, int x, int y, bool resetRotation)
 {
 	if (pbody == nullptr || pbody->body == nullptr)

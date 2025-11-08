@@ -1,6 +1,7 @@
 #pragma once
 #include "Globals.h"
 #include "p2Point.h"
+#include "Application.h"
 #include "ModulePhysics.h"
 
 class Car
@@ -19,7 +20,13 @@ public:
 
 public:
     PhysBody* body = nullptr;
+
     Vector2 position;
-    float width = 40.0f;
-    float height = 20.0f;
+    float width = 50;
+    float height = 25;
+
+    float acceleration = 15.0f;
+    float maxSpeed = 10.0f;
+    float turnSpeed = 1.0f;
+    float brakeForce = 8.0f;
 };
