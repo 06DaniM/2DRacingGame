@@ -18,6 +18,7 @@ enum class ColliderType {
     AICAR,
     WHEEL,
     UI,
+    CHECKEREDFLAG,
     UNKNOWN
 };
 

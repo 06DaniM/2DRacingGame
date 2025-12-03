@@ -20,7 +20,7 @@ enum GameState
 class PhysBody;
 class PhysicEntity;
 
-class ModuleGame : public Module
+class ModuleGame : public Module, public Listener
 {
 public:
 	ModuleGame(Application* app, bool start_enabled = true);
@@ -30,8 +30,8 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-	void OnCollision(PhysBody* physA, PhysBody* physB) override;
-	void EndCollision(PhysBody* physA, PhysBody* physB) override;
+	void OnCollision(PhysBody* physA, PhysBody* physB);
+	void EndCollision(PhysBody* physA, PhysBody* physB);
 
 private:
 	void DrawGameplay();
@@ -56,23 +56,27 @@ private:
 
 	float time = 0.0f;
 
-	PhysBody* pAMR23;
-	PhysBody* pR25;
-	PhysBody* pGP2Engine;
-	PhysBody* pMc4;
-	PhysBody* pMc22;
-	PhysBody* pPinkMerc;
-	PhysBody* pW11;
-	PhysBody* pRB21; 
+	PhysBody* pAMR23 = NULL;
+	PhysBody* pR25 = NULL;
+	PhysBody* pGP2Engine = NULL;
+	PhysBody* pMp4 = NULL;
+	PhysBody* pMp22 = NULL;
+	PhysBody* pPinkMerc = NULL;
+	PhysBody* pW11 = NULL;
+	PhysBody* pRB21 = NULL;
 
 	Texture2D tAMR23;
 	Texture2D tR25;
 	Texture2D tGP2Engine;
-	Texture2D tMc4;
-	Texture2D tMc22;
+	Texture2D tMp4;
+	Texture2D tMp22;
 	Texture2D tPinkMerc;
 	Texture2D tW11;
 	Texture2D tRB21;
+
+	PhysBody* checkeredFlag = NULL;
+
+	Texture2D track;
 
 	bool gamePlayStart = false;
 };

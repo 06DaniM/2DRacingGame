@@ -3,6 +3,7 @@
 #include "p2Point.h"
 #include "Application.h"
 #include "ModulePhysics.h"
+#include "ModuleRender.h"
 
 class Car
 {
@@ -35,9 +36,9 @@ protected:
 
     bool canMove = true;
 
-    int lap = 1;
     int checkPoint = 0;
 
 public:
     Texture2D texture;
+    int lap = 0;
 };

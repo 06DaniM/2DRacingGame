@@ -15,6 +15,10 @@ void Car::Start(Vector2 spawnPoint)
 
 void Car::Update(float dt)
 {
+    int x, y;
+    pbody->GetPosition(x, y);
+    position = { (float)x, (float)y };
+
     if (IsKeyPressed(KEY_F2))
         canMove = !canMove;
 }

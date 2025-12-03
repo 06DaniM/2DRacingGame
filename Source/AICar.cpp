@@ -8,6 +8,8 @@ AICar::~AICar() {}
 void AICar::Start(Vector2 spawnPoint)
 {
     Car::Start(spawnPoint);
+    pbody->ctype = ColliderType::AICAR;
+    pbody->listener = this;
 
     LOG("AI Car Start");
 }

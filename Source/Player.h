@@ -16,9 +16,11 @@ public:
     void OnCollision(PhysBody* physA, PhysBody* physB) override;
     void EndCollision(PhysBody* physA, PhysBody* physB) override;
 
+    void UpdateCameraPos();
+
 private:
     void Move();
-
+    Camera2D camera;
 public:
 
 private:

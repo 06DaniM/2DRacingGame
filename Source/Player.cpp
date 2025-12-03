@@ -8,6 +8,14 @@ Player::~Player() {}
 void Player::Start(Vector2 spawnPoint)
 {
     Car::Start(spawnPoint);
+    pbody->ctype = ColliderType::PLAYER;
+    pbody->listener = this;
+
+    Camera2D camera;
+    camera.offset = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
+    camera.target = { position.x, position.y };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
 
     LOG("Player Start");
 }
@@ -15,7 +23,6 @@ void Player::Start(Vector2 spawnPoint)
 void Player::Update(float dt)
 {
     if (!pbody) return;
-
     Move();
 
     return Car::Update(dt);
