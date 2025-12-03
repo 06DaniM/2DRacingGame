@@ -20,12 +20,10 @@ public:
     virtual void EndCollision(PhysBody* physA, PhysBody* physB) {}
 
 protected:
-    PhysBody* pbody = nullptr;
 
     int texW = 73;
     int texH = 29;
 
-    Vector2 position;
     float width = 50;
     float height = 25;
 
@@ -39,6 +37,9 @@ protected:
     int checkPoint = 0;
 
 public:
+    Vector2 position;
+    PhysBody* pbody = nullptr;
+
     Texture2D texture;
     int lap = 0;
 };

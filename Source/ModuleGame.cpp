@@ -1,19 +1,13 @@
-#include "Globals.h"
+﻿#include "Globals.h"
 #include "Application.h"
 #include "ModuleRender.h"
 #include "ModuleGame.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
-
 #include <vector>
 
-ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled)
-{
-	
-}
-
-ModuleGame::~ModuleGame()
-{}
+ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled) {}
+ModuleGame::~ModuleGame() {}
 
 bool ModuleGame::Start()
 {
@@ -27,57 +21,28 @@ bool ModuleGame::Start()
     tPinkMerc = LoadTexture("Assets/Textures/PinkMerc.png");
     tW11 = LoadTexture("Assets/Textures/W11.png");
     tRB21 = LoadTexture("Assets/Textures/RedBull(Tututuru).png");
-
     track = LoadTexture("Assets/Textures/Track.png");
 
-    pAMR23 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pAMR23->id = "AMR23";
-    pAMR23->carTexture = tAMR23;
-    carsPhys.push_back(pAMR23);
+    auto createUIRect = [this](float x, float y, Texture2D tex, const char* id) 
+        {
+        PhysBody* p = App->physics->CreateRectangle(x, y, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+        p->id = id;
+        p->carTexture = tex;
+        carsPhys.push_back(p);
+        return p;
+        };
 
-    pGP2Engine = App->physics->CreateRectangle(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pGP2Engine->id = "GP2";
-    pGP2Engine->carTexture = tGP2Engine;
-    carsPhys.push_back(pGP2Engine);
+    pAMR23      = createUIRect(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 0.65, tAMR23,       "AMR23");
+    pGP2Engine  = createUIRect(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 0.65, tGP2Engine,   "GP2");
+    pW11        = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 0.65, tW11,         "W11");
+    pPinkMerc   = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 0.65, tPinkMerc,    "PinkMerc");
+    pR25        = createUIRect(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 1.35, tR25,         "R25");
+    pMp4        = createUIRect(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp4,         "Mc4");
+    pMp22       = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp22,        "Mc22");
+    pRB21       = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 1.35, tRB21,        "RB21");
 
-    pW11 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pW11->id = "W11";
-    pW11->carTexture = tW11;
-    carsPhys.push_back(pW11);
-    
-    pPinkMerc = App->physics->CreateRectangle(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pPinkMerc->id = "PinkMerc";
-    pPinkMerc->carTexture = tPinkMerc;
-    carsPhys.push_back(pPinkMerc);
-
-    pR25 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pR25->id = "R25";
-    pR25->carTexture = tR25;
-    carsPhys.push_back(pR25);
-
-    pMp4 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pMp4->id = "Mc4";
-    pMp4->carTexture = tMp4;
-    carsPhys.push_back(pMp4);
-
-    pMp22 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pMp22->id = "Mc22";
-    pMp22->carTexture = tMp22;
-    carsPhys.push_back(pMp22);
-
-    pRB21 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pRB21->id = "RB21";
-    pRB21->carTexture = tRB21;
-    carsPhys.push_back(pRB21);
-
-    player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
-
-    for (int i = 0; i < 7; ++i)
-    {
-        AICar* ai = new AICar();
-        ai->Start({ (float)SCREEN_WIDTH / 2 + i * 100, SCREEN_HEIGHT / 2 });
-        aiCars.push_back(ai);
-    }
+    App->renderer->DrawInsideCamera = [this]() { DrawGameplay(); };
+    App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
     gameState = GameState::InitialMenu;
 
@@ -90,51 +55,24 @@ update_status ModuleGame::Update()
 
     switch (gameState)
     {
-    case GameState::InitialMenu:
-        InitialMenu(dt);
-        break;
-
-    case GameState::Gameplay:
-        Gameplay(dt);
-        break;
-    default:
-        break;
+    case GameState::InitialMenu: InitialMenu(dt); break;
+    case GameState::Gameplay:    Gameplay(dt); break;
     }
 
     return UPDATE_CONTINUE;
 }
 
-void ModuleGame::DrawInitialMenu()
-{
-    // Row 1
-    DrawTextureEx(tAMR23, { SCREEN_WIDTH * 0.26 - 29, SCREEN_HEIGHT / 2 * 0.65 + 73}, -90, 2, WHITE);
-    DrawTextureEx(tGP2Engine, { SCREEN_WIDTH * 0.42 - 29, SCREEN_HEIGHT / 2 * 0.65 + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tW11, { SCREEN_WIDTH * 0.58 - 29, SCREEN_HEIGHT / 2 * 0.65 + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tPinkMerc, { SCREEN_WIDTH * 0.74 - 29, SCREEN_HEIGHT / 2 * 0.65 + 73 }, -90, 2, WHITE);
-
-    // Row 2
-    DrawTextureEx(tR25, { SCREEN_WIDTH * 0.26 - 29, SCREEN_HEIGHT / 2 * 1.35 + 73}, -90, 2, WHITE);
-    DrawTextureEx(tMp4, { SCREEN_WIDTH * 0.42 - 29, SCREEN_HEIGHT / 2 * 1.35 + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tMp22, { SCREEN_WIDTH * 0.58 - 29, SCREEN_HEIGHT / 2 * 1.35 + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tRB21, { SCREEN_WIDTH * 0.74 - 29, SCREEN_HEIGHT / 2 * 1.35 + 73 }, -90, 2, WHITE);
-}
-
+// === INITIAL MENU === 
 void ModuleGame::InitialMenu(float dt)
 {
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         Vector2 mouse = GetMousePosition();
-        b2Vec2 pMousePosition = b2Vec2(PIXELS_TO_METERS(mouse.x), PIXELS_TO_METERS(mouse.y));
-        std::vector<b2Fixture*> fixtures = App->physics->GetFixtures();
+        b2Vec2 pMousePos = { PIXELS_TO_METERS(mouse.x), PIXELS_TO_METERS(mouse.y) };
 
-        for (auto fixture : fixtures)
-        {
-            if (fixture->TestPoint(pMousePosition))
-            {
+        for (auto fixture : App->physics->GetFixtures()) {
+            if (fixture->TestPoint(pMousePos)) {
                 PhysBody* car = (PhysBody*)fixture->GetBody()->GetUserData().pointer;
-
-                if (car->id != "")
-                {
+                if (!car->id.empty()) {
                     player.texture = car->carTexture;
                     car->selectable = false;
                     gameState = GameState::Gameplay;
@@ -146,35 +84,40 @@ void ModuleGame::InitialMenu(float dt)
     DrawInitialMenu();
 }
 
+
+// === GAMEPLAY ===
 void ModuleGame::Gameplay(float dt)
 {
     time += dt;
 
     GameplayStart();
     CarsUpdate(dt);
-
-    DrawGameplay();
 }
 
 void ModuleGame::GameplayStart()
 {
     if (gamePlayStart) return;
 
-    App->physics->DestroyBody(pAMR23);
-    App->physics->DestroyBody(pGP2Engine);
-    App->physics->DestroyBody(pMp22);
-    App->physics->DestroyBody(pMp4);
-    App->physics->DestroyBody(pPinkMerc);
-    App->physics->DestroyBody(pR25);
-    App->physics->DestroyBody(pW11);
-    App->physics->DestroyBody(pRB21);
+    // Creation of the cars after car is selected
+    player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
 
-    for (auto ai : aiCars)
+    for (int i = 0; i < 7; ++i)
     {
-        for (auto phys : carsPhys)
-        {
-            if (phys->selectable)
-            {
+        AICar* ai = new AICar();
+        ai->Start({ (float)SCREEN_WIDTH / 2 + i * 100, SCREEN_HEIGHT / 2 });
+        aiCars.push_back(ai);
+    }
+
+    // Sets the player for the camera
+    App->renderer->SetPlayer(&player);
+
+    // Destroy the physbodies of the cars to select
+    for (auto p : carsPhys) App->physics->DestroyBody(p);
+
+    // Sets the textures for the ai cars
+    for (auto ai : aiCars) {
+        for (auto phys : carsPhys) {
+            if (phys->selectable) {
                 ai->texture = phys->carTexture;
                 phys->selectable = false;
                 break;
@@ -182,49 +125,82 @@ void ModuleGame::GameplayStart()
         }
     }
 
-    checkeredFlag = App->physics->CreateRectangle(200, 300, 20, 100, true, this, ColliderType::CHECKEREDFLAG, STATIC);
-    
+    checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 250, true, this, ColliderType::CHECKEREDFLAG, STATIC);
     gamePlayStart = true;
 }
 
+// === CARS UPDATE ===
+void ModuleGame::CarsUpdate(float dt)
+{
+    player.Update(dt);
+    for (auto ai : aiCars) ai->Update(dt);
+}
+
+// === DRAWING FUNCTIONS ===
 void ModuleGame::DrawGameplay()
 {
-    DrawTextureEx(track, { 0,-100 }, 0, 5.0f, WHITE);
+    // Draw the track
+    DrawTextureEx(track, { 0,0 }, 0, 4.0f, WHITE);
 
     // Draw the cars
     CarsDraw();
+}
 
-    // Draw the UI
-    DrawText(TextFormat("Time: %f", time), 20, 50, 20, BLACK);
+void ModuleGame::DrawUI()
+{
+    // Draw the initial menu
+    if (gameState == GameState::InitialMenu) {
+        DrawInitialMenu();
+        return;
+    }
+
+    // Draw the UI in gameplay
+    DrawText(TextFormat("Time: %.2f", time), 20, 50, 20, BLACK);
     DrawText(TextFormat("Lap: %d", player.lap), 20, 70, 20, BLACK);
 }
 
-void ModuleGame::CarsUpdate(float dt)
+void ModuleGame::DrawInitialMenu()
 {
-    // Cars Update
-    player.Update(dt);
+    // Row 1
+    DrawTextureEx(tAMR23, { SCREEN_WIDTH * 0.26f - 29, SCREEN_HEIGHT / 2 * 0.65f + 73 }, -90, 2, WHITE);
+    DrawTextureEx(tGP2Engine, { SCREEN_WIDTH * 0.42f - 29, SCREEN_HEIGHT / 2 * 0.65f + 73 }, -90, 2, WHITE);
+    DrawTextureEx(tW11, { SCREEN_WIDTH * 0.58f - 29, SCREEN_HEIGHT / 2 * 0.65f + 73 }, -90, 2, WHITE);
+    DrawTextureEx(tPinkMerc, { SCREEN_WIDTH * 0.74f - 29, SCREEN_HEIGHT / 2 * 0.65f + 73 }, -90, 2, WHITE);
 
-    for (auto ai : aiCars)
-        ai->Update(dt);
+    // Row 2
+    DrawTextureEx(tR25, { SCREEN_WIDTH * 0.26f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
+    DrawTextureEx(tMp4, { SCREEN_WIDTH * 0.42f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
+    DrawTextureEx(tMp22, { SCREEN_WIDTH * 0.58f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
+    DrawTextureEx(tRB21, { SCREEN_WIDTH * 0.74f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
 }
 
 void ModuleGame::CarsDraw()
 {
-    // Cars draw
+    // Draw the cars
     player.Draw();
-    for (auto ai : aiCars)
-        ai->Draw();
+    for (auto ai : aiCars) ai->Draw();
 }
 
 bool ModuleGame::CleanUp()
 {
+    // Clean up
     player.CleanUp();
+
     for (auto ai : aiCars)
     {
         ai->CleanUp();
         delete ai;
     }
     aiCars.clear();
+
+    pAMR23      = NULL;
+    pR25        = NULL;
+    pGP2Engine  = NULL;
+    pMp4        = NULL;
+    pMp22       = NULL;
+    pPinkMerc   = NULL;
+    pW11        = NULL;
+    pRB21       = NULL;
 
     UnloadTexture(tAMR23);
     UnloadTexture(tGP2Engine);
@@ -240,13 +216,15 @@ bool ModuleGame::CleanUp()
 
 void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 {
-    switch (physA->ctype)
+    switch (physB->ctype)
     {
     case ColliderType::PLAYER:
-        if (physB->ctype == ColliderType::CHECKEREDFLAG)
+        if (physA->ctype == ColliderType::CHECKEREDFLAG)
         {
-            LOG("Collision with checkered flag");
+            LOG("Checkered flag detected");
+            player.lap++;
         }
+        break;
 
     default:
         break;

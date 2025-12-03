@@ -11,12 +11,6 @@ void Player::Start(Vector2 spawnPoint)
     pbody->ctype = ColliderType::PLAYER;
     pbody->listener = this;
 
-    Camera2D camera;
-    camera.offset = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-    camera.target = { position.x, position.y };
-    camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
-
     LOG("Player Start");
 }
 
@@ -74,10 +68,13 @@ void Player::CleanUp()
 
 void Player::Draw()
 {
+    if (!pbody) return;
+
     int x, y;
     pbody->GetPosition(x, y);
 
     float rotation = pbody->body->GetAngle() * RAD2DEG;
+
     DrawTextureEx(texture, { (float)x - texW / 2, (float)y - texH / 2 }, rotation, 1.0f, WHITE);
 }
 

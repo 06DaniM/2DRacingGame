@@ -31,8 +31,9 @@ void AICar::Draw()
 {
     int x, y;
     pbody->GetPosition(x, y);
-    
+
     float rotation = pbody->body->GetAngle() * RAD2DEG;
+
     DrawTextureEx(texture, { (float)x - texW / 2, (float)y - texH / 2 }, rotation, 1.0f, WHITE);
 }
 

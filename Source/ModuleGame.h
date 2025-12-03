@@ -5,6 +5,7 @@
 #include "Car.h"
 #include "Player.h"
 #include "AICar.h"
+#include "Listener.h"
 
 #include "p2Point.h"
 
@@ -30,8 +31,8 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-	void OnCollision(PhysBody* physA, PhysBody* physB);
-	void EndCollision(PhysBody* physA, PhysBody* physB);
+	void OnCollision(PhysBody* physA, PhysBody* physB) override;
+	void EndCollision(PhysBody* physA, PhysBody* physB) override;
 
 private:
 	void DrawGameplay();
@@ -39,6 +40,8 @@ private:
 
 	void InitialMenu(float dt);
 	void Gameplay(float dt);
+
+	void DrawUI();
 
 	void GameplayStart();
 
@@ -79,4 +82,6 @@ private:
 	Texture2D track;
 
 	bool gamePlayStart = false;
+
+	Camera2D camera = { 0 };
 };

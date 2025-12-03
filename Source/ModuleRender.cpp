@@ -1,97 +1,89 @@
-#include "Globals.h"
-#include "Application.h"
-#include "ModuleWindow.h"
 #include "ModuleRender.h"
-#include <math.h>
+#include "Application.h"
+#include "Player.h"
+#include <raylib.h>
 
 ModuleRender::ModuleRender(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
     background = RAYWHITE;
 }
 
-// Destructor
-ModuleRender::~ModuleRender()
-{}
+ModuleRender::~ModuleRender() {}
 
-// Called before render is available
 bool ModuleRender::Init()
 {
-	LOG("Creating Renderer context");
-	bool ret = true;
+    LOG("Creating Renderer context");
 
-	return ret;
+    camera.offset = { SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+    camera.target = { 0,0 };
+
+    return true;
 }
 
-// PreUpdate: clear buffer
 update_status ModuleRender::PreUpdate()
 {
-	return UPDATE_CONTINUE;
+    return UPDATE_CONTINUE;
 }
 
-// Update: debug camera
 update_status ModuleRender::Update()
 {
+    BeginDrawing();
     ClearBackground(background);
 
-    // NOTE: This function setups render batching system for
-    // maximum performance, all consecutive Draw() calls are
-    // not processed until EndDrawing() is called
-    BeginDrawing();
+    if (player)
+    {
+        int px, py;
+        player->pbody->GetPosition(px, py);
+        camera.target = { (float)px, (float)py };
+    }
 
-	return UPDATE_CONTINUE;
+    if (DrawInsideCamera)
+    {
+        BeginMode2D(camera);
+        DrawInsideCamera();
+        EndMode2D();
+    }
+
+    return UPDATE_CONTINUE;
 }
 
-// PostUpdate present buffer to screen
 update_status ModuleRender::PostUpdate()
 {
-    // Draw everything in our batch!
+    if (DrawAfterBegin)
+        DrawAfterBegin();
+
     DrawFPS(10, 10);
-
     EndDrawing();
-
-	return UPDATE_CONTINUE;
+    return UPDATE_CONTINUE;
 }
 
-// Called before quitting
 bool ModuleRender::CleanUp()
 {
-	return true;
+    return true;
 }
 
 void ModuleRender::SetBackgroundColor(Color color)
 {
-	background = color;
+    background = color;
 }
 
 // Draw to screen
 bool ModuleRender::Draw(Texture2D texture, int x, int y, const Rectangle* section, double angle, int pivot_x, int pivot_y) const
 {
-	bool ret = true;
-
-	float scale = 1.0f;
-    Vector2 position = { (float)x, (float)y };
+    Vector2 position = { (float)x - pivot_x, (float)y - pivot_y };
     Rectangle rect = { 0.f, 0.f, (float)texture.width, (float)texture.height };
 
-    if (section != NULL) rect = *section;
-
-    position.x = (float)(x-pivot_x) * scale + camera.x;
-    position.y = (float)(y-pivot_y) * scale + camera.y;
-
-	rect.width *= scale;
-	rect.height *= scale;
+    if (section != nullptr) rect = *section;
 
     DrawTextureRec(texture, rect, position, WHITE);
-
-	return ret;
+    return true;
 }
 
-bool ModuleRender::DrawText(const char * text, int x, int y, Font font, int spacing, Color tint) const
+bool ModuleRender::DrawText(const char* text, int x, int y, Font font, int spacing, Color tint) const
 {
-    bool ret = true;
-
     Vector2 position = { (float)x, (float)y };
-
     DrawTextEx(font, text, position, (float)font.baseSize, (float)spacing, tint);
-
-    return ret;
+    return true;
 }

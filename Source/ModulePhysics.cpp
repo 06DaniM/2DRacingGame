@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "ModulePhysics.h"
+#include "ModuleGame.h"
 #include "box2d/box2d.h"
 
 #include "p2Point.h"
@@ -271,6 +272,7 @@ void ModulePhysics::EndContact(b2Contact* contact)
 
 update_status ModulePhysics::PostUpdate()
 {
+	// Toggle debug mode
 	if (IsKeyPressed(KEY_F1))
 	{
 		debug = !debug;
@@ -280,7 +282,12 @@ update_status ModulePhysics::PostUpdate()
 		return UPDATE_CONTINUE;
 
 	Vector2 mouse = GetMousePosition();
-	b2Vec2 pMousePosition = b2Vec2(PIXELS_TO_METERS(mouse.x), PIXELS_TO_METERS(mouse.y));
+
+	Vector2 worldMouse = GetScreenToWorld2D(mouse, App->renderer->GetCamera());
+	b2Vec2 pMousePosition = b2Vec2(PIXELS_TO_METERS(worldMouse.x), PIXELS_TO_METERS(worldMouse.y));
+
+	if (App->scene_intro->gameState == GameState::Gameplay)
+		BeginMode2D(App->renderer->GetCamera());
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 	{
@@ -314,13 +321,12 @@ update_status ModulePhysics::PostUpdate()
 	{
 		mouse_joint->SetTarget(pMousePosition);
 
-		// Dibujar la línea entre el mouse y el cuerpo
 		b2Vec2 anchor = mouse_joint->GetBodyB()->GetPosition();
 		DrawLine(
 			METERS_TO_PIXELS(anchor.x),
 			METERS_TO_PIXELS(anchor.y),
-			mouse.x,
-			mouse.y,
+			worldMouse.x,
+			worldMouse.y,
 			RED
 		);
 	}
@@ -346,7 +352,12 @@ update_status ModulePhysics::PostUpdate()
 				b2CircleShape* shape = (b2CircleShape*)f->GetShape();
 				b2Vec2 pos = f->GetBody()->GetPosition();
 
-				DrawCircle(METERS_TO_PIXELS(pos.x), METERS_TO_PIXELS(pos.y), (float)METERS_TO_PIXELS(shape->m_radius), Color{ 0, 0, 0, 128 });
+				DrawCircle(
+					METERS_TO_PIXELS(pos.x),
+					METERS_TO_PIXELS(pos.y),
+					(float)METERS_TO_PIXELS(shape->m_radius),
+					Color{ 0, 0, 0, 128 }
+				);
 			}
 			break;
 
@@ -361,13 +372,20 @@ update_status ModulePhysics::PostUpdate()
 				{
 					v = b->GetWorldPoint(polygonShape->m_vertices[i]);
 					if (i > 0)
-						DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), DARKBLUE);
-
+						DrawLine(
+							METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y),
+							METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y),
+							DARKBLUE
+						);
 					prev = v;
 				}
 
 				v = b->GetWorldPoint(polygonShape->m_vertices[0]);
-				DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), DARKBLUE);
+				DrawLine(
+					METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y),
+					METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y),
+					DARKBLUE
+				);
 			}
 			break;
 
@@ -381,12 +399,20 @@ update_status ModulePhysics::PostUpdate()
 				{
 					v = b->GetWorldPoint(shape->m_vertices[i]);
 					if (i > 0)
-						DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), BLACK);
+						DrawLine(
+							METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y),
+							METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y),
+							BLACK
+						);
 					prev = v;
 				}
 
 				v = b->GetWorldPoint(shape->m_vertices[0]);
-				DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), BLACK);
+				DrawLine(
+					METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y),
+					METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y),
+					BLACK
+				);
 			}
 			break;
 
@@ -394,16 +420,22 @@ update_status ModulePhysics::PostUpdate()
 			case b2Shape::e_edge:
 			{
 				b2EdgeShape* shape = (b2EdgeShape*)f->GetShape();
-				b2Vec2 v1, v2;
+				b2Vec2 v1 = b->GetWorldPoint(shape->m_vertex0);
+				b2Vec2 v2 = b->GetWorldPoint(shape->m_vertex1);
 
-				v1 = b->GetWorldPoint(shape->m_vertex0);
-				v1 = b->GetWorldPoint(shape->m_vertex1);
-				DrawLine(METERS_TO_PIXELS(v1.x), METERS_TO_PIXELS(v1.y), METERS_TO_PIXELS(v2.x), METERS_TO_PIXELS(v2.y), RED);
+				DrawLine(
+					METERS_TO_PIXELS(v1.x), METERS_TO_PIXELS(v1.y),
+					METERS_TO_PIXELS(v2.x), METERS_TO_PIXELS(v2.y),
+					RED
+				);
 			}
 			break;
 			}
 		}
 	}
+
+	if (App->scene_intro->gameState == GameState::Gameplay)
+		EndMode2D();
 
 	return UPDATE_CONTINUE;
 }
