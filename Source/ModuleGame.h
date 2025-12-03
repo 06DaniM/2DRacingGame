@@ -40,6 +40,8 @@ private:
 	void InitialMenu(float dt);
 	void Gameplay(float dt);
 
+	void GameplayStart();
+
 	void CarsUpdate(float dt);
 	void CarsDraw();
 
@@ -50,6 +52,7 @@ private:
 	Car car;
 	Player player;
 	std::vector<AICar*> aiCars;
+	std::vector<PhysBody*> carsPhys;
 
 	float time = 0.0f;
 
@@ -70,4 +73,6 @@ private:
 	Texture2D tPinkMerc;
 	Texture2D tW11;
 	Texture2D tRB21;
+
+	bool gamePlayStart = false;
 };

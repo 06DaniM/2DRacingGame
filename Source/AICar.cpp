@@ -22,11 +22,16 @@ void AICar::Update(float dt)
 void AICar::CleanUp()
 {
     LOG("Cleaning up AI Car");
+    return Car::CleanUp();
 }
 
 void AICar::Draw()
 {
-    //pbody->Draw(width, height, RED);
+    int x, y;
+    pbody->GetPosition(x, y);
+    
+    float rotation = pbody->body->GetAngle() * RAD2DEG;
+    DrawTextureEx(texture, { (float)x - texW / 2, (float)y - texH / 2 }, rotation, 1.0f, WHITE);
 }
 
 void AICar::OnCollision(PhysBody* physA, PhysBody* physB)

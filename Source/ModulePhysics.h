@@ -5,6 +5,7 @@
 #include "Listener.h"
 #include "box2d/box2d.h"
 #include <vector>
+#include <string>
 
 enum bodyType {
     DYNAMIC,
@@ -85,8 +86,13 @@ public:
     ColliderType ctype;
     bodyType btype;
     Listener* listener;
-    int itemScore;
+
     int isActive = true;
+
+    Texture2D carTexture;
+    std::string id;
+
+    bool selectable = true;
 };
 
 // Module --------------------------------------
@@ -108,6 +114,8 @@ public:
 
     void SetBodyPosition(PhysBody* pbody, int x, int y, bool resetRotation);
     std::vector<b2Fixture*> GetFixtures();
+
+    void DestroyBody(PhysBody* pbody);
 
     void BeginContact(b2Contact* contact);
     void EndContact(b2Contact* contact);

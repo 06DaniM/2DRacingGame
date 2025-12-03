@@ -22,6 +22,9 @@ void Car::Update(float dt)
 void Car::CleanUp()
 {
     LOG("Cleaning up Car");
+
+    pbody = NULL;
+    UnloadTexture(texture);
 }
 
 void Car::Draw() {}

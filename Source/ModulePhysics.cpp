@@ -233,6 +233,12 @@ std::vector<b2Fixture*> ModulePhysics::GetFixtures()
 	return bodies;
 }
 
+void ModulePhysics::DestroyBody(PhysBody* pbody)
+{
+	if (!pbody) return;
+	world->DestroyBody(pbody->body);
+}
+
 void ModulePhysics::BeginContact(b2Contact* contact)
 {
 	b2BodyUserData dataA = contact->GetFixtureA()->GetBody()->GetUserData();

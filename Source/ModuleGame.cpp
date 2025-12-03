@@ -28,25 +28,54 @@ bool ModuleGame::Start()
     tW11 = LoadTexture("Assets/Textures/W11.png");
     tRB21 = LoadTexture("Assets/Textures/RedBull(Tututuru).png");
 
-    player.texture = tAMR23;
+    pAMR23 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.26 + 30, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+    pAMR23->id = "AMR23";
+    pAMR23->carTexture = tAMR23;
+    carsPhys.push_back(pAMR23);
+
+    pGP2Engine = App->physics->CreateRectangle(SCREEN_WIDTH * 0.42 + 30, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+    pGP2Engine->id = "GP2";
+    pGP2Engine->carTexture = tGP2Engine;
+    carsPhys.push_back(pGP2Engine);
+
+    pW11 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.58 + 30, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+    pW11->id = "W11";
+    pW11->carTexture = tW11;
+    carsPhys.push_back(pW11);
+    
+    pPinkMerc = App->physics->CreateRectangle(SCREEN_WIDTH * 0.74 + 30, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+    pPinkMerc->id = "PinkMerc";
+    pPinkMerc->carTexture = tPinkMerc;
+    carsPhys.push_back(pPinkMerc);
+
+    pR25 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.26 + 30, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+    pR25->id = "R25";
+    pR25->carTexture = tR25;
+    carsPhys.push_back(pR25);
+
+    pMc4 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.42 + 30, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+    pMc4->id = "Mc4";
+    pMc4->carTexture = tMc4;
+    carsPhys.push_back(pMc4);
+
+    pMc22 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.58 + 30, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+    pMc22->id = "Mc22";
+    pMc22->carTexture = tMc22;
+    carsPhys.push_back(pMc22);
+
+    pRB21 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.74 + 30, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+    pRB21->id = "RB21";
+    pRB21->carTexture = tRB21;
+    carsPhys.push_back(pRB21);
+
     player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
 
     for (int i = 0; i < 7; ++i)
     {
         AICar* ai = new AICar();
-        ai->Start({ (float)SCREEN_WIDTH / 2 + i * 60, SCREEN_HEIGHT / 2 });
+        ai->Start({ (float)SCREEN_WIDTH / 2 + i * 100, SCREEN_HEIGHT / 2 });
         aiCars.push_back(ai);
     }
-
-    pAMR23 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.26 + 30, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pGP2Engine = App->physics->CreateRectangle(SCREEN_WIDTH * 0.42 + 30, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pW11 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.58 + 30, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pPinkMerc = App->physics->CreateRectangle(SCREEN_WIDTH * 0.74 + 30, SCREEN_HEIGHT / 2 * 0.65, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    
-    pR25 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.26 + 30, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pMc4 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.42 + 30, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pMc22 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.58 + 30, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
-    pRB21 = App->physics->CreateRectangle(SCREEN_WIDTH * 0.74 + 30, SCREEN_HEIGHT / 2 * 1.35, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
 
     gameState = GameState::InitialMenu;
 
@@ -90,20 +119,24 @@ void ModuleGame::DrawInitialMenu()
 
 void ModuleGame::InitialMenu(float dt)
 {
-    Vector2 mouse = GetMousePosition();
-    b2Vec2 pMousePosition = b2Vec2(PIXELS_TO_METERS(mouse.x), PIXELS_TO_METERS(mouse.y));
-
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
-        std::vector<b2Fixture*> bodies = App->physics->GetFixtures();
+        Vector2 mouse = GetMousePosition();
+        b2Vec2 pMousePosition = b2Vec2(PIXELS_TO_METERS(mouse.x), PIXELS_TO_METERS(mouse.y));
+        std::vector<b2Fixture*> fixtures = App->physics->GetFixtures();
 
-        for (auto body : bodies)
+        for (auto fixture : fixtures)
         {
-            if (body->TestPoint(pMousePosition))
+            if (fixture->TestPoint(pMousePosition))
             {
-                LOG("Car detected");
-                // Mirar que physbody es
-                gameState = GameState::Gameplay;
+                PhysBody* car = (PhysBody*)fixture->GetBody()->GetUserData().pointer;
+
+                if (car->id != "")
+                {
+                    player.texture = car->carTexture;
+                    car->selectable = false;
+                    gameState = GameState::Gameplay;
+                }
             }
         }
     }
@@ -115,8 +148,38 @@ void ModuleGame::Gameplay(float dt)
 {
     time += dt;
 
+    GameplayStart();
     CarsUpdate(dt);
     DrawGameplay();
+}
+
+void ModuleGame::GameplayStart()
+{
+    if (gamePlayStart) return;
+
+    App->physics->DestroyBody(pAMR23);
+    App->physics->DestroyBody(pGP2Engine);
+    App->physics->DestroyBody(pMc22);
+    App->physics->DestroyBody(pMc4);
+    App->physics->DestroyBody(pPinkMerc);
+    App->physics->DestroyBody(pR25);
+    App->physics->DestroyBody(pW11);
+    App->physics->DestroyBody(pRB21);
+
+    for (auto ai : aiCars)
+    {
+        for (auto phys : carsPhys)
+        {
+            if (phys->selectable)
+            {
+                ai->texture = phys->carTexture;
+                phys->selectable = false;
+                break;
+            }
+        }
+    }
+    
+    gamePlayStart = true;
 }
 
 void ModuleGame::DrawGameplay()
@@ -154,6 +217,16 @@ bool ModuleGame::CleanUp()
         delete ai;
     }
     aiCars.clear();
+
+    UnloadTexture(tAMR23);
+    UnloadTexture(tGP2Engine);
+    UnloadTexture(tW11);
+    UnloadTexture(tMc22);
+    UnloadTexture(tMc4);
+    UnloadTexture(tPinkMerc);
+    UnloadTexture(tR25);
+    UnloadTexture(tRB21);
+
     return true;
 }
 
