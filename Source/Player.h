@@ -15,4 +15,12 @@ public:
 
     void OnCollision(PhysBody* physA, PhysBody* physB) override;
     void EndCollision(PhysBody* physA, PhysBody* physB) override;
+
+private:
+    void Move();
+
+public:
+
+private:
+
 };

@@ -15,6 +15,8 @@ void AICar::Start(Vector2 spawnPoint)
 void AICar::Update(float dt)
 {
     // === AI ===
+
+    return Car::Update(dt);
 }
 
 void AICar::CleanUp()
@@ -24,7 +26,7 @@ void AICar::CleanUp()
 
 void AICar::Draw()
 {
-     body->Draw(width, height, RED);
+    //pbody->Draw(width, height, RED);
 }
 
 void AICar::OnCollision(PhysBody* physA, PhysBody* physB)

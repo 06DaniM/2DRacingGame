@@ -216,6 +216,23 @@ void ModulePhysics::SetBodyPosition(PhysBody* pbody, int x, int y, bool resetRot
 	pbody->body->SetAngularVelocity(0);
 }
 
+std::vector<b2Fixture*> ModulePhysics::GetFixtures()
+{
+	std::vector<b2Fixture*> bodies;
+
+	for (b2Body* b = world->GetBodyList(); b; b = b->GetNext())
+	{
+		if (b->GetType() != b2_staticBody) continue;
+
+		for (b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
+		{
+			bodies.push_back(f);
+		}
+	}
+
+	return bodies;
+}
+
 void ModulePhysics::BeginContact(b2Contact* contact)
 {
 	b2BodyUserData dataA = contact->GetFixtureA()->GetBody()->GetUserData();

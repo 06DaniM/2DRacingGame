@@ -14,9 +14,18 @@ void Player::Start(Vector2 spawnPoint)
 
 void Player::Update(float dt)
 {
-    if (!body) return;
+    if (!pbody) return;
 
-    b2Body* b = body->body;
+    Move();
+
+    return Car::Update(dt);
+}
+
+void Player::Move()
+{
+    if (!canMove) return;
+
+    b2Body* b = pbody->body;
     b2Vec2 velocity = b->GetLinearVelocity();
     float currentSpeed = velocity.Length();
 
@@ -58,7 +67,14 @@ void Player::CleanUp()
 
 void Player::Draw()
 {
-    body->Draw(width, height, GREEN);
+    int x, y;
+    pbody->GetPosition(x, y);
+
+    //pbody->Draw(width, height, GREEN);
+
+    float rotation = pbody->body->GetAngle() * RAD2DEG;
+
+    DrawTextureEx(texture, { (float)x - texW / 2, (float)y - texH / 2 }, rotation, 1.0f, WHITE);
 }
 
 void Player::OnCollision(PhysBody* physA, PhysBody* physB)

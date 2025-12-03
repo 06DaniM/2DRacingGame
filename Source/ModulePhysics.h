@@ -4,6 +4,7 @@
 #include "Globals.h"
 #include "Listener.h"
 #include "box2d/box2d.h"
+#include <vector>
 
 enum bodyType {
     DYNAMIC,
@@ -15,6 +16,7 @@ enum class ColliderType {
     PLAYER,
     AICAR,
     WHEEL,
+    UI,
     UNKNOWN
 };
 
@@ -105,13 +107,14 @@ public:
     PhysBody* CreateCar(float x, float y, float width, float height, float wheelRadius);
 
     void SetBodyPosition(PhysBody* pbody, int x, int y, bool resetRotation);
+    std::vector<b2Fixture*> GetFixtures();
 
     void BeginContact(b2Contact* contact);
     void EndContact(b2Contact* contact);
 
+private:
     b2World* world = nullptr;
 
-private:
     bool debug = false;
     b2Body* ground = nullptr;
     b2Body* mouseSelect = nullptr;
