@@ -1,6 +1,7 @@
 #include "Car.h"
 #include "Globals.h"
 #include "Application.h"
+#include "ModuleGame.h"
 
 Car::Car() {}
 
@@ -15,14 +16,17 @@ void Car::Start(Vector2 spawnPoint)
 
 void Car::Update(float dt)
 {
-    int x, y;
-    pbody->GetPosition(x, y);
-    position = { (float)x, (float)y };
-
     if (IsKeyPressed(KEY_F2))
         canMove = !canMove;
 
-    //distanceToNextCheckpoint = b2Distance(position, checkPoints[checkPoint].)
+    Checkpoint* cp = App->scene_intro->checkpoints[checkpoint];
+
+    b2Vec2 cpPos = cp->GetPosition();
+    int x, y;
+    pbody->GetPosition(x, y);
+    b2Vec2 pos = { (float)x, (float)y };
+
+    distanceToNextCheckpoint = b2Distance(pos, cpPos);
 }
 
 void Car::CleanUp()

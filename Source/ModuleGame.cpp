@@ -68,7 +68,10 @@ void ModuleGame::InitialMenu(float dt)
                 if (!car->id.empty()) 
                 {
                     player.texture = car->carTexture;
+                    playerIdSelected = car->id;
+
                     car->selectable = false;
+
                     gameState = GameState::Gameplay;
                 }
             }
@@ -89,8 +92,8 @@ void ModuleGame::Gameplay(float dt)
 
 void ModuleGame::EndGameMenu(float dt)
 {
-    time += dt;
-    if (time >= 1.0f)
+    timeToNextState += dt;
+    if (timeToNextState >= 1.0f)
     {
         gameState = GameState::InitialMenu;
     }
@@ -101,7 +104,7 @@ void ModuleGame::InitialMenuStart()
     if (initialMenuStart) return;
     gamePlayStart = false;
 
-    auto createUIRect = [this](float x, float y, Texture2D tex, const char* id)
+    auto createUIRect = [this](float x, float y, Texture2D tex, std::string id)
         {
             PhysBody* p = App->physics->CreateRectangle(x, y, 29 * 2, 73 * 2, 0.0f, true, 0, ColliderType::UI, STATIC);
             p->id = id;
@@ -129,6 +132,8 @@ void ModuleGame::GameplayStart()
     // Creation of the cars after car is selected
     player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
     player.canMove = false;
+    player.pbody->id = playerIdSelected;
+
     lightsOut = false;
     allCars.push_back(&player);
 
@@ -143,87 +148,54 @@ void ModuleGame::GameplayStart()
     // Sets the player for the camera
     App->renderer->SetPlayer(&player);
 
-    // Destroy the physbodies of the cars to select
-    for (auto p : carsPhys) App->physics->DestroyBody(p);
-
     // Sets the textures for the ai cars
     for (auto ai : aiCars) {
         for (auto phys : carsPhys) {
             if (phys->selectable) {
                 ai->texture = phys->carTexture;
+                ai->pbody->id = phys->id;
                 phys->selectable = false;
                 break;
             }
         }
     }
+
+    // Destroy the physbodies of the cars to select
+    for (auto p : carsPhys) App->physics->DestroyBody(p);
     carsPhys.clear();
 
     // Creation of the checkered flags
     checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
-    checkPhys.push_back(checkeredFlag);
 
     checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 1, 45, this));
-    /*checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 2, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 3, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 4, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 5, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 6, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 7, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 8, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 9, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 10, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 11, 45));
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 12, 45));*/
+    checkpoints.push_back(new Checkpoint(2051, 1589, 20, 270, 2, 0, this));
+    checkpoints.push_back(new Checkpoint(2566, 1185, 20, 260, 3, 120, this));
+    checkpoints.push_back(new Checkpoint(2694, 1494, 20, 250, 4, 100, this));
+    checkpoints.push_back(new Checkpoint(2758, 2489, 20, 250, 5, 90, this));
+    checkpoints.push_back(new Checkpoint(3736, 2217, 20, 250, 6, 110, this));
+    checkpoints.push_back(new Checkpoint(4629, 2516, 20, 290, 7, 90, this));
+    checkpoints.push_back(new Checkpoint(6066, 4180, 20, 270, 8, 30, this));
+    checkpoints.push_back(new Checkpoint(5307, 2155, 20, 280, 9, 60, this));
+    checkpoints.push_back(new Checkpoint(3869, 1599, 20, 290, 10, -50, this));
+    checkpoints.push_back(new Checkpoint(2388, 2089, 20, 270, 11, 20, this));
+    checkpoints.push_back(new Checkpoint(442, 1076, 20, 270, 12, 55, this));
 
-    /*checkPoint1 = App->physics->CreateRectangle(1249, 1220, 20, 270, 45.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint1->n = 1;
-    checkPhys.push_back(checkPoint1);
+    std::sort(allCars.begin(), allCars.end(),
+        [](Car* a, Car* b)
+        {
+            if (a->lap != b->lap)
+                return a->lap > b->lap;
 
-    checkPoint2 = App->physics->CreateRectangle(2051, 1589, 20, 270, 0.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint2->n = 2;
-    checkPhys.push_back(checkPoint2);
+            if (a->checkpoint != b->checkpoint)
+                return a->checkpoint > b->checkpoint;
 
-    checkPoint3 = App->physics->CreateRectangle(2566, 1185, 20, 260, 120.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint3->n = 3;
-    checkPhys.push_back(checkPoint3);
+            return a->distanceToNextCheckpoint < b->distanceToNextCheckpoint;
+        });
 
-    checkPoint4 = App->physics->CreateRectangle(2694, 1494, 20, 250, 100.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint4->n = 4;
-    checkPhys.push_back(checkPoint4);
+    for (int i = 0; i < allCars.size(); i++)
+        allCars[i]->racePosition = i + 1;
 
-    checkPoint5 = App->physics->CreateRectangle(2758, 2489, 20, 250, 90.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint5->n = 5;
-    checkPhys.push_back(checkPoint5);
-
-    checkPoint6 = App->physics->CreateRectangle(3736, 2217, 20, 250, 110.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint6->n = 6;
-    checkPhys.push_back(checkPoint6);
-
-    checkPoint7 = App->physics->CreateRectangle(4629, 2516, 20, 290, 90.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint7->n = 7;
-    checkPhys.push_back(checkPoint7);
-
-    checkPoint8 = App->physics->CreateRectangle(6066, 4180, 20, 270, 30.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint8->n = 8;
-    checkPhys.push_back(checkPoint8);
-
-    checkPoint9 = App->physics->CreateRectangle(5307, 2155, 20, 280, 60.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint9->n = 9;
-    checkPhys.push_back(checkPoint9);
-
-    checkPoint10 = App->physics->CreateRectangle(3869, 1599, 20, 290, -50.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint10->n = 10;
-    checkPhys.push_back(checkPoint10);
-
-    checkPoint11 = App->physics->CreateRectangle(2388, 2089, 20, 270, 20.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint11->n = 11;
-    checkPhys.push_back(checkPoint11);
-
-    checkPoint12 = App->physics->CreateRectangle(442, 1076, 20, 270, 55.0f, true, this, ColliderType::CHECKPOINT, STATIC);
-    checkPoint12->n = 12;
-    checkPhys.push_back(checkPoint12);*/
-
-    time = 0.0f;
+    timeToNextState = 0.0f;
 
     gamePlayStart = true;
     initialMenuStart = false;
@@ -261,54 +233,60 @@ void ModuleGame::GameManager(float dt)
 {
     if (player.lap <= player.totalLaps)
     {
-        if (player.lap > 0 && player.lap)
+        if (player.lap > 0)
         {
             player.currentLapTime += GetFrameTime();
             showLap = player.lap;
+
+            UpdatePosition();
         }
     }
 
     else
     {
-        time += dt;
+        timeToNextState += dt;
         player.canMove = false;
         // Activar modo IA una vez acabada la carrera?
 
-        if (time >= 1.0f)
+        if (timeToNextState >= 1.0f)
         {
             for (auto ai : aiCars)
-            {
                 ai->Destroy();
-            }
+
             aiCars.clear();
             player.Destroy();
 
             for (auto ch : checkpoints)
                 ch->~Checkpoint();
+
             checkpoints.clear();
             App->physics->DestroyBody(checkeredFlag);
 
             allCars.clear();
 
-            time = 0;
+            timeToNextState = 0;
 
             gameState = GameState::EndGame;
         }
     }
-
-    std::sort(allCars.begin(), allCars.end()),
-        [](Car* a, Car* b)
-        {
-            if (a->lap != b->lap)
-                return a->lap > b->lap;
-            if (a->checkpoint != b->checkpoint)
-                return a->checkpoint > b->checkpoint;
-            return a->distanceToNextCheckpoint < b->distanceToNextCheckpoint;
-        };
 }
 
 void ModuleGame::UpdatePosition()
 {
+    std::sort(allCars.begin(), allCars.end(),
+        [](Car* a, Car* b)
+        {
+            if (a->lap != b->lap)
+                return a->lap > b->lap;
+
+            if (a->checkpoint != b->checkpoint)
+                return a->checkpoint > b->checkpoint;
+
+            return a->distanceToNextCheckpoint < b->distanceToNextCheckpoint;
+        });
+
+    for (int i = 0; i < allCars.size(); i++)
+        allCars[i]->racePosition = i + 1;
 }
 
 // === DRAWING FUNCTIONS ===
@@ -334,6 +312,22 @@ void ModuleGame::DrawUI()
     {
         // Draw the traffic light
         TrafficLight();
+
+        int startX = 20;
+        int startY = 180;
+        int lineSpacing = 22;
+
+        for (size_t i = 0; i < allCars.size(); i++)
+        {
+            Car* car = allCars[i];
+            DrawText(TextFormat("P%d  %s",
+                (int)i + 1,
+                car->pbody->id.c_str()),
+                startX,
+                startY + i * lineSpacing,
+                20,
+                BLACK);
+        }
 
         // Draw the UI in gameplay
         DrawText(TextFormat("Lap Time: %.2f", player.currentLapTime), 20, 50, 20, BLACK);
@@ -416,7 +410,7 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
         if (physA->ctype == ColliderType::CHECKEREDFLAG)
         {
             LOG("Checkered flag detected");
-            if (player.checkpoint == 12 || player.lap == 0)
+            if (player.checkpoint == checkpoints.size() || player.lap == 0)
             {
                 player.lap++;
                 player.checkpoint = 0;
@@ -431,12 +425,22 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
         else if (physA->ctype == ColliderType::CHECKPOINT)
         {
             if (player.checkpoint + 1 == physA->n)
-            {
-                LOG("Checkpoint detected");
                 player.checkpoint++;
-            }
         }
         break;
+
+    case ColliderType::AICAR:
+        if (physA->ctype == ColliderType::CHECKPOINT)
+        {
+            
+            auto car = dynamic_cast<AICar*>(physB->listener);
+
+            if (car != NULL)
+                if (car->checkpoint + 1 == physA->n)
+                    car->checkpoint++;
+        }
+        break;
+
 
     default:
         break;

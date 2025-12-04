@@ -13,15 +13,15 @@
 #include "raylib.h"
 #include <vector>
 
+class PhysBody;
+class PhysicEntity;
+
 enum GameState
 {
 	InitialMenu,
 	Gameplay,
 	EndGame
 };
-
-class PhysBody;
-class PhysicEntity;
 
 class ModuleGame : public Module, public Listener
 {
@@ -64,22 +64,24 @@ private:
 public:
 	GameState gameState;
 
+	std::vector<Checkpoint*> checkpoints;	// Vector with the checkpoints
+
 private:
 	Car car;
-	Player player;
-	std::vector<AICar*> aiCars;
+	Player player;				// The players car
+	std::vector<AICar*> aiCars; // The vector with the ai car
 
-	std::vector<Checkpoint*> checkpoints;
+	CoroutineManager coroutineManager;	// Coroutine
 
-	CoroutineManager coroutineManager;
+	std::vector<PhysBody*> carsPhys;	// Vector physic bodies of the cars for the initial menu (car selecition)
+	std::string playerIdSelected;		// The id of the player
 
-	std::vector<PhysBody*> carsPhys;
-	std::vector<PhysBody*> checkPhys;
+	std::vector<Car*> allCars;			// Vector of all the cars
 
-	std::vector<Car*> allCars;
 
-	float time = 0.0f;
+	float timeToNextState = 0.0f;		// Time to pass to the next state
 
+	// Cars physics bodies
 	PhysBody* pAMR23 = NULL;
 	PhysBody* pR25 = NULL;
 	PhysBody* pGP2Engine = NULL;
@@ -89,6 +91,7 @@ private:
 	PhysBody* pW11 = NULL;
 	PhysBody* pRB21 = NULL;
 
+	// Cars textures
 	Texture2D tAMR23;
 	Texture2D tR25;
 	Texture2D tGP2Engine;
@@ -98,8 +101,9 @@ private:
 	Texture2D tW11;
 	Texture2D tRB21;
 
-	PhysBody* checkeredFlag = NULL;
+	PhysBody* checkeredFlag = NULL;		// Physic body of the checkered flag
 
+	// Physics bodies of the checkpoints
 	PhysBody* checkPoint1 = NULL;
 	PhysBody* checkPoint2 = NULL;
 	PhysBody* checkPoint3 = NULL;
@@ -113,15 +117,15 @@ private:
 	PhysBody* checkPoint11 = NULL;
 	PhysBody* checkPoint12 = NULL;
 
-	Texture2D track;
+	Texture2D track;	// Texture of the track
 
-	bool initialMenuStart = false;
-	bool gamePlayStart = false;
-	bool lightsOut = false;
+	bool initialMenuStart = false;	// Declare if did the start of initial menu
+	bool gamePlayStart = false;		// Declare if did the start of the gameplay state 
+	bool lightsOut = false;			// Declare if the race has started
+	
+	float lightTimer = 0.0f;		// Set the time for starting the race
 
-	float lightTimer = 0.0f;
+	int showLap = 1;				// The lap to show
 
-	int showLap = 1;
-
-	Camera2D camera = { 0 };
+	Camera2D camera = { 0 };		// The camera
 };

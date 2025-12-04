@@ -13,11 +13,17 @@ public:
     {
         body = App->physics->CreateRectangle(x, y, width, height, angle, true, listener, ColliderType::CHECKPOINT, STATIC);
         body->n = index;
+        position = { x,y };
     }
+
     ~Checkpoint()
     {
         if (body) App->physics->DestroyBody(body);
     }
+
+    b2Vec2 GetPosition() { return position; }
+
+    b2Vec2 position = { 0,0 };
 
     PhysBody* body = NULL;
     float width = 0.0f;
@@ -68,9 +74,9 @@ public:
     bool canMove = true;
 
     int totalLaps = 3;
-    int lap = 0;
+    int lap = 1;
 
-    int pos = -1;
+    int racePosition = -1;
     int checkpoint = 0;
     float distanceToNextCheckpoint = 0.0f;
 
