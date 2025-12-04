@@ -204,7 +204,7 @@ void ModuleGame::GameplayStart()
 void ModuleGame::TrafficLight()
 {
     if (lightsOut) return;
-
+    player.canMove = true; // quitar
     lightTimer += GetFrameTime();
 
     if (lightTimer > 1.0f)

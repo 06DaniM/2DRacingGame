@@ -1,6 +1,12 @@
-#include "Player.h"
+﻿#include "Player.h"
 #include "Globals.h"
 #include "Application.h"
+
+#define CHASSIS_INDEX 0
+#define WHEEL_FL_INDEX 1
+#define WHEEL_FR_INDEX 2
+#define WHEEL_BL_INDEX 3
+#define WHEEL_BR_INDEX 4
 
 Player::Player() {}
 Player::~Player() {}
@@ -33,39 +39,111 @@ void Player::Move()
 {
     if (!canMove) return;
 
-    b2Body* b = pbody->body;
-    b2Vec2 velocity = b->GetLinearVelocity();
-    float currentSpeed = velocity.Length();
+    const float maxMotorForce = 25.0f;  // Acceleration
+    const float maxSteerAngle = 0.5f;    // Steer angle
+    const float lateralGripFactor = 5.0f; // Grip
 
-    // Direction of the car
-    b2Vec2 forward = b->GetWorldVector(b2Vec2(-1, 0)); // Define the front of the car
-    b2Vec2 force(0, 0);
+    // Movement
+    float motor = 0.0f;
+    float steer = 0.0f;
 
-    // === ACCELERATING ===
-    if (IsKeyDown(KEY_W))
+    // Keys
+    if (IsKeyDown(KEY_W)) motor += 1.0f;
+    if (IsKeyDown(KEY_S)) motor -= 1.0f;
+
+    if (IsKeyDown(KEY_A)) steer = -1.0f;
+    if (IsKeyDown(KEY_D)) steer = 1.0f;
+
+    //Access to the parts of the car
+    if (this->parts.size() < 5) return;
+
+    PhysBody* chassis = this->parts[CHASSIS_INDEX];
+
+    PhysBody* wheelFR = this->parts[WHEEL_FL_INDEX];  // FL current → FR real
+    PhysBody* wheelBR = this->parts[WHEEL_FR_INDEX];  // FR current → BR real
+    PhysBody* wheelFL = this->parts[WHEEL_BL_INDEX];  // BL current → FL real
+    PhysBody* wheelBL = this->parts[WHEEL_BR_INDEX];  // BR current → BL real
+
+    // Vector of the wheels
+    std::vector<PhysBody*> allWheels = { wheelFL, wheelFR, wheelBL, wheelBR };
+
+    // Apply the forces
+    ApplyCarForces(chassis, allWheels, motor, steer, maxMotorForce, maxSteerAngle, lateralGripFactor);
+
+    // Angular damping
+    chassis->body->SetAngularDamping(2.0f);
+}
+
+void Player::ApplyCarForces(PhysBody* chassis, std::vector<PhysBody*>& wheels, float motor, float steer, float maxMotorForce, float maxSteerAngle, float lateralGripFactor)
+{
+    if (wheels.size() < 4) return;
+
+    // Obtain the references
+    PhysBody* wheelFL = wheels[0];
+    PhysBody* wheelFR = wheels[1];
+
+    float steerAngle = steer * maxSteerAngle;
+
+    // Go across all the wheels
+    for (PhysBody* wheel : wheels)
     {
-        if (currentSpeed < maxSpeed)
-            force = acceleration * forward;
+        b2Body* wheelBody = wheel->body;
+
+        // Set if is rear or front wheel
+        bool isFrontWheel = (wheel == wheelFL || wheel == wheelFR);
+        bool isRearWheel = !isFrontWheel;
+
+        b2Vec2 forwardVector;
+
+        // If front wheel -> direction
+        if (isFrontWheel)
+        {
+            float chassisAngle = chassis->body->GetAngle();
+            float targetAngle = chassisAngle + steerAngle;
+
+            wheelBody->SetTransform(wheelBody->GetPosition(), targetAngle);
+
+            forwardVector = wheelBody->GetWorldVector(b2Vec2(-1, 0));
+        }
+
+        // If rear wheel -> traction
+        else
+        {
+            forwardVector = chassis->body->GetWorldVector(b2Vec2(-1, 0));
+        }
+
+        b2Vec2 velocity = wheelBody->GetLinearVelocity();
+
+        // Apply lateral friction
+        b2Vec2 lateralVector = b2Cross(1.0f, forwardVector);
+        float lateralSpeed = b2Dot(velocity, lateralVector);
+        b2Vec2 lateralVelocity = lateralSpeed * lateralVector;
+
+        // Calculation of the impulse friction
+        b2Vec2 desiredLateralVelocity = -lateralGripFactor * 0.25f * lateralVelocity;
+
+        b2Vec2 velocityChange = desiredLateralVelocity - lateralVelocity;
+        b2Vec2 lateralImpulse = wheelBody->GetMass() * velocityChange;
+
+        // Apply the impulse
+        wheelBody->ApplyLinearImpulse(lateralImpulse, wheelBody->GetWorldCenter(), true);
+
+
+        // Apply traction
+        if (isRearWheel)
+        {
+            float desiredSpeed = motor * maxMotorForce;
+            float currentSpeed = b2Dot(velocity, forwardVector);
+            float currentForce = (desiredSpeed - currentSpeed);
+
+            // Limit the force
+            currentForce = b2Clamp(currentForce, -maxMotorForce, maxMotorForce);
+
+            b2Vec2 motorForce = currentForce * forwardVector;
+
+            wheelBody->ApplyForce(motorForce, wheelBody->GetWorldCenter(), true);
+        }
     }
-
-    // === BRAKING ===
-    if (IsKeyDown(KEY_S))
-    {
-        force = -brakeForce * forward;
-    }
-
-    // === APPLY THE FORCE ===
-    b->ApplyForceToCenter(force, true);
-
-    // === TURN ===
-    float rotation = b->GetAngle();
-
-    if (IsKeyDown(KEY_A)) b->ApplyTorque(-1.0f, true);
-    if (IsKeyDown(KEY_D)) b->ApplyTorque(1.0f, true);
-
-    // === DAMPEN ===
-    b->SetLinearDamping(0.5f);
-    b->SetAngularDamping(2.0f);
 }
 
 void Player::CleanUp()
@@ -79,10 +157,39 @@ void Player::Draw()
 
     int x, y;
     pbody->GetPosition(x, y);
-
     float rotation = pbody->body->GetAngle() * RAD2DEG;
 
-    DrawTextureEx(texture, { (float)x - texW / 2, (float)y - texH / 2 }, rotation, 1.0f, WHITE);
+    DrawTextureEx(texture, { (float)x - texW/2, (float)y - texH/2 }, rotation, 1, WHITE);
+
+
+    // === Draw the wheels for debug ===
+    //if (parts.size() >= 5)
+    //{
+    //    // Obtén cada rueda
+    //    PhysBody* wheelFL = parts[WHEEL_FL_INDEX];
+    //    PhysBody* wheelFR = parts[WHEEL_FR_INDEX];
+    //    PhysBody* wheelBL = parts[WHEEL_BL_INDEX];
+    //    PhysBody* wheelBR = parts[WHEEL_BR_INDEX];
+
+    //    // Posiciones
+    //    int fx, fy, rx, ry;
+
+    //    // Front Left
+    //    wheelFL->GetPosition(fx, fy);
+    //    DrawCircle(fx, fy, 6, RED);
+
+    //    // Front Right
+    //    wheelFR->GetPosition(fx, fy);
+    //    DrawCircle(fx, fy, 6, GREEN);
+
+    //    // Back Left
+    //    wheelBL->GetPosition(rx, ry);
+    //    DrawCircle(rx, ry, 6, BLUE);
+
+    //    // Back Right
+    //    wheelBR->GetPosition(rx, ry);
+    //    DrawCircle(rx, ry, 6, YELLOW);
+    //}
 }
 
 void Player::OnCollision(PhysBody* physA, PhysBody* physB)

@@ -64,7 +64,7 @@ protected:
 
 public:
     std::vector<PhysBody*> parts;
-    std::vector<b2Joint*> joints;
+    std::vector<b2RevoluteJoint*> joints;
 
     Vector2 position;
     PhysBody* pbody = nullptr;

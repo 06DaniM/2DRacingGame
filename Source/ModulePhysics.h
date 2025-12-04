@@ -113,7 +113,7 @@ public:
     PhysBody* CreateRectangle(int x, int y, int width, int height, float angle, bool isSensor, Listener* listener, ColliderType ctype, bodyType type);
     PhysBody* CreateCircle(int x, int y, int radius, bool isSensor, Listener* listener, ColliderType ctype = ColliderType::UNKNOWN, bodyType type = bodyType::DYNAMIC);
     PhysBody* CreateChain(int x, int y, int* points, int size, bool isSensor, Listener* listener, ColliderType ctype = ColliderType::UNKNOWN, bodyType type = bodyType::STATIC);
-    PhysBody* CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*>& carParts, std::vector<b2Joint*>& carJoints);
+    PhysBody* CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*>& carParts, std::vector<b2RevoluteJoint*>& carJoints);
 
     void SetBodyPosition(PhysBody* pbody, int x, int y, bool resetRotation);
     std::vector<b2Fixture*> GetFixtures();

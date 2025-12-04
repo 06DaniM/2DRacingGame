@@ -165,54 +165,51 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size, bool i
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*>& carParts, std::vector<b2Joint*>& carJoints)
+PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*>& carParts, std::vector<b2RevoluteJoint*>& carJoints)
 {
-	// Create the chassis
-	PhysBody* chassis = CreateRectangle(x, y, width, height, 0.0f, false, nullptr, ColliderType::UNKNOWN, DYNAMIC);
-	chassis->body->SetAngularDamping(3.0f);
-	chassis->body->SetLinearDamping(0.8f);
+    // === CHASSIS ===
+    PhysBody* chassis = CreateRectangle(x, y, width, height, 0.0f, false, nullptr, ColliderType::UNKNOWN, DYNAMIC);
+    chassis->body->SetAngularDamping(3.0f);
+    chassis->body->SetLinearDamping(0.5f);
 
-	// Calculate the positions of the wheels
-	float offsetX = width * 0.4f;
-	float offsetY = height * 0.5f;
+    float offsetX = width * 0.4f;
+    float offsetY = height * 0.5f;
 
-	// Front wheels
-	PhysBody* wheelFrontLeft = CreateCircle(x - offsetX, y - offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
-	PhysBody* wheelFrontRight = CreateCircle(x + offsetX, y - offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+    // === WHEELS === (están mal, aunque ponga trasare derecha/no sé que no lo son no sé porqué xd, ya lo cambiaré ;( )
+    PhysBody* wheelFL = CreateCircle(x - offsetX, y - offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+    PhysBody* wheelFR = CreateCircle(x + offsetX, y - offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+    PhysBody* wheelBL = CreateCircle(x - offsetX, y + offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+    PhysBody* wheelBR = CreateCircle(x + offsetX, y + offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
 
-	// Rears wheels
-	PhysBody* wheelBackLeft = CreateCircle(x - offsetX, y + offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
-	PhysBody* wheelBackRight = CreateCircle(x + offsetX, y + offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+	// Creation of the joints
+    auto createWheelJoint = [&](PhysBody* wheel, bool canSteer)
+    {
+        b2RevoluteJointDef jointDef;
+        jointDef.bodyA = chassis->body;
+        jointDef.bodyB = wheel->body;
+        jointDef.localAnchorA = chassis->body->GetLocalPoint(wheel->body->GetPosition());
+        jointDef.localAnchorB.Set(0, 0);
+        jointDef.enableMotor = false;
+        jointDef.enableLimit = false;
 
-	// Joints
-	b2RevoluteJointDef jointDef;
-	jointDef.enableMotor = false;
-	jointDef.enableLimit = true;
-	jointDef.lowerAngle = 0;
-	jointDef.upperAngle = 0;
+        b2RevoluteJoint* joint = (b2RevoluteJoint*)world->CreateJoint(&jointDef);
+        carJoints.push_back(joint);
+    };
 
-	auto createJoint = [&](PhysBody* wheel)
-		{
-			jointDef.Initialize(chassis->body, wheel->body, wheel->body->GetWorldCenter());
-			b2Joint* j = App->physics->world->CreateJoint(&jointDef);
-			carJoints.push_back(j);
-		};
+    // Joints to the wheels
+    createWheelJoint(wheelFL, true);
+    createWheelJoint(wheelFR, true);
+    createWheelJoint(wheelBL, false);
+    createWheelJoint(wheelBR, false);
 
-	// Creates the joints
-	createJoint(wheelFrontLeft);
-	createJoint(wheelFrontRight);
-	createJoint(wheelBackLeft);
-	createJoint(wheelBackRight);
+	// Push back of the parts of the car so they can be destroyed
+    carParts.push_back(chassis);
+    carParts.push_back(wheelFL);
+    carParts.push_back(wheelFR);
+    carParts.push_back(wheelBL);
+    carParts.push_back(wheelBR);
 
-	carParts.push_back(chassis);
-	carParts.push_back(wheelFrontLeft);
-	carParts.push_back(wheelFrontRight);
-	carParts.push_back(wheelBackLeft);
-	carParts.push_back(wheelBackRight);
-
-	LOG("Car created successfully with 4 wheels and chassis");
-
-	return chassis;
+    return chassis;
 }
 
 void ModulePhysics::SetBodyPosition(PhysBody* pbody, int x, int y, bool resetRotation)
