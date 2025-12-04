@@ -34,8 +34,6 @@ protected:
     float turnSpeed = 1.0f;
     float brakeForce = 8.0f;
 
-    bool canMove = true;
-
     int checkPoint = 0;
 
 public:
@@ -46,6 +44,8 @@ public:
     PhysBody* pbody = nullptr;
 
     Texture2D texture;
+
+    bool canMove = true;
 
     int totalLaps = 3;
     int lap = 0;

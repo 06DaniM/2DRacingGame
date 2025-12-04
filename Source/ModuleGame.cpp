@@ -127,6 +127,8 @@ void ModuleGame::GameplayStart()
 
     // Creation of the cars after car is selected
     player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
+    player.canMove = false;
+    lightsOut = false;
 
     for (int i = 0; i < 7; ++i)
     {
@@ -153,6 +155,7 @@ void ModuleGame::GameplayStart()
     }
     carsPhys.clear();
 
+    // Creation of the checkered flags
     checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
     checkPhys.push_back(checkeredFlag);
 
@@ -210,6 +213,27 @@ void ModuleGame::GameplayStart()
     initialMenuStart = false;
 }
 
+void ModuleGame::TrafficLight()
+{
+    if (lightsOut) return;
+
+    lightTimer += GetFrameTime();
+
+    if (lightTimer > 1.0f)
+        DrawCircle(SCREEN_WIDTH / 2, 100, 20, RED);
+    if (lightTimer > 2.0f)
+        DrawCircle(SCREEN_WIDTH / 2, 150, 20, RED);
+    if (lightTimer > 3.0f)
+        DrawCircle(SCREEN_WIDTH / 2, 200, 20, RED);
+
+    if (lightTimer > 4.0f)
+    {
+        lightsOut = true;
+        player.canMove = true;
+        lightTimer = 0.0f;
+    }
+}
+
 // === CARS UPDATE ===
 void ModuleGame::CarsUpdate(float dt)
 {
@@ -231,6 +255,9 @@ void ModuleGame::GameManager(float dt)
     else
     {
         time += dt;
+        player.canMove = false;
+        // Activar modo IA una vez acabada la carrera?
+
         if (time >= 1.0f)
         {
             for (auto ai : aiCars)
@@ -272,6 +299,9 @@ void ModuleGame::DrawUI()
 
     else if (gameState == GameState::Gameplay) 
     {
+        // Draw the traffic light
+        TrafficLight();
+
         // Draw the UI in gameplay
         DrawText(TextFormat("Lap Time: %.2f", player.currentLapTime), 20, 50, 20, BLACK);
         DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), 20, 70, 20, BLACK);

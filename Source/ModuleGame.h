@@ -48,6 +48,7 @@ private:
 
 	void InitialMenuStart();
 	void GameplayStart();
+	void TrafficLight();
 
 	void CarsUpdate(float dt);
 	void GameManager(float dt);
@@ -108,8 +109,12 @@ private:
 
 	Texture2D track;
 
-	bool gamePlayStart = false;
 	bool initialMenuStart = false;
+	bool gamePlayStart = false;
+	bool lightsOut = false;
+
+	float lightTimer = 0.0f;
+
 	int showLap = 1;
 
 	Camera2D camera = { 0 };
