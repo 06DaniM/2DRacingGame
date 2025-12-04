@@ -190,6 +190,7 @@
     <ClInclude Include="Source/p2Point.h" />
     <ClInclude Include="Source\AICar.h" />
     <ClInclude Include="Source\Car.h" />
+    <ClInclude Include="Source\Coroutine.h" />
     <ClInclude Include="Source\Listener.h" />
     <ClInclude Include="Source\ModuleGame.h" />
     <ClInclude Include="Source\Player.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="Source/ModuleWindow.cpp" />
     <ClCompile Include="Source\AICar.cpp" />
     <ClCompile Include="Source\Car.cpp" />
+    <ClCompile Include="Source\Coroutine.cpp" />
     <ClCompile Include="Source\ModuleGame.cpp" />
     <ClCompile Include="Source\Player.cpp" />
     <ClCompile Include="Source\Timer.cpp" />

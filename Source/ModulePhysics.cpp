@@ -4,11 +4,14 @@
 #include "ModuleRender.h"
 #include "ModulePhysics.h"
 #include "ModuleGame.h"
+#include "Car.h"
 #include "box2d/box2d.h"
 
 #include "p2Point.h"
 
 #include <math.h>
+
+class Car;
 
 ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
@@ -59,19 +62,20 @@ update_status ModulePhysics::PreUpdate()
 	return UPDATE_CONTINUE;
 }
 
-PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, bool isSensor, Listener* listener, ColliderType ctype, bodyType type)
+PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, float angle, bool isSensor, Listener* listener, ColliderType ctype, bodyType type)
 {
 	b2BodyDef bodyDef;
 	if (type == DYNAMIC) bodyDef.type = b2_dynamicBody;
 	else if (type == KINEMATIC) bodyDef.type = b2_kinematicBody;
 	else bodyDef.type = b2_staticBody;
 	bodyDef.position.Set(PIXELS_TO_METERS(x), PIXELS_TO_METERS(y));
+	bodyDef.angle = angle * PI / 180;
 
 	b2Body* b = world->CreateBody(&bodyDef);
 
 	b2PolygonShape box;
 	box.SetAsBox(PIXELS_TO_METERS(width * 0.5f), PIXELS_TO_METERS(height * 0.5f));
-
+	
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &box;
 	fixtureDef.isSensor = isSensor;
@@ -163,8 +167,10 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size, bool i
 
 PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*> carParts)
 {
+	Car car;
+
 	// Create the chassis
-	PhysBody* chassis = CreateRectangle(x, y, width, height, false, nullptr, ColliderType::UNKNOWN, DYNAMIC);
+	PhysBody* chassis = CreateRectangle(x, y, width, height, 0.0f, false, nullptr, ColliderType::UNKNOWN, DYNAMIC);
 	chassis->body->SetAngularDamping(3.0f);
 	chassis->body->SetLinearDamping(0.8f);
 
@@ -198,6 +204,12 @@ PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, 
 	createJoint(wheelFrontRight);
 	createJoint(wheelBackLeft);
 	createJoint(wheelBackRight);
+
+	car.parts.push_back(chassis);
+	car.parts.push_back(wheelFrontLeft);
+	car.parts.push_back(wheelFrontRight);
+	car.parts.push_back(wheelBackLeft);
+	car.parts.push_back(wheelBackRight);
 
 	LOG("Car created successfully with 4 wheels and chassis");
 

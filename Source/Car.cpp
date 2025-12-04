@@ -32,3 +32,9 @@ void Car::CleanUp()
 }
 
 void Car::Draw() {}
+
+void Car::Destroy()
+{
+    for (auto p : parts)
+        App->physics->DestroyBody(p);
+}

@@ -25,7 +25,7 @@ bool ModuleGame::Start()
 
     auto createUIRect = [this](float x, float y, Texture2D tex, const char* id) 
         {
-        PhysBody* p = App->physics->CreateRectangle(x, y, 29 * 2, 73 * 2, true, 0, ColliderType::UI, STATIC);
+        PhysBody* p = App->physics->CreateRectangle(x, y, 29 * 2, 73 * 2, 0.0f, true, 0, ColliderType::UI, STATIC);
         p->id = id;
         p->carTexture = tex;
         carsPhys.push_back(p);
@@ -41,7 +41,7 @@ bool ModuleGame::Start()
     pMp22       = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp22,        "Mc22");
     pRB21       = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 1.35, tRB21,        "RB21");
 
-    App->renderer->DrawInsideCamera = [this]() { DrawGameplay(); };
+    App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
     gameState = GameState::InitialMenu;
@@ -51,12 +51,16 @@ bool ModuleGame::Start()
 
 update_status ModuleGame::Update()
 {
+    if (IsKeyPressed(KEY_F5)) player.lap = 5;
     float dt = GetFrameTime();
+
+    coroutineManager.Update(dt);
 
     switch (gameState)
     {
     case GameState::InitialMenu: InitialMenu(dt); break;
     case GameState::Gameplay:    Gameplay(dt); break;
+    case GameState::EndGame:     EndGameMenu(dt); break;
     }
 
     return UPDATE_CONTINUE;
@@ -65,14 +69,19 @@ update_status ModuleGame::Update()
 // === INITIAL MENU === 
 void ModuleGame::InitialMenu(float dt)
 {
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) 
+    {
         Vector2 mouse = GetMousePosition();
         b2Vec2 pMousePos = { PIXELS_TO_METERS(mouse.x), PIXELS_TO_METERS(mouse.y) };
 
-        for (auto fixture : App->physics->GetFixtures()) {
-            if (fixture->TestPoint(pMousePos)) {
+        for (auto fixture : App->physics->GetFixtures()) 
+        {
+            if (fixture->TestPoint(pMousePos)) 
+            {
                 PhysBody* car = (PhysBody*)fixture->GetBody()->GetUserData().pointer;
-                if (!car->id.empty()) {
+
+                if (!car->id.empty()) 
+                {
                     player.texture = car->carTexture;
                     car->selectable = false;
                     gameState = GameState::Gameplay;
@@ -88,10 +97,14 @@ void ModuleGame::InitialMenu(float dt)
 // === GAMEPLAY ===
 void ModuleGame::Gameplay(float dt)
 {
-    time += dt;
-
     GameplayStart();
     CarsUpdate(dt);
+    GameManager(dt);
+}
+
+void ModuleGame::EndGameMenu(float dt)
+{
+
 }
 
 void ModuleGame::GameplayStart()
@@ -125,7 +138,59 @@ void ModuleGame::GameplayStart()
         }
     }
 
-    checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 250, true, this, ColliderType::CHECKEREDFLAG, STATIC);
+    checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
+    checkPhys.push_back(checkeredFlag);
+
+    checkPoint1 = App->physics->CreateRectangle(1249, 1220, 20, 270, 45.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint1->n = 1;
+    checkPhys.push_back(checkPoint1);
+
+    checkPoint2 = App->physics->CreateRectangle(2051, 1589, 20, 270, 0.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint2->n = 2;
+    checkPhys.push_back(checkPoint2);
+
+    checkPoint3 = App->physics->CreateRectangle(2566, 1185, 20, 260, 120.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint3->n = 3;
+    checkPhys.push_back(checkPoint3);
+
+    checkPoint4 = App->physics->CreateRectangle(2694, 1494, 20, 250, 100.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint4->n = 4;
+    checkPhys.push_back(checkPoint4);
+
+    checkPoint5 = App->physics->CreateRectangle(2758, 2489, 20, 250, 90.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint5->n = 5;
+    checkPhys.push_back(checkPoint5);
+
+    checkPoint6 = App->physics->CreateRectangle(3736, 2217, 20, 250, 110.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint6->n = 6;
+    checkPhys.push_back(checkPoint6);
+
+    checkPoint7 = App->physics->CreateRectangle(4629, 2516, 20, 290, 90.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint7->n = 7;
+    checkPhys.push_back(checkPoint7);
+
+    checkPoint8 = App->physics->CreateRectangle(6066, 4180, 20, 270, 30.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint8->n = 8;
+    checkPhys.push_back(checkPoint8);
+
+    checkPoint9 = App->physics->CreateRectangle(5307, 2155, 20, 280, 60.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint9->n = 9;
+    checkPhys.push_back(checkPoint9);
+
+    checkPoint10 = App->physics->CreateRectangle(3869, 1599, 20, 290, -50.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint10->n = 10;
+    checkPhys.push_back(checkPoint10);
+
+    checkPoint11 = App->physics->CreateRectangle(2388, 2089, 20, 270, 20.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint11->n = 11;
+    checkPhys.push_back(checkPoint11);
+
+    checkPoint12 = App->physics->CreateRectangle(442, 1076, 20, 270, 55.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkPoint12->n = 12;
+    checkPhys.push_back(checkPoint12);
+
+    time = 0.0f;
+
     gamePlayStart = true;
 }
 
@@ -134,6 +199,38 @@ void ModuleGame::CarsUpdate(float dt)
 {
     player.Update(dt);
     for (auto ai : aiCars) ai->Update(dt);
+}
+
+void ModuleGame::GameManager(float dt)
+{
+    if (player.lap <= player.totalLaps)
+    {
+        if (player.lap > 0 && player.lap)
+        {
+            player.currentLapTime += GetFrameTime();
+            showLap = player.lap;
+        }
+    }
+
+    else
+    {
+        time += dt;
+        if (time >= 1.0f)
+        {
+            for (auto ai : aiCars)
+            {
+                ai->Destroy();
+            }
+            aiCars.clear();
+            player.Destroy();
+
+            for (auto ch : checkPhys)
+                App->physics->DestroyBody(ch);
+            checkPhys.clear();
+
+            gameState = GameState::EndGame;
+        }
+    }
 }
 
 // === DRAWING FUNCTIONS ===
@@ -148,15 +245,28 @@ void ModuleGame::DrawGameplay()
 
 void ModuleGame::DrawUI()
 {
-    // Draw the initial menu
-    if (gameState == GameState::InitialMenu) {
+    if (gameState == GameState::InitialMenu)
+    {
+        // Draw the initial menu
         DrawInitialMenu();
         return;
     }
 
-    // Draw the UI in gameplay
-    DrawText(TextFormat("Time: %.2f", time), 20, 50, 20, BLACK);
-    DrawText(TextFormat("Lap: %d", player.lap), 20, 70, 20, BLACK);
+    else if (gameState == GameState::Gameplay) 
+    {
+        // Draw the UI in gameplay
+        DrawText(TextFormat("Lap Time: %.2f", player.currentLapTime), 20, 50, 20, BLACK);
+        DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), 20, 70, 20, BLACK);
+        DrawText(TextFormat("Fastest Lap Time: %.2f", player.fastestLapTime), 20, 120, 20, BLACK);
+        DrawText(TextFormat("Lap: %d", showLap), SCREEN_WIDTH - 100, 50, 20, BLACK);
+        return;
+    }
+
+    else
+    {
+        // Draw the UI after gameplay
+        return;
+    }
 }
 
 void ModuleGame::DrawInitialMenu()
@@ -222,7 +332,25 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
         if (physA->ctype == ColliderType::CHECKEREDFLAG)
         {
             LOG("Checkered flag detected");
-            player.lap++;
+            if (player.checkpoint == 12 || player.lap == 0)
+            {
+                player.lap++;
+                player.checkpoint = 0;
+
+                player.previousLapTime = player.currentLapTime;
+                if (player.fastestLapTime > player.currentLapTime) 
+                    player.fastestLapTime = player.currentLapTime;
+                player.currentLapTime = 0.0f;
+            }
+        }
+
+        else if (physA->ctype == ColliderType::CHECKPOINT)
+        {
+            if (player.checkpoint + 1 == physA->n)
+            {
+                LOG("Checkpoint detected");
+                player.checkpoint++;
+            }
         }
         break;
 
