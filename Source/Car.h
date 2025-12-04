@@ -40,6 +40,7 @@ protected:
 
 public:
     std::vector<PhysBody*> parts;
+    std::vector<b2Joint*> joints;
 
     Vector2 position;
     PhysBody* pbody = nullptr;

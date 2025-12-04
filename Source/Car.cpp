@@ -9,7 +9,7 @@ Car::~Car() {}
 void Car::Start(Vector2 spawnPoint)
 {
     position = spawnPoint;
-    pbody = App->physics->CreateCar(spawnPoint.x, spawnPoint.y, width, height, 6, parts);
+    pbody = App->physics->CreateCar(spawnPoint.x, spawnPoint.y, width, height, 6, parts, joints);
     LOG("Car Start");
 }
 
@@ -35,6 +35,11 @@ void Car::Draw() {}
 
 void Car::Destroy()
 {
+    for (auto j : joints)
+        App->physics->DestroyJoint(j);
+    joints.clear();
+
     for (auto p : parts)
         App->physics->DestroyBody(p);
+    parts.clear();
 }

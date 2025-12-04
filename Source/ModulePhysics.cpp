@@ -165,10 +165,8 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size, bool i
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*> carParts)
+PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*>& carParts, std::vector<b2Joint*>& carJoints)
 {
-	Car car;
-
 	// Create the chassis
 	PhysBody* chassis = CreateRectangle(x, y, width, height, 0.0f, false, nullptr, ColliderType::UNKNOWN, DYNAMIC);
 	chassis->body->SetAngularDamping(3.0f);
@@ -196,7 +194,8 @@ PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, 
 	auto createJoint = [&](PhysBody* wheel)
 		{
 			jointDef.Initialize(chassis->body, wheel->body, wheel->body->GetWorldCenter());
-			App->physics->world->CreateJoint(&jointDef);
+			b2Joint* j = App->physics->world->CreateJoint(&jointDef);
+			carJoints.push_back(j);
 		};
 
 	// Creates the joints
@@ -205,11 +204,11 @@ PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, 
 	createJoint(wheelBackLeft);
 	createJoint(wheelBackRight);
 
-	car.parts.push_back(chassis);
-	car.parts.push_back(wheelFrontLeft);
-	car.parts.push_back(wheelFrontRight);
-	car.parts.push_back(wheelBackLeft);
-	car.parts.push_back(wheelBackRight);
+	carParts.push_back(chassis);
+	carParts.push_back(wheelFrontLeft);
+	carParts.push_back(wheelFrontRight);
+	carParts.push_back(wheelBackLeft);
+	carParts.push_back(wheelBackRight);
 
 	LOG("Car created successfully with 4 wheels and chassis");
 
@@ -250,6 +249,12 @@ void ModulePhysics::DestroyBody(PhysBody* pbody)
 {
 	if (!pbody) return;
 	world->DestroyBody(pbody->body);
+}
+
+void ModulePhysics::DestroyJoint(b2Joint* joint)
+{
+	if (!joint) return;
+	world->DestroyJoint(joint);
 }
 
 void ModulePhysics::BeginContact(b2Contact* contact)
