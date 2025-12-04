@@ -46,10 +46,12 @@ private:
 
 	void DrawUI();
 
+	void InitialMenuStart();
 	void GameplayStart();
 
 	void CarsUpdate(float dt);
 	void GameManager(float dt);
+
 	void CarsDraw();
 
 	void Destroy(PhysBody* pbody)
@@ -107,6 +109,7 @@ private:
 	Texture2D track;
 
 	bool gamePlayStart = false;
+	bool initialMenuStart = false;
 	int showLap = 1;
 
 	Camera2D camera = { 0 };

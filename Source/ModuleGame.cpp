@@ -23,24 +23,6 @@ bool ModuleGame::Start()
     tRB21 = LoadTexture("Assets/Textures/RedBull(Tututuru).png");
     track = LoadTexture("Assets/Textures/Track.png");
 
-    auto createUIRect = [this](float x, float y, Texture2D tex, const char* id) 
-        {
-        PhysBody* p = App->physics->CreateRectangle(x, y, 29 * 2, 73 * 2, 0.0f, true, 0, ColliderType::UI, STATIC);
-        p->id = id;
-        p->carTexture = tex;
-        carsPhys.push_back(p);
-        return p;
-        };
-
-    pAMR23      = createUIRect(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 0.65, tAMR23,       "AMR23");
-    pGP2Engine  = createUIRect(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 0.65, tGP2Engine,   "GP2");
-    pW11        = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 0.65, tW11,         "W11");
-    pPinkMerc   = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 0.65, tPinkMerc,    "PinkMerc");
-    pR25        = createUIRect(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 1.35, tR25,         "R25");
-    pMp4        = createUIRect(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp4,         "Mc4");
-    pMp22       = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp22,        "Mc22");
-    pRB21       = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 1.35, tRB21,        "RB21");
-
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
@@ -69,6 +51,8 @@ update_status ModuleGame::Update()
 // === INITIAL MENU === 
 void ModuleGame::InitialMenu(float dt)
 {
+    InitialMenuStart();
+
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) 
     {
         Vector2 mouse = GetMousePosition();
@@ -104,7 +88,37 @@ void ModuleGame::Gameplay(float dt)
 
 void ModuleGame::EndGameMenu(float dt)
 {
+    time += dt;
+    if (time >= 1.0f)
+    {
+        gameState = GameState::InitialMenu;
+    }
+}
 
+void ModuleGame::InitialMenuStart()
+{
+    if (initialMenuStart) return;
+    gamePlayStart = false;
+
+    auto createUIRect = [this](float x, float y, Texture2D tex, const char* id)
+        {
+            PhysBody* p = App->physics->CreateRectangle(x, y, 29 * 2, 73 * 2, 0.0f, true, 0, ColliderType::UI, STATIC);
+            p->id = id;
+            p->carTexture = tex;
+            carsPhys.push_back(p);
+            return p;
+        };
+
+    pAMR23 = createUIRect(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 0.65, tAMR23, "AMR23");
+    pGP2Engine = createUIRect(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 0.65, tGP2Engine, "GP2");
+    pW11 = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 0.65, tW11, "W11");
+    pPinkMerc = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 0.65, tPinkMerc, "PinkMerc");
+    pR25 = createUIRect(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 1.35, tR25, "R25");
+    pMp4 = createUIRect(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp4, "Mc4");
+    pMp22 = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp22, "Mc22");
+    pRB21 = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 1.35, tRB21, "RB21");
+
+    initialMenuStart = true;
 }
 
 void ModuleGame::GameplayStart()
@@ -137,6 +151,7 @@ void ModuleGame::GameplayStart()
             }
         }
     }
+    carsPhys.clear();
 
     checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
     checkPhys.push_back(checkeredFlag);
@@ -192,6 +207,7 @@ void ModuleGame::GameplayStart()
     time = 0.0f;
 
     gamePlayStart = true;
+    initialMenuStart = false;
 }
 
 // === CARS UPDATE ===
@@ -227,6 +243,8 @@ void ModuleGame::GameManager(float dt)
             for (auto ch : checkPhys)
                 App->physics->DestroyBody(ch);
             checkPhys.clear();
+
+            time = 0;
 
             gameState = GameState::EndGame;
         }
@@ -265,6 +283,8 @@ void ModuleGame::DrawUI()
     else
     {
         // Draw the UI after gameplay
+        DrawText(TextFormat("%d Laps", player.totalLaps), SCREEN_WIDTH / 2 - 80, 150, 50, BLACK);
+        DrawText(TextFormat("Fastest Lap: %.2f", player.fastestLapTime), SCREEN_WIDTH / 2 - 200, 200, 50, BLACK);
         return;
     }
 }

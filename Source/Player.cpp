@@ -11,6 +11,13 @@ void Player::Start(Vector2 spawnPoint)
     pbody->ctype = ColliderType::PLAYER;
     pbody->listener = this;
 
+    lap = 0;
+    checkPoint = 0;
+
+    previousLapTime = 0.0f;
+    fastestLapTime = 0.0f;
+    currentLapTime = 0.0f;
+
     LOG("Player Start");
 }
 
