@@ -21,6 +21,8 @@ void Car::Update(float dt)
 
     if (IsKeyPressed(KEY_F2))
         canMove = !canMove;
+
+    //distanceToNextCheckpoint = b2Distance(position, checkPoints[checkPoint].)
 }
 
 void Car::CleanUp()

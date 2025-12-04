@@ -4,6 +4,26 @@
 #include "Application.h"
 #include "ModulePhysics.h"
 #include "ModuleRender.h"
+#include "Listener.h"
+
+class Checkpoint
+{
+public:
+    Checkpoint(float x, float y, float w, float h, int index, float angle, Listener* listener) : width(w), height(h), index(index)
+    {
+        body = App->physics->CreateRectangle(x, y, width, height, angle, true, listener, ColliderType::CHECKPOINT, STATIC);
+        body->n = index;
+    }
+    ~Checkpoint()
+    {
+        if (body) App->physics->DestroyBody(body);
+    }
+
+    PhysBody* body = NULL;
+    float width = 0.0f;
+    float height = 0.0f;
+    int index;
+};
 
 class Car
 {
@@ -49,7 +69,10 @@ public:
 
     int totalLaps = 3;
     int lap = 0;
+
+    int pos = -1;
     int checkpoint = 0;
+    float distanceToNextCheckpoint = 0.0f;
 
     float fastestLapTime = 0.0f;
     float previousLapTime = 0.0f;

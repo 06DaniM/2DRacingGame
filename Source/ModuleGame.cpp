@@ -5,6 +5,7 @@
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
 #include <vector>
+#include <algorithm>
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled) {}
 ModuleGame::~ModuleGame() {}
@@ -129,12 +130,14 @@ void ModuleGame::GameplayStart()
     player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
     player.canMove = false;
     lightsOut = false;
+    allCars.push_back(&player);
 
     for (int i = 0; i < 7; ++i)
     {
         AICar* ai = new AICar();
         ai->Start({ (float)SCREEN_WIDTH / 2 + i * 100, SCREEN_HEIGHT / 2 });
         aiCars.push_back(ai);
+        allCars.push_back(ai);
     }
 
     // Sets the player for the camera
@@ -159,7 +162,20 @@ void ModuleGame::GameplayStart()
     checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
     checkPhys.push_back(checkeredFlag);
 
-    checkPoint1 = App->physics->CreateRectangle(1249, 1220, 20, 270, 45.0f, true, this, ColliderType::CHECKPOINT, STATIC);
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 1, 45, this));
+    /*checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 2, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 3, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 4, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 5, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 6, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 7, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 8, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 9, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 10, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 11, 45));
+    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 12, 45));*/
+
+    /*checkPoint1 = App->physics->CreateRectangle(1249, 1220, 20, 270, 45.0f, true, this, ColliderType::CHECKPOINT, STATIC);
     checkPoint1->n = 1;
     checkPhys.push_back(checkPoint1);
 
@@ -205,7 +221,7 @@ void ModuleGame::GameplayStart()
 
     checkPoint12 = App->physics->CreateRectangle(442, 1076, 20, 270, 55.0f, true, this, ColliderType::CHECKPOINT, STATIC);
     checkPoint12->n = 12;
-    checkPhys.push_back(checkPoint12);
+    checkPhys.push_back(checkPoint12);*/
 
     time = 0.0f;
 
@@ -267,15 +283,32 @@ void ModuleGame::GameManager(float dt)
             aiCars.clear();
             player.Destroy();
 
-            for (auto ch : checkPhys)
-                App->physics->DestroyBody(ch);
-            checkPhys.clear();
+            for (auto ch : checkpoints)
+                ch->~Checkpoint();
+            checkpoints.clear();
+            App->physics->DestroyBody(checkeredFlag);
+
+            allCars.clear();
 
             time = 0;
 
             gameState = GameState::EndGame;
         }
     }
+
+    std::sort(allCars.begin(), allCars.end()),
+        [](Car* a, Car* b)
+        {
+            if (a->lap != b->lap)
+                return a->lap > b->lap;
+            if (a->checkpoint != b->checkpoint)
+                return a->checkpoint > b->checkpoint;
+            return a->distanceToNextCheckpoint < b->distanceToNextCheckpoint;
+        };
+}
+
+void ModuleGame::UpdatePosition()
+{
 }
 
 // === DRAWING FUNCTIONS ===
@@ -352,6 +385,7 @@ bool ModuleGame::CleanUp()
         delete ai;
     }
     aiCars.clear();
+    allCars.clear();
 
     pAMR23      = NULL;
     pR25        = NULL;

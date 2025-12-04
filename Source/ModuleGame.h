@@ -52,6 +52,7 @@ private:
 
 	void CarsUpdate(float dt);
 	void GameManager(float dt);
+	void UpdatePosition();
 
 	void CarsDraw();
 
@@ -67,10 +68,15 @@ private:
 	Car car;
 	Player player;
 	std::vector<AICar*> aiCars;
+
+	std::vector<Checkpoint*> checkpoints;
+
 	CoroutineManager coroutineManager;
 
 	std::vector<PhysBody*> carsPhys;
 	std::vector<PhysBody*> checkPhys;
+
+	std::vector<Car*> allCars;
 
 	float time = 0.0f;
 
