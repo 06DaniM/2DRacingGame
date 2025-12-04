@@ -8,6 +8,7 @@
 #include "Listener.h"
 
 #include "p2Point.h"
+#include "Coroutine.h"
 
 #include "raylib.h"
 #include <vector>
@@ -15,7 +16,8 @@
 enum GameState
 {
 	InitialMenu,
-	Gameplay
+	Gameplay,
+	EndGame
 };
 
 class PhysBody;
@@ -40,13 +42,20 @@ private:
 
 	void InitialMenu(float dt);
 	void Gameplay(float dt);
+	void EndGameMenu(float dt);
 
 	void DrawUI();
 
 	void GameplayStart();
 
 	void CarsUpdate(float dt);
+	void GameManager(float dt);
 	void CarsDraw();
+
+	void Destroy(PhysBody* pbody)
+	{
+		App->physics->DestroyBody(pbody);
+	}
 
 public:
 	GameState gameState;
@@ -55,7 +64,10 @@ private:
 	Car car;
 	Player player;
 	std::vector<AICar*> aiCars;
+	CoroutineManager coroutineManager;
+
 	std::vector<PhysBody*> carsPhys;
+	std::vector<PhysBody*> checkPhys;
 
 	float time = 0.0f;
 
@@ -79,9 +91,23 @@ private:
 
 	PhysBody* checkeredFlag = NULL;
 
+	PhysBody* checkPoint1 = NULL;
+	PhysBody* checkPoint2 = NULL;
+	PhysBody* checkPoint3 = NULL;
+	PhysBody* checkPoint4 = NULL;
+	PhysBody* checkPoint5 = NULL;
+	PhysBody* checkPoint6 = NULL;
+	PhysBody* checkPoint7 = NULL;
+	PhysBody* checkPoint8 = NULL;
+	PhysBody* checkPoint9 = NULL;
+	PhysBody* checkPoint10 = NULL;
+	PhysBody* checkPoint11 = NULL;
+	PhysBody* checkPoint12 = NULL;
+
 	Texture2D track;
 
 	bool gamePlayStart = false;
+	int showLap = 1;
 
 	Camera2D camera = { 0 };
 };

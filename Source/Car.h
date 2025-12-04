@@ -19,6 +19,8 @@ public:
     virtual void OnCollision(PhysBody* physA, PhysBody* physB) {}
     virtual void EndCollision(PhysBody* physA, PhysBody* physB) {}
 
+    void Destroy();
+
 protected:
 
     int texW = 73;
@@ -37,9 +39,18 @@ protected:
     int checkPoint = 0;
 
 public:
+    std::vector<PhysBody*> parts;
+
     Vector2 position;
     PhysBody* pbody = nullptr;
 
     Texture2D texture;
+
+    int totalLaps = 3;
     int lap = 0;
+    int checkpoint = 0;
+
+    float fastestLapTime = 0.0f;
+    float previousLapTime = 0.0f;
+    float currentLapTime = 0.0f;
 };
