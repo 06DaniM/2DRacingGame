@@ -176,10 +176,10 @@ PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, 
     float offsetY = height * 0.5f;
 
     // === WHEELS === (están mal, aunque ponga trasare derecha/no sé que no lo son no sé porqué xd, ya lo cambiaré ;( )
-    PhysBody* wheelFL = CreateCircle(x - offsetX, y - offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
-    PhysBody* wheelFR = CreateCircle(x + offsetX, y - offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
-    PhysBody* wheelBL = CreateCircle(x - offsetX, y + offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
-    PhysBody* wheelBR = CreateCircle(x + offsetX, y + offsetY, wheelRadius, false, nullptr, ColliderType::WHEEL, DYNAMIC);
+    PhysBody* wheelFL = CreateCircle(x - offsetX, y - offsetY, wheelRadius, true, nullptr, ColliderType::WHEEL, DYNAMIC);
+    PhysBody* wheelFR = CreateCircle(x + offsetX, y - offsetY, wheelRadius, true, nullptr, ColliderType::WHEEL, DYNAMIC);
+    PhysBody* wheelBL = CreateCircle(x - offsetX, y + offsetY, wheelRadius, true, nullptr, ColliderType::WHEEL, DYNAMIC);
+    PhysBody* wheelBR = CreateCircle(x + offsetX, y + offsetY, wheelRadius, true, nullptr, ColliderType::WHEEL, DYNAMIC);
 
 	// Creation of the joints
     auto createWheelJoint = [&](PhysBody* wheel, bool canSteer)
