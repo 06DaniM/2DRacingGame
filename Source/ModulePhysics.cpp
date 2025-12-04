@@ -161,7 +161,7 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size, bool i
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, float wheelRadius)
+PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*> carParts)
 {
 	// Create the chassis
 	PhysBody* chassis = CreateRectangle(x, y, width, height, false, nullptr, ColliderType::UNKNOWN, DYNAMIC);
