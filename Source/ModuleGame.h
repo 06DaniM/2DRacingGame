@@ -65,6 +65,7 @@ public:
 	GameState gameState;
 
 	std::vector<Checkpoint*> checkpoints;	// Vector with the checkpoints
+	PhysBody* checkeredFlag = NULL;			// Physic body of the checkered flag
 
 private:
 	Car car;
@@ -100,8 +101,6 @@ private:
 	Texture2D tPinkMerc;
 	Texture2D tW11;
 	Texture2D tRB21;
-
-	PhysBody* checkeredFlag = NULL;		// Physic body of the checkered flag
 
 	// Physics bodies of the checkpoints
 	PhysBody* checkPoint1 = NULL;

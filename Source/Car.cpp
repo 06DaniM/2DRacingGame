@@ -16,17 +16,22 @@ void Car::Start(Vector2 spawnPoint)
 
 void Car::Update(float dt)
 {
-    if (IsKeyPressed(KEY_F2))
-        canMove = !canMove;
+    // Obtain checkpoint or checkered flag
+    int cpX, cpY;
+    if (checkpoint < App->scene_intro->checkpoints.size())
+        App->scene_intro->checkpoints[checkpoint]->body->GetPosition(cpX, cpY);
+    else
+        App->scene_intro->checkeredFlag->GetPosition(cpX, cpY);
 
-    Checkpoint* cp = App->scene_intro->checkpoints[checkpoint];
+    // Car position
+    int carX, carY;
+    pbody->GetPosition(carX, carY);
 
-    b2Vec2 cpPos = cp->GetPosition();
-    int x, y;
-    pbody->GetPosition(x, y);
-    b2Vec2 pos = { (float)x, (float)y };
-
-    distanceToNextCheckpoint = b2Distance(pos, cpPos);
+    // Distance to the next checkpoint
+    distanceToNextCheckpoint = b2Distance(
+        b2Vec2((float)carX, (float)carY),
+        b2Vec2((float)cpX, (float)cpY)
+    );
 }
 
 void Car::CleanUp()
