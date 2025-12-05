@@ -55,16 +55,16 @@ void Player::Move()
     else motor = 0;
 
     // Keys
-    if (IsKeyDown(KEY_W)) motor += 1.0f;
-    if (IsKeyDown(KEY_S)) motor -= 0.2f;
+    if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) motor += 1.0f;
+    if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) motor -= 0.2f;
 
     if (motor > 1.0f) motor = 1.0f;
     else if (motor < -1.0f) motor = -1.0f;
 
     if (inDirt) motor -= 0.5f;
 
-    if (IsKeyDown(KEY_A)) steer = -1.0f;
-    if (IsKeyDown(KEY_D)) steer = 1.0f;
+    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) steer = -1.0f;
+    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) steer = 1.0f;
 
     //Access to the parts of the car
     if (this->parts.size() < 5) return;
