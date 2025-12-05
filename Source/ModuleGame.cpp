@@ -65,20 +65,26 @@ void ModuleGame::InitialMenu(float dt)
             {
                 PhysBody* car = (PhysBody*)fixture->GetBody()->GetUserData().pointer;
 
-                if (!car->id.empty()) 
+                if (!car->id.empty())
                 {
-                    player.texture = car->carTexture;
-                    playerIdSelected = car->id;
+                    if (car->id != "UI")
+                    {
+                        player.texture = car->carTexture;
+                        playerIdSelected = car->id;
 
-                    car->selectable = false;
+                        car->selectable = false;
 
-                    gameState = GameState::Gameplay;
+                        gameState = GameState::Gameplay;
+                    }
+                    else
+                    {
+                        if (car->isLeft && player.totalLaps > 3) player.totalLaps--;
+                        else if (!car->isLeft) player.totalLaps++;
+                    }
                 }
             }
         }
     }
-
-    DrawInitialMenu();
 }
 
 
@@ -121,6 +127,14 @@ void ModuleGame::InitialMenuStart()
     pMp4 = createUIRect(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp4, "Mc4");
     pMp22 = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp22, "Mc22");
     pRB21 = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 1.35, tRB21, "RB21");
+
+    leftArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT - 100, 20, 20, 0.0f, true, this, ColliderType::UI, STATIC);
+    leftArrowLap->id = "UI";
+    righttArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 + 60, SCREEN_HEIGHT - 100, 20, 20, 0.0f, true, this, ColliderType::UI, STATIC);
+    righttArrowLap->id = "UI";
+    righttArrowLap->isLeft = false;
+    carsPhys.push_back(leftArrowLap);
+    carsPhys.push_back(righttArrowLap);
 
     initialMenuStart = true;
 }
@@ -335,7 +349,7 @@ void ModuleGame::DrawUI()
         DrawText(TextFormat("Lap Time: %.2f", player.currentLapTime), 20, 50, 20, BLACK);
         DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), 20, 70, 20, BLACK);
         DrawText(TextFormat("Fastest Lap Time: %.2f", player.fastestLapTime), 20, 120, 20, BLACK);
-        DrawText(TextFormat("Lap: %d", showLap), SCREEN_WIDTH - 100, 50, 20, BLACK);
+        DrawText(TextFormat("Lap: %d/%d", showLap, player.totalLaps), SCREEN_WIDTH - 100, 50, 20, BLACK);
         return;
     }
 
@@ -361,6 +375,8 @@ void ModuleGame::DrawInitialMenu()
     DrawTextureEx(tMp4, { SCREEN_WIDTH * 0.42f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
     DrawTextureEx(tMp22, { SCREEN_WIDTH * 0.58f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
     DrawTextureEx(tRB21, { SCREEN_WIDTH * 0.74f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
+
+    DrawText(TextFormat("%d Laps", player.totalLaps), SCREEN_WIDTH / 2 - 35, SCREEN_HEIGHT - 105, 20, BLACK);
 }
 
 void ModuleGame::CarsDraw()

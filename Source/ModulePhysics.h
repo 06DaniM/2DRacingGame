@@ -94,6 +94,7 @@ public:
 
     Texture2D carTexture;
     std::string id;
+    bool isLeft = true;
     int n;
 
     bool selectable = true;

@@ -79,6 +79,9 @@ private:
 
 	std::vector<Car*> allCars;			// Vector of all the cars
 
+	PhysBody* leftArrowLap;
+	PhysBody* righttArrowLap;
+
 
 	float timeToNextState = 0.0f;		// Time to pass to the next state
 
