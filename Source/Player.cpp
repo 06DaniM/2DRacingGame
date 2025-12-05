@@ -61,7 +61,7 @@ void Player::Move()
     if (motor > 1.0f) motor = 1.0f;
     else if (motor < -1.0f) motor = -1.0f;
 
-    if (inDirt) motor -= 0.5f;
+    if (inDirt) motor -= 0.7f;
 
     if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) steer = -1.0f;
     if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) steer = 1.0f;
