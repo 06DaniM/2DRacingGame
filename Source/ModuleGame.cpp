@@ -180,6 +180,8 @@ void ModuleGame::GameplayStart()
     checkpoints.push_back(new Checkpoint(2388, 2089, 20, 270, 11, 20, this));
     checkpoints.push_back(new Checkpoint(442, 1076, 20, 270, 12, 55, this));
 
+    App->physics->CreateCircle(1000, 1220, 50, true, this, ColliderType::DIRT, STATIC);
+
     std::sort(allCars.begin(), allCars.end(),
         [](Car* a, Car* b)
         {
@@ -416,7 +418,7 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
                 player.checkpoint = 0;
 
                 player.previousLapTime = player.currentLapTime;
-                if (player.fastestLapTime > player.currentLapTime) 
+                if (player.fastestLapTime > player.currentLapTime || player.lap == 2 ) 
                     player.fastestLapTime = player.currentLapTime;
                 player.currentLapTime = 0.0f;
             }
@@ -432,7 +434,6 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
     case ColliderType::AICAR:
         if (physA->ctype == ColliderType::CHECKPOINT)
         {
-            
             auto car = dynamic_cast<AICar*>(physB->listener);
 
             if (car != NULL)
@@ -440,6 +441,12 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
                     car->checkpoint++;
         }
         break;
+
+    case ColliderType::WHEEL:
+        if (physA->ctype == ColliderType::DIRT)
+        {
+            player.inDirt = true;
+        }
 
 
     default:
@@ -449,4 +456,16 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 
 void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
 {
+    switch (physB->ctype)
+    {
+    case ColliderType::WHEEL:
+        if (physA->ctype == ColliderType::DIRT)
+        {
+            player.inDirt = false;
+        }
+
+
+    default:
+        break;
+    }
 }

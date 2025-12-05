@@ -83,4 +83,6 @@ public:
     float fastestLapTime = 0.0f;
     float previousLapTime = 0.0f;
     float currentLapTime = 0.0f;
+
+    bool inDirt = false;
 };

@@ -39,17 +39,29 @@ void Player::Move()
 {
     if (!canMove) return;
 
-    const float maxMotorForce = 20.0f;  // Acceleration
+    const float maxMotorForce = 20.0f;    // Acceleration
     const float maxSteerAngle = 0.25f;    // Steer angle
     const float lateralGripFactor = 1.0f; // Grip
 
     // Movement
-    float motor = 0.0f;
     float steer = 0.0f;
+
+    if (motor > 0.2f)
+        motor -= GetFrameTime() / 2;
+
+    else if (motor < -0.19f) 
+        motor += GetFrameTime() / 2;
+
+    else motor = 0;
 
     // Keys
     if (IsKeyDown(KEY_W)) motor += 1.0f;
-    if (IsKeyDown(KEY_S)) motor -= 1.0f;
+    if (IsKeyDown(KEY_S)) motor -= 0.2f;
+
+    if (motor > 1.0f) motor = 1.0f;
+    else if (motor < -1.0f) motor = -1.0f;
+
+    if (inDirt) motor -= 0.5f;
 
     if (IsKeyDown(KEY_A)) steer = -1.0f;
     if (IsKeyDown(KEY_D)) steer = 1.0f;

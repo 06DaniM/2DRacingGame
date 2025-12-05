@@ -23,5 +23,5 @@ private:
 public:
 
 private:
-
+    float motor = 0.0f;
 };

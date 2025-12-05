@@ -17,6 +17,7 @@ enum class ColliderType {
     PLAYER,
     AICAR,
     WHEEL,
+    DIRT,
     UI,
     CHECKEREDFLAG,
     CHECKPOINT,
