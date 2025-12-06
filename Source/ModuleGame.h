@@ -12,6 +12,7 @@
 
 #include "raylib.h"
 #include <vector>
+#include <memory>
 
 class PhysBody;
 class PhysicEntity;
@@ -54,6 +55,7 @@ private:
 	void GameManager(float dt);
 	void UpdatePosition();
 
+	void AssignAICars();
 	void CarsDraw();
 
 	void Destroy(PhysBody* pbody)
@@ -64,23 +66,38 @@ private:
 public:
 	GameState gameState;
 
-	std::vector<Checkpoint*> checkpoints;	// Vector with the checkpoints
+	std::vector<std::unique_ptr<Checkpoint>> checkpoints;	// Vector with the checkpoints
 	PhysBody* checkeredFlag = NULL;			// Physic body of the checkered flag
 
 private:
+
+	struct CarInfo {
+		Texture2D texture;
+		std::string id;
+		std::string description;
+	};
+
+	std::vector<CarInfo> carList;
+	int currentCarIndex = 0;
+
 	Car car;
 	Player player;				// The players car
 	std::vector<AICar*> aiCars; // The vector with the ai car
 
 	CoroutineManager coroutineManager;	// Coroutine
 
-	std::vector<PhysBody*> carsPhys;	// Vector physic bodies of the cars for the initial menu (car selecition)
+	std::vector<PhysBody*> uiPhys;	// Vector physic bodies of the ui for the initial menu
 	std::string playerIdSelected;		// The id of the player
 
 	std::vector<Car*> allCars;			// Vector of all the cars
 
-	PhysBody* leftArrowLap;
-	PhysBody* righttArrowLap;
+	PhysBody* leftArrowLap = NULL;
+	PhysBody* righttArrowLap = NULL;
+
+	PhysBody* menuCar = NULL;
+
+	PhysBody* leftArrowCar = NULL;
+	PhysBody* rightArrowCar = NULL;
 
 
 	float timeToNextState = 0.0f;		// Time to pass to the next state

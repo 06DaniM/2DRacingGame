@@ -6,6 +6,7 @@
 #include "ModulePhysics.h"
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled) {}
 ModuleGame::~ModuleGame() {}
@@ -27,6 +28,15 @@ bool ModuleGame::Start()
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
+    carList.push_back({ tAMR23, "AMR23", "33"});
+    carList.push_back({ tGP2Engine, "GP2", "Where is palmer?"});
+    carList.push_back({ tW11, "W11" , "Hammer time"});
+    carList.push_back({ tPinkMerc, "PinkMerc", "Rosa"});
+    carList.push_back({ tR25, "R25", "WE ARE THE CHAMPIONS"});
+    carList.push_back({ tMp4, "Mc4", "RIP"});
+    carList.push_back({ tMp22, "Mc22", "MAFIA"});
+    carList.push_back({ tRB21, "RB21", "EL QUINTO??"});
+
     gameState = GameState::InitialMenu;
 
     return true;
@@ -34,7 +44,7 @@ bool ModuleGame::Start()
 
 update_status ModuleGame::Update()
 {
-    if (IsKeyPressed(KEY_F5)) player.lap = 5;
+    if (IsKeyPressed(KEY_F5)) player.lap = 99999;
     float dt = GetFrameTime();
 
     coroutineManager.Update(dt);
@@ -54,39 +64,40 @@ void ModuleGame::InitialMenu(float dt)
 {
     InitialMenuStart();
 
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) 
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
         Vector2 mouse = GetMousePosition();
         b2Vec2 pMousePos = { PIXELS_TO_METERS(mouse.x), PIXELS_TO_METERS(mouse.y) };
 
-        for (auto fixture : App->physics->GetFixtures()) 
+        for (auto fixture : App->physics->GetFixtures())
         {
-            if (fixture->TestPoint(pMousePos)) 
+            if (fixture->TestPoint(pMousePos))
             {
-                PhysBody* car = (PhysBody*)fixture->GetBody()->GetUserData().pointer;
+                PhysBody* ui = (PhysBody*)fixture->GetBody()->GetUserData().pointer;
+                if (!ui || ui->id.empty()) continue;
 
-                if (!car->id.empty())
-                {
-                    if (car->id != "UI")
-                    {
-                        player.texture = car->carTexture;
-                        playerIdSelected = car->id;
-
-                        car->selectable = false;
-
-                        gameState = GameState::Gameplay;
-                    }
-                    else
-                    {
-                        if (car->isLeft && player.totalLaps > 3) player.totalLaps--;
-                        else if (!car->isLeft) player.totalLaps++;
-                    }
+                if (ui->id == "CAR_LEFT") {
+                    currentCarIndex = (currentCarIndex - 1 + carList.size()) % carList.size();
+                    menuCar->carTexture = carList[currentCarIndex].texture;
+                }
+                else if (ui->id == "CAR_RIGHT") {
+                    currentCarIndex = (currentCarIndex + 1) % carList.size();
+                    menuCar->carTexture = carList[currentCarIndex].texture;
+                }
+                else if (ui->id == "CAR_DISPLAY") {
+                    player.texture = menuCar->carTexture;
+                    playerIdSelected = carList[currentCarIndex].id;
+                    ui->selectable = false;
+                    gameState = GameState::Gameplay;
+                }
+                else if (ui->id == "UI") {
+                    if (ui->isLeft && player.totalLaps > 3) player.totalLaps--;
+                    else if (!ui->isLeft && player.totalLaps < 72) player.totalLaps++;
                 }
             }
         }
     }
 }
-
 
 // === GAMEPLAY ===
 void ModuleGame::Gameplay(float dt)
@@ -107,34 +118,53 @@ void ModuleGame::EndGameMenu(float dt)
 
 void ModuleGame::InitialMenuStart()
 {
+    // OPTIMIZAR / HACER CLASE / MEJORAR DE ALGUNA FORMA
     if (initialMenuStart) return;
     gamePlayStart = false;
+    currentCarIndex = 0;
 
-    auto createUIRect = [this](float x, float y, Texture2D tex, std::string id)
-        {
-            PhysBody* p = App->physics->CreateRectangle(x, y, 29 * 2, 73 * 2, 0.0f, true, 0, ColliderType::UI, STATIC);
-            p->id = id;
-            p->carTexture = tex;
-            carsPhys.push_back(p);
-            return p;
-        };
+    menuCar = App->physics->CreateRectangle(
+        SCREEN_WIDTH / 2,
+        SCREEN_HEIGHT / 2,
+        29 * 2, 73 * 2,
+        0.0f,
+        true,
+        0,
+        ColliderType::UI,
+        STATIC
+    );
 
-    pAMR23 = createUIRect(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 0.65, tAMR23, "AMR23");
-    pGP2Engine = createUIRect(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 0.65, tGP2Engine, "GP2");
-    pW11 = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 0.65, tW11, "W11");
-    pPinkMerc = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 0.65, tPinkMerc, "PinkMerc");
-    pR25 = createUIRect(SCREEN_WIDTH * 0.26 + 1, SCREEN_HEIGHT / 2 * 1.35, tR25, "R25");
-    pMp4 = createUIRect(SCREEN_WIDTH * 0.42 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp4, "Mc4");
-    pMp22 = createUIRect(SCREEN_WIDTH * 0.58 + 1, SCREEN_HEIGHT / 2 * 1.35, tMp22, "Mc22");
-    pRB21 = createUIRect(SCREEN_WIDTH * 0.74 + 1, SCREEN_HEIGHT / 2 * 1.35, tRB21, "RB21");
+    menuCar->id = "CAR_DISPLAY";
+    menuCar->carTexture = carList[currentCarIndex].texture;
+
+    leftArrowCar = App->physics->CreateRectangle(
+        SCREEN_WIDTH / 2 - 150,
+        SCREEN_HEIGHT / 2,
+        20, 20,
+        0.0f, true, this, ColliderType::UI, STATIC
+    );
+    leftArrowCar->id = "CAR_LEFT";
+
+    rightArrowCar = App->physics->CreateRectangle(
+        SCREEN_WIDTH / 2 + 150,
+        SCREEN_HEIGHT / 2,
+        20, 20,
+        0.0f, true, this, ColliderType::UI, STATIC
+    );
+    rightArrowCar->id = "CAR_RIGHT";
 
     leftArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT - 100, 20, 20, 0.0f, true, this, ColliderType::UI, STATIC);
     leftArrowLap->id = "UI";
     righttArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 + 60, SCREEN_HEIGHT - 100, 20, 20, 0.0f, true, this, ColliderType::UI, STATIC);
     righttArrowLap->id = "UI";
     righttArrowLap->isLeft = false;
-    carsPhys.push_back(leftArrowLap);
-    carsPhys.push_back(righttArrowLap);
+
+
+    uiPhys.push_back(menuCar);
+    uiPhys.push_back(leftArrowCar);
+    uiPhys.push_back(rightArrowCar);
+    uiPhys.push_back(leftArrowLap);
+    uiPhys.push_back(righttArrowLap);
 
     initialMenuStart = true;
 }
@@ -142,6 +172,11 @@ void ModuleGame::InitialMenuStart()
 void ModuleGame::GameplayStart()
 {
     if (gamePlayStart) return;
+
+    // Destroy ui
+    for (auto ui : uiPhys)
+        Destroy(ui);
+    uiPhys.clear();
 
     // Creation of the cars after car is selected
     player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
@@ -162,37 +197,23 @@ void ModuleGame::GameplayStart()
     // Sets the player for the camera
     App->renderer->SetPlayer(&player);
 
-    // Sets the textures for the ai cars
-    for (auto ai : aiCars) {
-        for (auto phys : carsPhys) {
-            if (phys->selectable) {
-                ai->texture = phys->carTexture;
-                ai->pbody->id = phys->id;
-                phys->selectable = false;
-                break;
-            }
-        }
-    }
-
-    // Destroy the physbodies of the cars to select
-    for (auto p : carsPhys) App->physics->DestroyBody(p);
-    carsPhys.clear();
+    AssignAICars();
 
     // Creation of the checkered flags
     checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
 
-    checkpoints.push_back(new Checkpoint(1249, 1220, 20, 270, 1, 45, this));
-    checkpoints.push_back(new Checkpoint(2051, 1589, 20, 270, 2, 0, this));
-    checkpoints.push_back(new Checkpoint(2566, 1185, 20, 260, 3, 120, this));
-    checkpoints.push_back(new Checkpoint(2694, 1494, 20, 250, 4, 100, this));
-    checkpoints.push_back(new Checkpoint(2758, 2489, 20, 250, 5, 90, this));
-    checkpoints.push_back(new Checkpoint(3736, 2217, 20, 250, 6, 110, this));
-    checkpoints.push_back(new Checkpoint(4629, 2516, 20, 290, 7, 90, this));
-    checkpoints.push_back(new Checkpoint(6066, 4180, 20, 270, 8, 30, this));
-    checkpoints.push_back(new Checkpoint(5307, 2155, 20, 280, 9, 60, this));
-    checkpoints.push_back(new Checkpoint(3869, 1599, 20, 290, 10, -50, this));
-    checkpoints.push_back(new Checkpoint(2388, 2089, 20, 270, 11, 20, this));
-    checkpoints.push_back(new Checkpoint(442, 1076, 20, 270, 12, 55, this));
+    checkpoints.push_back((std::make_unique<Checkpoint>(1249, 1220, 20, 270, 1, 45, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2051, 1589, 20, 270, 2, 0, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2566, 1185, 20, 260, 3, 120, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2694, 1494, 20, 250, 4, 100, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2758, 2489, 20, 250, 5, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3736, 2217, 20, 250, 6, 110, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4629, 2516, 20, 290, 7, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(6066, 4180, 20, 270, 8, 30, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5307, 2155, 20, 280, 9, 60, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3869, 1599, 20, 290, 10, -50, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2388, 2089, 20, 270, 11, 20, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(442, 1076, 20, 270, 12, 55, this)));
 
     App->physics->CreateCircle(1000, 1220, 50, true, this, ColliderType::DIRT, STATIC);
 
@@ -220,7 +241,7 @@ void ModuleGame::GameplayStart()
 void ModuleGame::TrafficLight()
 {
     if (lightsOut) return;
-    player.canMove = true; // quitar
+    player.canMove = true; // QUITAR
     lightTimer += GetFrameTime();
 
     if (lightTimer > 1.0f)
@@ -272,9 +293,6 @@ void ModuleGame::GameManager(float dt)
             aiCars.clear();
             player.Destroy();
 
-            for (auto ch : checkpoints)
-                ch->~Checkpoint();
-
             checkpoints.clear();
             App->physics->DestroyBody(checkeredFlag);
 
@@ -323,8 +341,7 @@ void ModuleGame::DrawUI()
         DrawInitialMenu();
         return;
     }
-
-    else if (gameState == GameState::Gameplay) 
+    else if (gameState == GameState::Gameplay)
     {
         // Draw the traffic light
         TrafficLight();
@@ -345,38 +362,74 @@ void ModuleGame::DrawUI()
                 BLACK);
         }
 
-        // Draw the UI in gameplay
+        // Draw gameplay UI
         DrawText(TextFormat("Lap Time: %.2f", player.currentLapTime), 20, 50, 20, BLACK);
         DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), 20, 70, 20, BLACK);
         DrawText(TextFormat("Fastest Lap Time: %.2f", player.fastestLapTime), 20, 120, 20, BLACK);
-        DrawText(TextFormat("Lap: %d/%d", showLap, player.totalLaps), SCREEN_WIDTH - 100, 50, 20, BLACK);
+
+        // Draw the current number of laps & the total
+        std::string lapText = TextFormat("Lap: %d/%d", showLap, player.totalLaps);
+        int lapWidth = MeasureText(lapText.c_str(), 20);
+        DrawText(lapText.c_str(), SCREEN_WIDTH - lapWidth - 20, 50, 20, BLACK);
+
         return;
     }
-
     else
     {
-        // Draw the UI after gameplay
-        DrawText(TextFormat("%d Laps", player.totalLaps), SCREEN_WIDTH / 2 - 80, 150, 50, BLACK);
-        DrawText(TextFormat("Fastest Lap: %.2f", player.fastestLapTime), SCREEN_WIDTH / 2 - 200, 200, 50, BLACK);
+        // Draw the total laps & the fastest lap
+        std::string lapsText = TextFormat("%d Laps", player.totalLaps);
+        int lapsWidth = MeasureText(lapsText.c_str(), 50);
+        DrawText(lapsText.c_str(), SCREEN_WIDTH / 2 - lapsWidth / 2, 150, 50, BLACK);
+
+        std::string fastestLapText = TextFormat("Fastest Lap: %.2f", player.fastestLapTime);
+        int fastestWidth = MeasureText(fastestLapText.c_str(), 50);
+        DrawText(fastestLapText.c_str(), SCREEN_WIDTH / 2 - fastestWidth / 2, 200, 50, BLACK);
+
         return;
     }
 }
 
 void ModuleGame::DrawInitialMenu()
 {
-    // Row 1
-    DrawTextureEx(tAMR23, { SCREEN_WIDTH * 0.26f - 29, SCREEN_HEIGHT / 2 * 0.65f + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tGP2Engine, { SCREEN_WIDTH * 0.42f - 29, SCREEN_HEIGHT / 2 * 0.65f + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tW11, { SCREEN_WIDTH * 0.58f - 29, SCREEN_HEIGHT / 2 * 0.65f + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tPinkMerc, { SCREEN_WIDTH * 0.74f - 29, SCREEN_HEIGHT / 2 * 0.65f + 73 }, -90, 2, WHITE);
+    CarInfo& carShown = carList[currentCarIndex];
 
-    // Row 2
-    DrawTextureEx(tR25, { SCREEN_WIDTH * 0.26f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tMp4, { SCREEN_WIDTH * 0.42f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tMp22, { SCREEN_WIDTH * 0.58f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
-    DrawTextureEx(tRB21, { SCREEN_WIDTH * 0.74f - 29, SCREEN_HEIGHT / 2 * 1.35f + 73 }, -90, 2, WHITE);
+    // Draw the car to show
+    DrawTextureEx(menuCar->carTexture, { SCREEN_WIDTH / 2 - 30, SCREEN_HEIGHT / 2 + 73 }, -90, 2, WHITE);
 
-    DrawText(TextFormat("%d Laps", player.totalLaps), SCREEN_WIDTH / 2 - 35, SCREEN_HEIGHT - 105, 20, BLACK);
+    // Draw the description
+    int descWidth = MeasureText(carShown.description.c_str(), 30);
+    DrawText(carShown.description.c_str(), SCREEN_WIDTH / 2 - descWidth / 2, SCREEN_HEIGHT / 2 - 110, 30, BLACK);
+
+    // Draw the number of total laps
+    std::string lapsText = TextFormat("%d Laps", player.totalLaps);
+    int lapsWidth = MeasureText(lapsText.c_str(), 20);
+    DrawText(lapsText.c_str(), SCREEN_WIDTH / 2 - lapsWidth / 2, SCREEN_HEIGHT - 105, 20, BLACK);
+}
+
+void ModuleGame::AssignAICars()
+{
+    // Hacer clase?? Tengo que mejorar la estructura del código
+    std::vector<int> available;
+
+    for (int i = 0; i < carList.size(); i++)
+    {
+        if (i != currentCarIndex)
+            available.push_back(i);
+    }
+
+    std::random_shuffle(available.begin(), available.end());
+
+    int indexAI = 0;
+
+    for (auto ai : aiCars)
+    {
+        if (indexAI >= available.size()) break;
+
+        int idx = available[indexAI++];
+
+        ai->texture = carList[idx].texture;
+        ai->pbody->id = carList[idx].id;
+    }
 }
 
 void ModuleGame::CarsDraw()
@@ -407,6 +460,26 @@ bool ModuleGame::CleanUp()
     pPinkMerc   = NULL;
     pW11        = NULL;
     pRB21       = NULL;
+
+    checkeredFlag = NULL;
+    checkPoint1   = NULL;
+    checkPoint2   = NULL;
+    checkPoint3   = NULL;
+    checkPoint4   = NULL;
+    checkPoint5   = NULL;
+    checkPoint6   = NULL;
+    checkPoint7   = NULL;
+    checkPoint8   = NULL;
+    checkPoint9   = NULL;
+    checkPoint10  = NULL;
+    checkPoint11  = NULL;
+    checkPoint12  = NULL;
+
+    menuCar         = NULL;
+    leftArrowLap    = NULL;
+    righttArrowLap  = NULL;
+    leftArrowCar    = NULL;
+    rightArrowCar   = NULL;
 
     UnloadTexture(tAMR23);
     UnloadTexture(tGP2Engine);

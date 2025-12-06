@@ -16,12 +16,9 @@ public:
         position = { x,y };
     }
 
-    ~Checkpoint()
-    {
-        if (body) App->physics->DestroyBody(body);
-    }
+    ~Checkpoint() {}
 
-    b2Vec2 GetPosition() { return position; }
+    b2Vec2 GetPosition() const { return position; }
 
     b2Vec2 position = { 0,0 };
 

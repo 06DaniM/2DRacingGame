@@ -24,6 +24,8 @@ void Player::Start(Vector2 spawnPoint)
     fastestLapTime = 0.0f;
     currentLapTime = 0.0f;
 
+    motor = 0;
+
     LOG("Player Start");
 }
 
