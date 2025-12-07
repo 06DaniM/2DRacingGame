@@ -25,6 +25,9 @@ bool ModuleGame::Start()
     tRB21 = LoadTexture("Assets/Textures/RedBull(Tututuru).png");
     track = LoadTexture("Assets/Textures/Track.png");
 
+    leftArrow = LoadTexture("Assets/Textures/Car_Selection1.png");
+    rightArrow = LoadTexture("Assets/Textures/Car_Selection2.png");
+
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
@@ -140,7 +143,7 @@ void ModuleGame::InitialMenuStart()
     leftArrowCar = App->physics->CreateRectangle(
         SCREEN_WIDTH / 2 - 150,
         SCREEN_HEIGHT / 2,
-        20, 20,
+        16, 28,
         0.0f, true, this, ColliderType::UI, STATIC
     );
     leftArrowCar->id = "CAR_LEFT";
@@ -148,17 +151,16 @@ void ModuleGame::InitialMenuStart()
     rightArrowCar = App->physics->CreateRectangle(
         SCREEN_WIDTH / 2 + 150,
         SCREEN_HEIGHT / 2,
-        20, 20,
+        16, 28,
         0.0f, true, this, ColliderType::UI, STATIC
     );
     rightArrowCar->id = "CAR_RIGHT";
 
-    leftArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT - 100, 20, 20, 0.0f, true, this, ColliderType::UI, STATIC);
+    leftArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
     leftArrowLap->id = "UI";
-    righttArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 + 60, SCREEN_HEIGHT - 100, 20, 20, 0.0f, true, this, ColliderType::UI, STATIC);
+    righttArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 + 60, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
     righttArrowLap->id = "UI";
     righttArrowLap->isLeft = false;
-
 
     uiPhys.push_back(menuCar);
     uiPhys.push_back(leftArrowCar);
@@ -396,6 +398,9 @@ void ModuleGame::DrawInitialMenu()
     // Draw the car to show
     DrawTextureEx(menuCar->carTexture, { SCREEN_WIDTH / 2 - 30, SCREEN_HEIGHT / 2 + 73 }, -90, 2, WHITE);
 
+    DrawTextureEx(leftArrow, { SCREEN_WIDTH / 2 - 158, SCREEN_HEIGHT / 2 - 14 }, 0, 2, WHITE);
+    DrawTextureEx(rightArrow, { SCREEN_WIDTH / 2 + 141, SCREEN_HEIGHT / 2 - 14 }, 0, 2, WHITE);
+
     // Draw the description
     int descWidth = MeasureText(carShown.description.c_str(), 30);
     DrawText(carShown.description.c_str(), SCREEN_WIDTH / 2 - descWidth / 2, SCREEN_HEIGHT / 2 - 110, 30, BLACK);
@@ -404,6 +409,9 @@ void ModuleGame::DrawInitialMenu()
     std::string lapsText = TextFormat("%d Laps", player.totalLaps);
     int lapsWidth = MeasureText(lapsText.c_str(), 20);
     DrawText(lapsText.c_str(), SCREEN_WIDTH / 2 - lapsWidth / 2, SCREEN_HEIGHT - 105, 20, BLACK);
+
+    DrawTextureEx(leftArrow, { SCREEN_WIDTH / 2  - 67, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
+    DrawTextureEx(rightArrow, { SCREEN_WIDTH / 2 + 53, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
 }
 
 void ModuleGame::AssignAICars()
@@ -526,12 +534,11 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
         break;
 
     case ColliderType::AICAR:
-        auto car = dynamic_cast<AICar*>(physB->listener);
-
         if (physA->ctype == ColliderType::CHECKEREDFLAG)
         {
             LOG("Checkered flag detected");
 
+            auto car = dynamic_cast<AICar*>(physB->listener);
             if (car->checkpoint == checkpoints.size() || car->lap == 0)
             {
                 car->lap++;
@@ -546,6 +553,7 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 
         else if (physA->ctype == ColliderType::CHECKPOINT)
         {
+            auto car = dynamic_cast<AICar*>(physB->listener);
             if (car != NULL)
                 if (car->checkpoint + 1 == physA->n)
                     car->checkpoint++;
@@ -553,6 +561,7 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 
         else if (physA->ctype == ColliderType::DIRT)
         {
+            auto car = dynamic_cast<AICar*>(physB->listener);
             car->inDirt = true;
         }
         break;
@@ -573,12 +582,12 @@ void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
         }
 
     case ColliderType::AICAR:
-        auto car = dynamic_cast<AICar*>(physB->listener);
-
         if (physA->ctype == ColliderType::DIRT)
         {
+            auto car = dynamic_cast<AICar*>(physB->listener);
             car->inDirt = false;
         }
+        break;
 
     default:
         break;

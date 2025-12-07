@@ -122,6 +122,9 @@ private:
 	Texture2D tW11;
 	Texture2D tRB21;
 
+	Texture2D leftArrow;
+	Texture2D rightArrow;
+
 	// Physics bodies of the checkpoints
 	PhysBody* checkPoint1 = NULL;
 	PhysBody* checkPoint2 = NULL;
