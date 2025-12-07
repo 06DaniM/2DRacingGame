@@ -35,7 +35,7 @@ bool ModuleGame::Start()
     carList.push_back({ tR25, "R25", "WE ARE THE CHAMPIONS"});
     carList.push_back({ tMp4, "Mc4", "RIP"});
     carList.push_back({ tMp22, "Mc22", "MAFIA"});
-    carList.push_back({ tRB21, "RB21", "EL QUINTO??"});
+    carList.push_back({ tRB21, "RB21", "EL QUINTO?? Ya no ;("});
 
     gameState = GameState::InitialMenu;
 
@@ -518,25 +518,44 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
             if (player.checkpoint + 1 == physA->n)
                 player.checkpoint++;
         }
+
+        else if (physA->ctype == ColliderType::DIRT)
+        {
+            player.inDirt = true;
+        }
         break;
 
     case ColliderType::AICAR:
-        if (physA->ctype == ColliderType::CHECKPOINT)
-        {
-            auto car = dynamic_cast<AICar*>(physB->listener);
+        auto car = dynamic_cast<AICar*>(physB->listener);
 
+        if (physA->ctype == ColliderType::CHECKEREDFLAG)
+        {
+            LOG("Checkered flag detected");
+
+            if (car->checkpoint == checkpoints.size() || car->lap == 0)
+            {
+                car->lap++;
+                car->checkpoint = 0;
+
+                car->previousLapTime = car->currentLapTime;
+                if (car->fastestLapTime > car->currentLapTime || car->lap == 2)
+                    car->fastestLapTime = car->currentLapTime;
+                car->currentLapTime = 0.0f;
+            }
+        }
+
+        else if (physA->ctype == ColliderType::CHECKPOINT)
+        {
             if (car != NULL)
                 if (car->checkpoint + 1 == physA->n)
                     car->checkpoint++;
         }
-        break;
 
-    case ColliderType::WHEEL:
-        if (physA->ctype == ColliderType::DIRT)
+        else if (physA->ctype == ColliderType::DIRT)
         {
-            player.inDirt = true;
+            car->inDirt = true;
         }
-
+        break;
 
     default:
         break;
@@ -547,12 +566,19 @@ void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
 {
     switch (physB->ctype)
     {
-    case ColliderType::WHEEL:
+    case ColliderType::PLAYER:
         if (physA->ctype == ColliderType::DIRT)
         {
             player.inDirt = false;
         }
 
+    case ColliderType::AICAR:
+        auto car = dynamic_cast<AICar*>(physB->listener);
+
+        if (physA->ctype == ColliderType::DIRT)
+        {
+            car->inDirt = false;
+        }
 
     default:
         break;

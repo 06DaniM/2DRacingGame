@@ -1,6 +1,7 @@
-#include "AICar.h"
+﻿#include "AICar.h"
 #include "Globals.h"
 #include "Application.h"
+#include "ModuleGame.h"
 
 AICar::AICar() {}
 AICar::~AICar() {}
@@ -16,9 +17,58 @@ void AICar::Start(Vector2 spawnPoint)
 
 void AICar::Update(float dt)
 {
-    // === AI ===
+    if (!pbody) return;
+
+    // AI
+    CalculateMove();
+
+    // Move
+    MoveAI();
 
     return Car::Update(dt);
+}
+
+void AICar::CalculateMove()
+{
+    float carX, carY, cpX, cpY;
+    GetCarAndCheckPos(carX, carY, cpX, cpY);
+
+    // Calculate the distance to the checkpoint
+    float dx = carX - cpX;
+    float dy = carY - cpY;
+
+    // Convert to agnle
+    float desiredAngle = atan2f(dy, dx);
+    float currentAngle = pbody->body->GetAngle();
+
+    // Angle diff
+    float angleDiff = desiredAngle - currentAngle;
+    while (angleDiff > 3.14159f) angleDiff -= 6.28318f;
+    while (angleDiff < -3.14159f) angleDiff += 6.28318f;
+
+    // Convert angle diff to the steer
+    float steer = 0.0f;
+    if (angleDiff > 0.1f) steer = 1.0f;
+    else if (angleDiff < -0.1f) steer = -1.0f;
+    else steer = 0.0f;
+
+    // Automatic acceleration
+    float targetAccel = accelRate;
+
+    // Save the values
+    this->aiSteer = steer;
+    this->aiAccel = targetAccel;
+}
+
+void AICar::MoveAI()
+{
+    if (!canMove) return;
+
+    float dt = GetFrameTime();
+    steer = aiSteer;
+    targetAccel = aiAccel;
+
+    ApplyPhysic();
 }
 
 void AICar::CleanUp()

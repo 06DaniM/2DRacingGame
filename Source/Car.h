@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Globals.h"
 #include "p2Point.h"
 #include "Application.h"
@@ -45,6 +45,11 @@ public:
     void Destroy();
 
 protected:
+    void ApplyPhysic();
+    void ApplyCarForces(PhysBody* chassis, std::vector<PhysBody*>& wheels, float motor, float steer, float maxMotorForce, float maxSteerAngle, float lateralGripFactor);
+    void GetCarAndCheckPos(float& carX, float& carY, float& cpX, float& cpY) const;
+
+protected:
 
     int texW = 73;
     int texH = 29;
@@ -52,12 +57,24 @@ protected:
     float width = 50;
     float height = 25;
 
-    float acceleration = 15.0f;
-    float maxSpeed = 10.0f;
-    float turnSpeed = 1.0f;
-    float brakeForce = 8.0f;
+    float motor = 0.0f;            // Current motor force
+
+    float velocity = 0.0f;         // Current velocity
+    float acceleration = 0.0f;     // Current acceleration
+
+    const float maxSpeed = 30.0f;  // Maximum speed
+    const float accelRate = 18.0f; // Acceleration
+    const float brakeRate = 25.0f; // Break force
+    const float drag = 10.0f;      // Drag
 
     int checkPoint = 0;
+
+    PhysBody* chassis = NULL;
+
+    PhysBody* wheelFR = NULL;  // FL current → FR real
+    PhysBody* wheelBR = NULL;  // FR current → BR real
+    PhysBody* wheelFL = NULL;  // BL current → FL real
+    PhysBody* wheelBL = NULL;  // BR current → BL real
 
 public:
     std::vector<PhysBody*> parts;
@@ -82,4 +99,11 @@ public:
     float currentLapTime = 0.0f;
 
     bool inDirt = false;
+
+    const float maxMotorForce = 20.0f;      // Max force
+    const float maxSteerAngle = 0.25f;      // Max steering
+    const float lateralGripFactor = 1.0f;   // Grip
+
+    float steer = 0.0f;
+    float targetAccel = 0.0f;
 };

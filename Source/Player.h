@@ -18,10 +18,9 @@ public:
 
 private:
     void Move();
-    void ApplyCarForces(PhysBody* chassis, std::vector<PhysBody*>& wheels, float motor, float steer, float maxMotorForce, float maxSteerAngle, float lateralGripFactor);
 
 public:
 
 private:
-    float motor = 0.0f;
+
 };

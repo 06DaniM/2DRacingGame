@@ -15,4 +15,18 @@ public:
 
     void OnCollision(PhysBody* physA, PhysBody* physB) override;
     void EndCollision(PhysBody* physA, PhysBody* physB) override;
+
+private:
+    void CalculateMove();
+    void MoveAI();
+
+public:
+
+private:
+    float aiSteer = 0.0f;
+    float aiAccel = 0.0f;
+
+    float checkpointOffset = 0.0f;  // Horizontal offset
+    int lastCheckpoint = -1;        // To know if needs a new point
+
 };
