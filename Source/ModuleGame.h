@@ -58,6 +58,8 @@ private:
 	void AssignAICars();
 	void CarsDraw();
 
+	bool LoadChainFromFile(const char* path, std::vector<int>& outPoints);
+
 	void Destroy(PhysBody* pbody)
 	{
 		App->physics->DestroyBody(pbody);
@@ -70,7 +72,6 @@ public:
 	PhysBody* checkeredFlag = NULL;			// Physic body of the checkered flag
 
 private:
-
 	struct CarInfo {
 		Texture2D texture;
 		std::string id;
@@ -90,6 +91,8 @@ private:
 	std::string playerIdSelected;		// The id of the player
 
 	std::vector<Car*> allCars;			// Vector of all the cars
+
+	std::vector<int> trackPoints;
 
 	PhysBody* leftArrowLap = NULL;
 	PhysBody* righttArrowLap = NULL;
@@ -124,20 +127,6 @@ private:
 
 	Texture2D leftArrow;
 	Texture2D rightArrow;
-
-	// Physics bodies of the checkpoints
-	PhysBody* checkPoint1 = NULL;
-	PhysBody* checkPoint2 = NULL;
-	PhysBody* checkPoint3 = NULL;
-	PhysBody* checkPoint4 = NULL;
-	PhysBody* checkPoint5 = NULL;
-	PhysBody* checkPoint6 = NULL;
-	PhysBody* checkPoint7 = NULL;
-	PhysBody* checkPoint8 = NULL;
-	PhysBody* checkPoint9 = NULL;
-	PhysBody* checkPoint10 = NULL;
-	PhysBody* checkPoint11 = NULL;
-	PhysBody* checkPoint12 = NULL;
 
 	Texture2D track;	// Texture of the track
 

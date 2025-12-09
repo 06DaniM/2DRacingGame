@@ -190,6 +190,7 @@
     <ClInclude Include="Source/p2Point.h" />
     <ClInclude Include="Source\AICar.h" />
     <ClInclude Include="Source\Car.h" />
+    <ClInclude Include="Source\Colliders.h" />
     <ClInclude Include="Source\Coroutine.h" />
     <ClInclude Include="Source\Listener.h" />
     <ClInclude Include="Source\ModuleGame.h" />

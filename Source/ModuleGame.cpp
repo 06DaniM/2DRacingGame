@@ -4,9 +4,11 @@
 #include "ModuleGame.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
+#include "Colliders.h"
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <fstream>
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled) {}
 ModuleGame::~ModuleGame() {}
@@ -204,6 +206,11 @@ void ModuleGame::GameplayStart()
     // Creation of the checkered flags
     checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
 
+    if (LoadChainFromFile("Assets/Track_Points.txt", trackPoints))
+    {
+        Colliders* circuit = new Colliders(0, 0, trackPoints.data(), trackPoints.size(), ColliderType::WALL, this);
+    }
+
     checkpoints.push_back((std::make_unique<Checkpoint>(1249, 1220, 20, 270, 1, 45, this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2051, 1589, 20, 270, 2, 0, this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2566, 1185, 20, 260, 3, 120, this)));
@@ -243,7 +250,7 @@ void ModuleGame::GameplayStart()
 void ModuleGame::TrafficLight()
 {
     if (lightsOut) return;
-    player.canMove = true; // QUITAR
+    //player.canMove = true; // QUITAR
     lightTimer += GetFrameTime();
 
     if (lightTimer > 1.0f)
@@ -256,7 +263,7 @@ void ModuleGame::TrafficLight()
     if (lightTimer > 4.0f)
     {
         lightsOut = true;
-        player.canMove = true;
+        //player.canMove = true;
         lightTimer = 0.0f;
     }
 }
@@ -447,6 +454,23 @@ void ModuleGame::CarsDraw()
     for (auto ai : aiCars) ai->Draw();
 }
 
+bool ModuleGame::LoadChainFromFile(const char* path, std::vector<int>& outPoints)
+{
+    std::ifstream file(path);
+
+    if (!file.is_open())
+        return false;
+
+    int x, y;
+
+    while (file >> x >> y) {
+        outPoints.push_back(x);
+        outPoints.push_back(y);
+    }
+
+    return true;
+}
+
 bool ModuleGame::CleanUp()
 {
     // Clean up
@@ -470,18 +494,6 @@ bool ModuleGame::CleanUp()
     pRB21       = NULL;
 
     checkeredFlag = NULL;
-    checkPoint1   = NULL;
-    checkPoint2   = NULL;
-    checkPoint3   = NULL;
-    checkPoint4   = NULL;
-    checkPoint5   = NULL;
-    checkPoint6   = NULL;
-    checkPoint7   = NULL;
-    checkPoint8   = NULL;
-    checkPoint9   = NULL;
-    checkPoint10  = NULL;
-    checkPoint11  = NULL;
-    checkPoint12  = NULL;
 
     menuCar         = NULL;
     leftArrowLap    = NULL;

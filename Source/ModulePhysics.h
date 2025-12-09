@@ -19,6 +19,7 @@ enum class ColliderType {
     WHEEL,
     DIRT,
     UI,
+    WALL,
     CHECKEREDFLAG,
     CHECKPOINT,
     UNKNOWN
