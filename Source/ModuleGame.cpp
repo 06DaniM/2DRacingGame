@@ -49,6 +49,7 @@ bool ModuleGame::Start()
 
 update_status ModuleGame::Update()
 {
+    // === HACER CLASES CON LOS DIFERENTES ESTADOS DEL JUEGO ===
     if (IsKeyPressed(KEY_F5)) player.lap = 99999;
     float dt = GetFrameTime();
 
@@ -206,10 +207,20 @@ void ModuleGame::GameplayStart()
     // Creation of the checkered flags
     checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
 
-    if (LoadChainFromFile("Assets/Track_Points.txt", trackPoints))
-    {
-        Colliders* circuit = new Colliders(0, 0, trackPoints.data(), trackPoints.size(), ColliderType::WALL, this);
-    }
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_External_Points.txt", externalTrackPoints))
+        Colliders* circuit = new Colliders(0, 0, externalTrackPoints.data(), externalTrackPoints.size(), ColliderType::WALL, this);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS1.txt", internalTrackPointsS1))
+        Colliders* circuit = new Colliders(0, 0, internalTrackPointsS1.data(), internalTrackPointsS1.size(), ColliderType::WALL, this);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS2.txt", internalTrackPointsS2))
+        Colliders* circuit = new Colliders(0, 0, internalTrackPointsS2.data(), internalTrackPointsS2.size(), ColliderType::WALL, this);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsAbove.txt", sensorTrackPointsAbove))
+        Colliders* circuit = new Colliders(0, 0, sensorTrackPointsAbove.data(), sensorTrackPointsAbove.size(), ColliderType::WALL, this);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsBelow.txt", sensorTrackPointsBelow))
+        Colliders* circuit = new Colliders(0, 0, sensorTrackPointsBelow.data(), sensorTrackPointsBelow.size(), ColliderType::WALL, this);
 
     checkpoints.push_back((std::make_unique<Checkpoint>(1249, 1220, 20, 270, 1, 45, this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2051, 1589, 20, 270, 2, 0, this)));
@@ -574,7 +585,7 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
         else if (physA->ctype == ColliderType::DIRT)
         {
             auto car = dynamic_cast<AICar*>(physB->listener);
-            car->inDirt = true;
+            if (car != NULL) car->inDirt = true;
         }
         break;
 
@@ -597,7 +608,7 @@ void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
         if (physA->ctype == ColliderType::DIRT)
         {
             auto car = dynamic_cast<AICar*>(physB->listener);
-            car->inDirt = false;
+            if (car != NULL) car->inDirt = false;
         }
         break;
 

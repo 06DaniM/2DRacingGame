@@ -87,14 +87,25 @@ private:
 
 	CoroutineManager coroutineManager;	// Coroutine
 
-	std::vector<PhysBody*> uiPhys;	// Vector physic bodies of the ui for the initial menu
-	std::string playerIdSelected;		// The id of the player
+	std::vector<PhysBody*> uiPhys;			 // Vector physic bodies of the ui for the initial menu
+	std::string playerIdSelected;			 // The id of the player
 
-	std::vector<Car*> allCars;			// Vector of all the cars
+	std::vector<Car*> allCars;				 // Vector of all the cars
 
-	std::vector<int> trackPoints;
+	std::vector<int> externalTrackPoints;	 // External barriers
 
-	PhysBody* leftArrowLap = NULL;
+	std::vector<int> internalTrackPointsS1;	 // Internal barriers of sector 1
+	std::vector<int> internalTrackPointsS2;  // Internal barriers of sector 2
+
+	std::vector<int> sensorTrackPointsAbove; // Sensor barriers track on top
+	std::vector<int> sensorTrackPointsBelow; // Sensor barriers track on bottom
+
+	PhysBody* sensorAboveTop = NULL;
+	PhysBody* sensorAboveBottom = NULL;
+	PhysBody* sensorBelowTop = NULL;
+	PhysBody* sensorBelowBottom = NULL;
+
+	PhysBody* leftArrowLap = NULL;		
 	PhysBody* righttArrowLap = NULL;
 
 	PhysBody* menuCar = NULL;
