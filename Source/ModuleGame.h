@@ -150,6 +150,7 @@ private:
 	Texture2D tRB21;
 
 	Texture2D initialMenuScreen;
+	Texture2D endScreen;
 
 	Texture2D amr23Stats;
 	Texture2D r25Stats;

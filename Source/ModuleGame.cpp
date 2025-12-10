@@ -35,20 +35,20 @@ bool ModuleGame::Start()
     mc22Stats = LoadTexture("Assets/Textures/Stats/mc22_stats.png");
     rb21Stats = LoadTexture("Assets/Textures/Stats/rb21_stats.png");
 
-
     initialMenuScreen = LoadTexture("Assets/Textures/UI/Main_menu.png");
+    endScreen = LoadTexture("Assets/Textures/UI/Endgame.png");
 
     leftArrow = LoadTexture("Assets/Textures/UI/Car_Selection1.png");
     rightArrow = LoadTexture("Assets/Textures/UI/Car_Selection2.png");
 
-    carList.push_back({ tAMR23, "AMR23", amr23Stats });
-    carList.push_back({ tGP2Engine, "GP2", gp2Stats });
-    carList.push_back({ tW11, "W11" , w11Stats });
-    carList.push_back({ tPinkMerc, "PinkMerc", pinkMercStats });
-    carList.push_back({ tR25, "R25", r25Stats });
-    carList.push_back({ tMp4, "Mc4", mc4Stats });
-    carList.push_back({ tMp22, "Mc22", mc22Stats });
-    carList.push_back({ tRB21, "RB21", rb21Stats });
+    carList.push_back({ tAMR23,     "AMR23",    amr23Stats });
+    carList.push_back({ tGP2Engine, "MCL33",    gp2Stats });
+    carList.push_back({ tW11,       "W11" ,     w11Stats });
+    carList.push_back({ tPinkMerc,  "RP20",     pinkMercStats });
+    carList.push_back({ tR25,       "R25",      r25Stats });
+    carList.push_back({ tMp4,       "MP4-4",    mc4Stats });
+    carList.push_back({ tMp22,      "MP4-22",   mc22Stats });
+    carList.push_back({ tRB21,      "RB21",     rb21Stats });
 
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
@@ -127,8 +127,9 @@ void ModuleGame::Gameplay(float dt)
 void ModuleGame::EndGameMenu(float dt)
 {
     timeToNextState += dt;
-    if (timeToNextState >= 1.0f)
+    if (timeToNextState >= 5.0f)
     {
+        allCars.clear();
         gameState = GameState::InitialMenu;
     }
 }
@@ -170,9 +171,9 @@ void ModuleGame::InitialMenuStart()
     );
     rightArrowCar->id = "CAR_RIGHT";
 
-    leftArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
+    leftArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 - 78, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
     leftArrowLap->id = "UI";
-    righttArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 + 60, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
+    righttArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 + 78, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
     righttArrowLap->id = "UI";
     righttArrowLap->isLeft = false;
 
@@ -321,8 +322,6 @@ void ModuleGame::GameManager(float dt)
             checkpoints.clear();
             App->physics->DestroyBody(checkeredFlag);
 
-            allCars.clear();
-
             timeToNextState = 0;
 
             gameState = GameState::EndGame;
@@ -401,14 +400,36 @@ void ModuleGame::DrawUI()
     }
     else
     {
+        // Draw the background
+        DrawTextureEx(endScreen, { 0,0 }, 0, 1, WHITE);
+
         // Draw the total laps & the fastest lap
         std::string lapsText = TextFormat("%d Laps", player.totalLaps);
         int lapsWidth = MeasureText(lapsText.c_str(), 50);
-        DrawText(lapsText.c_str(), SCREEN_WIDTH / 2 - lapsWidth / 2, 150, 50, BLACK);
+        DrawText(lapsText.c_str(), 200 - lapsWidth / 2, 70, 20, BLACK);
 
-        std::string fastestLapText = TextFormat("Fastest Lap: %.2f", player.fastestLapTime);
-        int fastestWidth = MeasureText(fastestLapText.c_str(), 50);
-        DrawText(fastestLapText.c_str(), SCREEN_WIDTH / 2 - fastestWidth / 2, 200, 50, BLACK);
+        int nameX = 120;
+        int startX = 80;
+        int startY = 130;
+        int fastLapX = 210;
+        int lineSpacing = 50;
+
+        for (size_t i = 0; i < allCars.size(); i++)
+        {
+            Car* car = allCars[i];
+            const char* placeText = (i == 0) ? " " : TextFormat("%d", (int)i + 1);
+            int y = startY + i * lineSpacing;
+
+            // Cars position
+            DrawText(placeText, startX, y, 20, BLACK);
+
+            // Name
+            DrawText(car->pbody->id.c_str(), nameX, y, 20, BLACK);
+
+            // Fast lap
+            DrawText(TextFormat("Fast lap: %.2f", car->fastestLapTime),
+                fastLapX, y, 20, BLACK);
+        }
 
         return;
     }
@@ -433,10 +454,10 @@ void ModuleGame::DrawInitialMenu()
     // Draw the number of total laps
     std::string lapsText = TextFormat("%d Laps", player.totalLaps);
     int lapsWidth = MeasureText(lapsText.c_str(), 20);
-    DrawText(lapsText.c_str(), SCREEN_WIDTH / 2 - lapsWidth / 2, SCREEN_HEIGHT - 105, 20, BLACK);
+    DrawText(lapsText.c_str(), SCREEN_WIDTH / 2 - lapsWidth / 2 - 17, SCREEN_HEIGHT - 115, 30, BLACK);
 
-    DrawTextureEx(leftArrow, { SCREEN_WIDTH / 2  - 67, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
-    DrawTextureEx(rightArrow, { SCREEN_WIDTH / 2 + 53, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
+    DrawTextureEx(leftArrow, { SCREEN_WIDTH / 2  - 85, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
+    DrawTextureEx(rightArrow, { SCREEN_WIDTH / 2 + 71, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
 }
 
 void ModuleGame::AssignAICars()
