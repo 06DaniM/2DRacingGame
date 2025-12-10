@@ -46,13 +46,24 @@ void Car::ApplyPhysic()
 
     velocity += targetAccel * dt;
 
-    if (velocity > maxSpeed) velocity = maxSpeed;
-    if (velocity < -maxSpeed * 0.4f) velocity = -maxSpeed * 0.4f;
+    float maxSp = maxSpeed;
 
-    if (inDirt)
-        velocity *= 0.6f;
+    if (inDirt) maxSp /= 2;
 
-    // Acceso a las partes (igual)
+    if (velocity > maxSp) velocity = maxSp;
+    if (velocity < -maxSp * 0.4f) velocity = -maxSp * 0.4f;
+
+    // Normalize speed between 0 - 1
+    float speed01 = fabs(velocity) / maxSp;
+    if (speed01 > 0.8f) speed01 = 0.8f;
+
+    // Faster it goes less it turns
+    float steerFactor = 1.0f - speed01;
+
+    // Final steer angle
+    float currentSteer = maxSteerAngle * steerFactor;
+
+    // Access to the parts of the car
     if (parts.size() < 5) return;
 
     chassis = parts[CHASSIS_INDEX];
@@ -64,7 +75,7 @@ void Car::ApplyPhysic()
 
     std::vector<PhysBody*> allWheels = { wheelFL, wheelFR, wheelBL, wheelBR };
 
-    float motorForceNormalized = velocity / maxSpeed;
+    float motorForceNormalized = velocity / maxSp;
 
     ApplyCarForces(
         chassis,
@@ -72,7 +83,7 @@ void Car::ApplyPhysic()
         motorForceNormalized,
         steer,
         maxMotorForce,
-        maxSteerAngle,
+        currentSteer,
         lateralGripFactor
     );
 

@@ -65,7 +65,7 @@ protected:
     const float maxSpeed = 30.0f;  // Maximum speed
     const float accelRate = 18.0f; // Acceleration
     const float brakeRate = 25.0f; // Break force
-    const float drag = 10.0f;      // Drag
+    const float drag = 15.0f;      // Drag
 
     int checkPoint = 0;
 
@@ -101,7 +101,7 @@ public:
     bool inDirt = false;
 
     const float maxMotorForce = 20.0f;      // Max force
-    const float maxSteerAngle = 0.25f;      // Max steering
+    const float maxSteerAngle = 0.5f;       // Max steering
     const float lateralGripFactor = 1.0f;   // Grip
 
     float steer = 0.0f;
