@@ -25,6 +25,13 @@ void Car::Start(Vector2 spawnPoint)
     PhysBody* wheelFL = this->parts[WHEEL_BL_INDEX];  // BL current → FL real
     PhysBody* wheelBL = this->parts[WHEEL_BR_INDEX];  // BR current → BL real
 
+    // Start angle
+    float startAngle = -150.0f;
+    float startAngleRad = startAngle * DEG2RAD;
+
+    b2Vec2 pos = chassis->body->GetPosition();
+    chassis->body->SetTransform(pos, startAngleRad);
+
     LOG("Car Start");
 }
 

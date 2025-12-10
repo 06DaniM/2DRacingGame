@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "AICar.h"
 #include "Listener.h"
+#include "Colliders.h"
 
 #include "p2Point.h"
 #include "Coroutine.h"
@@ -58,6 +59,7 @@ private:
 	void AssignAICars();
 	void CarsDraw();
 
+	void CreateColliders();
 	bool LoadChainFromFile(const char* path, std::vector<int>& outPoints);
 
 	void Destroy(PhysBody* pbody)
@@ -87,6 +89,14 @@ private:
 
 	CoroutineManager coroutineManager;	// Coroutine
 
+	Colliders* trackExt			 = NULL;
+	Colliders* trackIntS1		 = NULL;
+	Colliders* trackIntS2		 = NULL;
+	Colliders* sensorAboveRight  = NULL;
+	Colliders* sensorAboveLeft	 = NULL;
+	Colliders* sensorBelowUp	 = NULL;
+	Colliders* sensorBelowDown	 = NULL;
+
 	std::vector<PhysBody*> uiPhys;			 // Vector physic bodies of the ui for the initial menu
 	std::vector<PhysBody*> trackPhys;	     // Vector physic bodies of the track
 
@@ -99,13 +109,14 @@ private:
 	std::vector<int> internalTrackPointsS1;	 // Internal barriers of sector 1
 	std::vector<int> internalTrackPointsS2;  // Internal barriers of sector 2
 
-	std::vector<int> sensorTrackPointsAbove; // Sensor barriers track on top
-	std::vector<int> sensorTrackPointsBelow; // Sensor barriers track on bottom
+	std::vector<int> sensorTrackPointsAboveRight; // Sensor barriers track on top right
+	std::vector<int> sensorTrackPointsAboveLeft;  // Sensor barriers track on top left
 
-	PhysBody* sensorAboveTop = NULL;
-	PhysBody* sensorAboveBottom = NULL;
-	PhysBody* sensorBelowTop = NULL;
-	PhysBody* sensorBelowBottom = NULL;
+	std::vector<int> sensorTrackPointsBelowUp;	  // Sensor barriers track on bottom up
+	std::vector<int> sensorTrackPointsBelowDown;  // Sensor barriers track on bottom down
+
+	PhysBody* sensorAbove = NULL;
+	PhysBody* sensorBelow = NULL;
 
 	PhysBody* leftArrowLap = NULL;		
 	PhysBody* righttArrowLap = NULL;
@@ -139,6 +150,7 @@ private:
 	Texture2D tRB21;
 
 	Texture2D initialMenuScreen;
+	Texture2D endScreen;
 
 	Texture2D amr23Stats;
 	Texture2D r25Stats;

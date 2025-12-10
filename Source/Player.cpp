@@ -46,7 +46,7 @@ void Player::Move()
     if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))
         targetAccel -= brakeRate;
 
-    if (!IsKeyDown(KEY_W) && !IsKeyDown(KEY_S))
+    if (!IsKeyDown(KEY_W) && !IsKeyDown(KEY_S) && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN))
     {
         if (velocity > 0)
             velocity -= drag * dt;

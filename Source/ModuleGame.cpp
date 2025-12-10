@@ -4,7 +4,6 @@
 #include "ModuleGame.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
-#include "Colliders.h"
 #include <vector>
 #include <algorithm>
 #include <memory>
@@ -17,42 +16,42 @@ bool ModuleGame::Start()
 {
     SetTargetFPS(60);
 
-    tAMR23 = LoadTexture("Assets/Textures/AMR23.png");
-    tR25 = LoadTexture("Assets/Textures/R25.png");
-    tGP2Engine = LoadTexture("Assets/Textures/GP2Engine.png");
-    tMp4 = LoadTexture("Assets/Textures/Mc4.png");
-    tMp22 = LoadTexture("Assets/Textures/Mc22.png");
-    tPinkMerc = LoadTexture("Assets/Textures/PinkMerc.png");
-    tW11 = LoadTexture("Assets/Textures/W11.png");
-    tRB21 = LoadTexture("Assets/Textures/RedBull(Tututuru).png");
+    tAMR23 = LoadTexture("Assets/Textures/Cars/AMR23.png");
+    tR25 = LoadTexture("Assets/Textures/Cars/R25.png");
+    tGP2Engine = LoadTexture("Assets/Textures/Cars/GP2Engine.png");
+    tMp4 = LoadTexture("Assets/Textures/Cars/Mc4.png");
+    tMp22 = LoadTexture("Assets/Textures/Cars/Mc22.png");
+    tPinkMerc = LoadTexture("Assets/Textures/Cars/PinkMerc.png");
+    tW11 = LoadTexture("Assets/Textures/Cars/W11.png");
+    tRB21 = LoadTexture("Assets/Textures/Cars/RedBull(Tututuru).png");
     track = LoadTexture("Assets/Textures/Track.png");
 
-    amr23Stats = LoadTexture("Assets/Textures/amr23_stats.png");
-    r25Stats = LoadTexture("Assets/Textures/r25_stats.png");
-    w11Stats = LoadTexture("Assets/Textures/w11_stats.png");
-    gp2Stats = LoadTexture("Assets/Textures/amr23_stats.png");
-    pinkMercStats = LoadTexture("Assets/Textures/amr23_stats.png");
-    mc4Stats = LoadTexture("Assets/Textures/amr23_stats.png");
-    mc22Stats = LoadTexture("Assets/Textures/amr23_stats.png");
-    rb21Stats = LoadTexture("Assets/Textures/amr23_stats.png");
+    amr23Stats = LoadTexture("Assets/Textures/Stats/amr23_stats.png");
+    r25Stats = LoadTexture("Assets/Textures/Stats/r25_stats.png");
+    w11Stats = LoadTexture("Assets/Textures/Stats/w11_stats.png");
+    gp2Stats = LoadTexture("Assets/Textures/Stats/gp2_stats.png");
+    pinkMercStats = LoadTexture("Assets/Textures/Stats/pinkMerc_stats.png");
+    mc4Stats = LoadTexture("Assets/Textures/Stats/mc4_stats.png");
+    mc22Stats = LoadTexture("Assets/Textures/Stats/mc22_stats.png");
+    rb21Stats = LoadTexture("Assets/Textures/Stats/rb21_stats.png");
 
+    initialMenuScreen = LoadTexture("Assets/Textures/UI/Main_menu.png");
+    endScreen = LoadTexture("Assets/Textures/UI/Endgame.png");
 
-    initialMenuScreen = LoadTexture("Assets/Textures/Main_menu.png");
+    leftArrow = LoadTexture("Assets/Textures/UI/Car_Selection1.png");
+    rightArrow = LoadTexture("Assets/Textures/UI/Car_Selection2.png");
 
-    leftArrow = LoadTexture("Assets/Textures/Car_Selection1.png");
-    rightArrow = LoadTexture("Assets/Textures/Car_Selection2.png");
+    carList.push_back({ tAMR23,     "AMR23",    amr23Stats });
+    carList.push_back({ tGP2Engine, "MCL33",    gp2Stats });
+    carList.push_back({ tW11,       "W11" ,     w11Stats });
+    carList.push_back({ tPinkMerc,  "RP20",     pinkMercStats });
+    carList.push_back({ tR25,       "R25",      r25Stats });
+    carList.push_back({ tMp4,       "MP4-4",    mc4Stats });
+    carList.push_back({ tMp22,      "MP4-22",   mc22Stats });
+    carList.push_back({ tRB21,      "RB21",     rb21Stats });
 
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
-
-    carList.push_back({ tAMR23, "AMR23", amr23Stats });
-    carList.push_back({ tGP2Engine, "GP2", amr23Stats });
-    carList.push_back({ tW11, "W11" , w11Stats });
-    carList.push_back({ tPinkMerc, "PinkMerc", amr23Stats });
-    carList.push_back({ tR25, "R25", r25Stats });
-    carList.push_back({ tMp4, "Mc4", amr23Stats });
-    carList.push_back({ tMp22, "Mc22", amr23Stats });
-    carList.push_back({ tRB21, "RB21", amr23Stats });
 
     gameState = GameState::InitialMenu;
 
@@ -128,8 +127,9 @@ void ModuleGame::Gameplay(float dt)
 void ModuleGame::EndGameMenu(float dt)
 {
     timeToNextState += dt;
-    if (timeToNextState >= 1.0f)
+    if (timeToNextState >= 5.0f)
     {
+        allCars.clear();
         gameState = GameState::InitialMenu;
     }
 }
@@ -142,7 +142,7 @@ void ModuleGame::InitialMenuStart()
     currentCarIndex = 0;
 
     menuCar = App->physics->CreateRectangle(
-        358,
+        328,
         SCREEN_HEIGHT / 2,
         29 * 4, 73 * 4,
         0.0f,
@@ -156,7 +156,7 @@ void ModuleGame::InitialMenuStart()
     menuCar->carTexture = carList[currentCarIndex].texture;
 
     leftArrowCar = App->physics->CreateRectangle(
-        244,
+        194,
         SCREEN_HEIGHT / 2,
         16, 28,
         0.0f, true, this, ColliderType::UI, STATIC
@@ -164,16 +164,16 @@ void ModuleGame::InitialMenuStart()
     leftArrowCar->id = "CAR_LEFT";
 
     rightArrowCar = App->physics->CreateRectangle(
-        473,
+        463,
         SCREEN_HEIGHT / 2,
         16, 28,
         0.0f, true, this, ColliderType::UI, STATIC
     );
     rightArrowCar->id = "CAR_RIGHT";
 
-    leftArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
+    leftArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 - 78, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
     leftArrowLap->id = "UI";
-    righttArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 + 60, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
+    righttArrowLap = App->physics->CreateRectangle(SCREEN_WIDTH / 2 + 78, SCREEN_HEIGHT - 100, 13, 21, 0.0f, true, this, ColliderType::UI, STATIC);
     righttArrowLap->id = "UI";
     righttArrowLap->isLeft = false;
 
@@ -196,20 +196,35 @@ void ModuleGame::GameplayStart()
     uiPhys.clear();
 
     // Creation of the cars after car is selected
-    player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
+    player.Start({ 5500, 2340});
     player.canMove = false;
     player.pbody->id = playerIdSelected;
 
     lightsOut = false;
     allCars.push_back(&player);
 
+    float startAngle = -150.0f;
+    float startAngleRad = startAngle * DEG2RAD;
+
+    float dirX = cosf(startAngleRad);
+    float dirY = sinf(startAngleRad);
+
+    float spacing = 100.0f;
+
     for (int i = 0; i < 7; ++i)
     {
         AICar* ai = new AICar();
-        ai->Start({ (float)SCREEN_WIDTH / 2 + i * 100, SCREEN_HEIGHT / 2 });
+
+        Vector2 spawnPos = {
+            5550.0f + dirX * spacing * i,
+            2320.0f + dirY * spacing * i
+        };
+
+        ai->Start(spawnPos);
         aiCars.push_back(ai);
         allCars.push_back(ai);
     }
+
 
     // Sets the player for the camera
     App->renderer->SetPlayer(&player);
@@ -217,60 +232,25 @@ void ModuleGame::GameplayStart()
     AssignAICars();
 
     // Creation of the checkered flags
-    checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
+    checkeredFlag = App->physics->CreateRectangle(5670, 2670, 20, 280, 60.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
 
-    if (LoadChainFromFile("Assets/ColliderPoints/Track_External_Points.txt", externalTrackPoints))
-        Colliders* circuit = new Colliders(
-            0, 0, 
-            externalTrackPoints.data(), 
-            externalTrackPoints.size(), 
-            ColliderType::WALL, this, 
-            trackPhys);
+    CreateColliders();
 
-    /*if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS1.txt", internalTrackPointsS1))
-        Colliders* circuit = new Colliders(
-            0, 0, 
-            internalTrackPointsS1.data(), 
-            internalTrackPointsS1.size(), 
-            ColliderType::WALL, this,
-            trackPhys);
+    sensorAbove = App->physics->CreateRectangle(3050, 2245, 20, 400, 0.0f, true, this, ColliderType::SENSOR, STATIC);
+    sensorBelow = App->physics->CreateRectangle(2720, 1900, 350, 20, 0.0f, true, this, ColliderType::SENSOR, STATIC);
 
-    if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS2.txt", internalTrackPointsS2))
-        Colliders* circuit = new Colliders(
-            0, 0, 
-            internalTrackPointsS2.data(), 
-            internalTrackPointsS2.size(), 
-            ColliderType::WALL, this,
-            trackPhys);
+    checkpoints.push_back((std::make_unique<Checkpoint>(6362, 3632, 20, 280, 1, 60, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5992, 4146, 20, 400, 2, 50, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5735, 3805, 20, 400, 3, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5535, 3550, 20, 400, 4, 0, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5285, 3385, 20, 400, 5, 80, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5144, 3015, 20, 400, 6, 50, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4842, 2926, 20, 400, 7, 35, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4614, 2596, 20, 400, 8, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4744, 2214, 20, 400, 9, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4380, 1895, 20, 400, 10, 0, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3974, 1982, 20, 400, 11, -10, this)));
 
-    if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsAbove.txt", sensorTrackPointsAbove))
-        Colliders* circuit = new Colliders(
-            0, 0, 
-            sensorTrackPointsAbove.data(), 
-            sensorTrackPointsAbove.size(), 
-            ColliderType::WALL, this,
-            trackPhys);
-
-    if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsBelow.txt", sensorTrackPointsBelow))
-        Colliders* circuit = new Colliders(
-            0, 0, 
-            sensorTrackPointsBelow.data(), 
-            sensorTrackPointsBelow.size(), 
-            ColliderType::WALL, this,
-            trackPhys);*/
-
-    checkpoints.push_back((std::make_unique<Checkpoint>(1249, 1220, 20, 270, 1, 45, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2051, 1589, 20, 270, 2, 0, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2566, 1185, 20, 260, 3, 120, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2694, 1494, 20, 250, 4, 100, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2758, 2489, 20, 250, 5, 90, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(3736, 2217, 20, 250, 6, 110, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4629, 2516, 20, 290, 7, 90, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(6066, 4180, 20, 270, 8, 30, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5307, 2155, 20, 280, 9, 60, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(3869, 1599, 20, 290, 10, -50, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2388, 2089, 20, 270, 11, 20, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(442, 1076, 20, 270, 12, 55, this)));
 
     App->physics->CreateCircle(1000, 1220, 50, true, this, ColliderType::DIRT, STATIC);
 
@@ -357,8 +337,6 @@ void ModuleGame::GameManager(float dt)
             checkpoints.clear();
             App->physics->DestroyBody(checkeredFlag);
 
-            allCars.clear();
-
             timeToNextState = 0;
 
             gameState = GameState::EndGame;
@@ -437,14 +415,36 @@ void ModuleGame::DrawUI()
     }
     else
     {
+        // Draw the background
+        DrawTextureEx(endScreen, { 0,0 }, 0, 1, WHITE);
+
         // Draw the total laps & the fastest lap
         std::string lapsText = TextFormat("%d Laps", player.totalLaps);
         int lapsWidth = MeasureText(lapsText.c_str(), 50);
-        DrawText(lapsText.c_str(), SCREEN_WIDTH / 2 - lapsWidth / 2, 150, 50, BLACK);
+        DrawText(lapsText.c_str(), 200 - lapsWidth / 2, 70, 20, BLACK);
 
-        std::string fastestLapText = TextFormat("Fastest Lap: %.2f", player.fastestLapTime);
-        int fastestWidth = MeasureText(fastestLapText.c_str(), 50);
-        DrawText(fastestLapText.c_str(), SCREEN_WIDTH / 2 - fastestWidth / 2, 200, 50, BLACK);
+        int nameX = 120;
+        int startX = 80;
+        int startY = 130;
+        int fastLapX = 210;
+        int lineSpacing = 50;
+
+        for (size_t i = 0; i < allCars.size(); i++)
+        {
+            Car* car = allCars[i];
+            const char* placeText = (i == 0) ? " " : TextFormat("%d", (int)i + 1);
+            int y = startY + i * lineSpacing;
+
+            // Cars position
+            DrawText(placeText, startX, y, 20, BLACK);
+
+            // Name
+            DrawText(car->pbody->id.c_str(), nameX, y, 20, BLACK);
+
+            // Fast lap
+            DrawText(TextFormat("Fast lap: %.2f", car->fastestLapTime),
+                fastLapX, y, 20, BLACK);
+        }
 
         return;
     }
@@ -455,24 +455,24 @@ void ModuleGame::DrawInitialMenu()
     CarInfo& carShown = carList[currentCarIndex];
 
     // Draw background
-    //DrawTexture(initialMenuScreen, 0, 0, WHITE);
+    DrawTexture(initialMenuScreen, 0, 0, WHITE);
 
     // Draw the car to show
-    DrawTextureEx(menuCar->carTexture, { 300, SCREEN_HEIGHT / 2 + 146 }, - 90, 4, WHITE);
+    DrawTextureEx(menuCar->carTexture, { 270, SCREEN_HEIGHT / 2 + 146 }, - 90, 4, WHITE);
 
     // Draw the description
     DrawTexture(carShown.imageToShow, 0, 0, WHITE);
 
-    DrawTextureEx(leftArrow, { 236, SCREEN_HEIGHT / 2 - 14 }, 0, 2, WHITE);
-    DrawTextureEx(rightArrow, { 464, SCREEN_HEIGHT / 2 - 14 }, 0, 2, WHITE);
+    DrawTextureEx(leftArrow, { 186, SCREEN_HEIGHT / 2 - 14 }, 0, 2, WHITE);
+    DrawTextureEx(rightArrow, { 454, SCREEN_HEIGHT / 2 - 14 }, 0, 2, WHITE);
 
     // Draw the number of total laps
     std::string lapsText = TextFormat("%d Laps", player.totalLaps);
     int lapsWidth = MeasureText(lapsText.c_str(), 20);
-    DrawText(lapsText.c_str(), SCREEN_WIDTH / 2 - lapsWidth / 2, SCREEN_HEIGHT - 105, 20, BLACK);
+    DrawText(lapsText.c_str(), SCREEN_WIDTH / 2 - lapsWidth / 2 - 17, SCREEN_HEIGHT - 115, 30, BLACK);
 
-    DrawTextureEx(leftArrow, { SCREEN_WIDTH / 2  - 67, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
-    DrawTextureEx(rightArrow, { SCREEN_WIDTH / 2 + 53, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
+    DrawTextureEx(leftArrow, { SCREEN_WIDTH / 2  - 85, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
+    DrawTextureEx(rightArrow, { SCREEN_WIDTH / 2 + 71, SCREEN_HEIGHT - 110 }, 0, 1.5f, WHITE);
 }
 
 void ModuleGame::AssignAICars()
@@ -506,6 +506,65 @@ void ModuleGame::CarsDraw()
     // Draw the cars
     player.Draw();
     for (auto ai : aiCars) ai->Draw();
+}
+
+void ModuleGame::CreateColliders()
+{
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_External_Points.txt", externalTrackPoints))
+        trackExt = new Colliders(
+            0, 0,
+            externalTrackPoints.data(),
+            externalTrackPoints.size(),
+            ColliderType::WALL, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS1.txt", internalTrackPointsS1))
+        trackIntS1 = new Colliders(
+            0, 0,
+            internalTrackPointsS1.data(),
+            internalTrackPointsS1.size(),
+            ColliderType::WALL, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS2.txt", internalTrackPointsS2))
+        trackIntS2 = new Colliders(
+            0, 0,
+            internalTrackPointsS2.data(),
+            internalTrackPointsS2.size(),
+            ColliderType::WALL, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsAboveRight.txt", sensorTrackPointsAboveRight))
+        sensorAboveRight = new Colliders(
+            0, 0,
+            sensorTrackPointsAboveRight.data(),
+            sensorTrackPointsAboveRight.size(),
+            ColliderType::WALL, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsAboveLeft.txt", sensorTrackPointsAboveLeft))
+        sensorAboveLeft = new Colliders(
+            0, 0,
+            sensorTrackPointsAboveLeft.data(),
+            sensorTrackPointsAboveLeft.size(),
+            ColliderType::WALL, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsBelowUp.txt", sensorTrackPointsBelowUp))
+        sensorBelowUp = new Colliders(
+            0, 0,
+            sensorTrackPointsBelowUp.data(),
+            sensorTrackPointsBelowUp.size(),
+            ColliderType::WALL, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsBelowDown.txt", sensorTrackPointsBelowDown))
+        sensorBelowDown = new Colliders(
+            0, 0,
+            sensorTrackPointsBelowDown.data(),
+            sensorTrackPointsBelowDown.size(),
+            ColliderType::WALL, this,
+            trackPhys);
 }
 
 bool ModuleGame::LoadChainFromFile(const char* path, std::vector<int>& outPoints)
