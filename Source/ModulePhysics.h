@@ -20,6 +20,7 @@ enum class ColliderType {
     DIRT,
     UI,
     WALL,
+    SENSOR,
     CHECKEREDFLAG,
     CHECKPOINT,
     UNKNOWN

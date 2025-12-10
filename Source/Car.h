@@ -63,7 +63,7 @@ protected:
     float velocity = 0.0f;         // Current velocity
     float acceleration = 0.0f;     // Current acceleration
 
-    const float maxSpeed = 30.0f;  // Maximum speed
+    const float maxSpeed = 25.0f;  // Maximum speed
     const float accelRate = 18.0f; // Acceleration
     const float brakeRate = 25.0f; // Break force
     const float drag = 15.0f;      // Drag

@@ -12,6 +12,7 @@ void AICar::Start(Vector2 spawnPoint)
     pbody->ctype = ColliderType::AICAR;
     pbody->listener = this;
     canMove = false;
+
     LOG("AI Car Start");
 }
 

@@ -15,7 +15,7 @@ public:
             x, y,
             points, 
             size,
-            false,
+            true,
             this,
             type,
             STATIC
