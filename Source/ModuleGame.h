@@ -75,7 +75,7 @@ private:
 	struct CarInfo {
 		Texture2D texture;
 		std::string id;
-		std::string description;
+		Texture2D imageToShow;
 	};
 
 	std::vector<CarInfo> carList;
@@ -88,6 +88,8 @@ private:
 	CoroutineManager coroutineManager;	// Coroutine
 
 	std::vector<PhysBody*> uiPhys;			 // Vector physic bodies of the ui for the initial menu
+	std::vector<PhysBody*> trackPhys;	     // Vector physic bodies of the track
+
 	std::string playerIdSelected;			 // The id of the player
 
 	std::vector<Car*> allCars;				 // Vector of all the cars
@@ -135,6 +137,17 @@ private:
 	Texture2D tPinkMerc;
 	Texture2D tW11;
 	Texture2D tRB21;
+
+	Texture2D initialMenuScreen;
+
+	Texture2D amr23Stats;
+	Texture2D r25Stats;
+	Texture2D w11Stats;
+	Texture2D gp2Stats;
+	Texture2D pinkMercStats;
+	Texture2D mc4Stats;
+	Texture2D mc22Stats;
+	Texture2D rb21Stats;
 
 	Texture2D leftArrow;
 	Texture2D rightArrow;
