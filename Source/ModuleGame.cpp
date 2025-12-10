@@ -225,33 +225,16 @@ void ModuleGame::GameplayStart()
         allCars.push_back(ai);
     }
 
-
     // Sets the player for the camera
     App->renderer->SetPlayer(&player);
 
     AssignAICars();
 
-    // Creation of the checkered flags
-    checkeredFlag = App->physics->CreateRectangle(5670, 2670, 20, 280, 60.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
-
     CreateColliders();
+    CreateCheckpoints();
 
     sensorAbove = App->physics->CreateRectangle(3050, 2245, 20, 400, 0.0f, true, this, ColliderType::SENSOR, STATIC);
     sensorBelow = App->physics->CreateRectangle(2720, 1900, 350, 20, 0.0f, true, this, ColliderType::SENSOR, STATIC);
-
-    checkpoints.push_back((std::make_unique<Checkpoint>(6362, 3632, 20, 280, 1, 60, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5992, 4146, 20, 400, 2, 50, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5735, 3805, 20, 400, 3, 90, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5535, 3550, 20, 400, 4, 0, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5285, 3385, 20, 400, 5, 80, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5144, 3015, 20, 400, 6, 50, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4842, 2926, 20, 400, 7, 35, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4614, 2596, 20, 400, 8, 90, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4744, 2214, 20, 400, 9, 90, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4380, 1895, 20, 400, 10, 0, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(3974, 1982, 20, 400, 11, -10, this)));
-
-
     App->physics->CreateCircle(1000, 1220, 50, true, this, ColliderType::DIRT, STATIC);
 
     std::sort(allCars.begin(), allCars.end(),
@@ -565,6 +548,35 @@ void ModuleGame::CreateColliders()
             sensorTrackPointsBelowDown.size(),
             ColliderType::WALL, this,
             trackPhys);
+}
+
+void ModuleGame::CreateCheckpoints()
+{
+    // Creation of the checkered flags
+    checkeredFlag = App->physics->CreateRectangle(5670, 2670, 20, 280, 60.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
+
+    // Creation of the checkpoints
+    checkpoints.push_back((std::make_unique<Checkpoint>(6362, 3632, 20, 280, 1, 60, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5992, 4146, 20, 400, 2, 50, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5735, 3805, 20, 400, 3, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5535, 3550, 20, 400, 4, 0, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5285, 3385, 20, 400, 5, 80, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5144, 3015, 20, 400, 6, 50, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4842, 2926, 20, 400, 7, 35, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4614, 2596, 20, 400, 8, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4744, 2214, 20, 400, 9, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4380, 1895, 20, 400, 10, 0, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3974, 1982, 20, 400, 11, -10, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3734, 2192, 20, 320, 12, -50, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3626, 2530, 20, 400, 13, 310, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3380, 2715, 20, 400, 14, 0, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2990, 2715, 20, 400, 15, 0, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2742, 2332, 20, 400, 16, 85, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2680, 1660, 20, 400, 17, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2832, 1350, 20, 350, 18, 95, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2560, 1174, 20, 420, 19, 100, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2400, 1472, 20, 400, 20, 45, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(1934, 1600, 20, 400, 21, 0, this)));
 }
 
 bool ModuleGame::LoadChainFromFile(const char* path, std::vector<int>& outPoints)

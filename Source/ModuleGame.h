@@ -60,6 +60,7 @@ private:
 	void CarsDraw();
 
 	void CreateColliders();
+	void CreateCheckpoints();
 	bool LoadChainFromFile(const char* path, std::vector<int>& outPoints);
 
 	void Destroy(PhysBody* pbody)
