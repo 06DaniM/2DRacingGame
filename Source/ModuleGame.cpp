@@ -210,7 +210,7 @@ void ModuleGame::GameplayStart()
     if (LoadChainFromFile("Assets/ColliderPoints/Track_External_Points.txt", externalTrackPoints))
         Colliders* circuit = new Colliders(0, 0, externalTrackPoints.data(), externalTrackPoints.size(), ColliderType::WALL, this);
 
-    if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS1.txt", internalTrackPointsS1))
+    /*if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS1.txt", internalTrackPointsS1))
         Colliders* circuit = new Colliders(0, 0, internalTrackPointsS1.data(), internalTrackPointsS1.size(), ColliderType::WALL, this);
 
     if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS2.txt", internalTrackPointsS2))
@@ -220,7 +220,7 @@ void ModuleGame::GameplayStart()
         Colliders* circuit = new Colliders(0, 0, sensorTrackPointsAbove.data(), sensorTrackPointsAbove.size(), ColliderType::WALL, this);
 
     if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsBelow.txt", sensorTrackPointsBelow))
-        Colliders* circuit = new Colliders(0, 0, sensorTrackPointsBelow.data(), sensorTrackPointsBelow.size(), ColliderType::WALL, this);
+        Colliders* circuit = new Colliders(0, 0, sensorTrackPointsBelow.data(), sensorTrackPointsBelow.size(), ColliderType::WALL, this);*/
 
     checkpoints.push_back((std::make_unique<Checkpoint>(1249, 1220, 20, 270, 1, 45, this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2051, 1589, 20, 270, 2, 0, this)));
