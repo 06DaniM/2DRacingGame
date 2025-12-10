@@ -11,7 +11,7 @@ void AICar::Start(Vector2 spawnPoint)
     Car::Start(spawnPoint);
     pbody->ctype = ColliderType::AICAR;
     pbody->listener = this;
-    canMove = false;
+    //canMove = false;
 
     LOG("AI Car Start");
 }
@@ -37,26 +37,30 @@ void AICar::CalculateMove()
     // Calculate the distance to the checkpoint
     float dx = carX - cpX;
     float dy = carY - cpY;
+    float dist = sqrtf(dx * dx + dy * dy);
 
-    // Convert to agnle
+    // Get the angle
     float desiredAngle = atan2f(dy, dx);
     float currentAngle = pbody->body->GetAngle();
 
     // Angle diff
     float angleDiff = desiredAngle - currentAngle;
+
     while (angleDiff > 3.14159f) angleDiff -= 6.28318f;
     while (angleDiff < -3.14159f) angleDiff += 6.28318f;
 
-    // Convert angle diff to the steer
+    // Steering
     float steer = 0.0f;
     if (angleDiff > 0.1f) steer = 1.0f;
     else if (angleDiff < -0.1f) steer = -1.0f;
-    else steer = 0.0f;
 
-    // Automatic acceleration
+    // Acceleration
     float targetAccel = accelRate;
 
-    // Save the values
+    // Breaking
+    if (fabs(angleDiff) > 0.15f && velocity > 5)
+        targetAccel = -brakeRate;
+
     this->aiSteer = steer;
     this->aiAccel = targetAccel;
 }

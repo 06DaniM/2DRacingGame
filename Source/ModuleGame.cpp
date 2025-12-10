@@ -196,20 +196,35 @@ void ModuleGame::GameplayStart()
     uiPhys.clear();
 
     // Creation of the cars after car is selected
-    player.Start({ SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 });
+    player.Start({ 5500, 2340});
     player.canMove = false;
     player.pbody->id = playerIdSelected;
 
     lightsOut = false;
     allCars.push_back(&player);
 
+    float startAngle = -150.0f;
+    float startAngleRad = startAngle * DEG2RAD;
+
+    float dirX = cosf(startAngleRad);
+    float dirY = sinf(startAngleRad);
+
+    float spacing = 100.0f;
+
     for (int i = 0; i < 7; ++i)
     {
         AICar* ai = new AICar();
-        ai->Start({ (float)SCREEN_WIDTH / 2 + i * 100, SCREEN_HEIGHT / 2 });
+
+        Vector2 spawnPos = {
+            5550.0f + dirX * spacing * i,
+            2320.0f + dirY * spacing * i
+        };
+
+        ai->Start(spawnPos);
         aiCars.push_back(ai);
         allCars.push_back(ai);
     }
+
 
     // Sets the player for the camera
     App->renderer->SetPlayer(&player);
@@ -217,25 +232,25 @@ void ModuleGame::GameplayStart()
     AssignAICars();
 
     // Creation of the checkered flags
-    checkeredFlag = App->physics->CreateRectangle(600, 500, 20, 280, 0.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
+    checkeredFlag = App->physics->CreateRectangle(5670, 2670, 20, 280, 60.0f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
 
     CreateColliders();
 
     sensorAbove = App->physics->CreateRectangle(3050, 2245, 20, 400, 0.0f, true, this, ColliderType::SENSOR, STATIC);
     sensorBelow = App->physics->CreateRectangle(2720, 1900, 350, 20, 0.0f, true, this, ColliderType::SENSOR, STATIC);
 
-    checkpoints.push_back((std::make_unique<Checkpoint>(1249, 1220, 20, 300, 1, 45, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2051, 1589, 20, 270, 2, 0, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2566, 1185, 20, 260, 3, 120, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2694, 1494, 20, 250, 4, 100, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2758, 2489, 20, 250, 5, 90, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(3736, 2217, 20, 250, 6, 110, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4629, 2516, 20, 290, 7, 90, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(6066, 4180, 20, 270, 8, 30, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5307, 2155, 20, 280, 9, 60, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(3869, 1599, 20, 290, 10, -50, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2388, 2089, 20, 270, 11, 20, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(442, 1076, 20, 270, 12, 55, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(6362, 3632, 20, 280, 1, 60, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5992, 4146, 20, 400, 2, 50, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5735, 3805, 20, 400, 3, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5535, 3550, 20, 400, 4, 0, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5285, 3385, 20, 400, 5, 80, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5144, 3015, 20, 400, 6, 50, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4842, 2926, 20, 400, 7, 35, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4614, 2596, 20, 400, 8, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4744, 2214, 20, 400, 9, 90, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4380, 1895, 20, 400, 10, 0, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3974, 1982, 20, 400, 11, -10, this)));
+
 
     App->physics->CreateCircle(1000, 1220, 50, true, this, ColliderType::DIRT, STATIC);
 
