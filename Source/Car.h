@@ -9,7 +9,8 @@
 class Checkpoint
 {
 public:
-    Checkpoint(float x, float y, float w, float h, int index, float angle, Listener* listener) : width(w), height(h), index(index)
+    Checkpoint(float x, float y, float w, float h, int index, float angle, Listener* listener) : 
+        width(w), height(h), index(index)
     {
         body = App->physics->CreateRectangle(x, y, width, height, angle, true, listener, ColliderType::CHECKPOINT, STATIC);
         body->n = index;
@@ -101,7 +102,7 @@ public:
     bool inDirt = false;
 
     const float maxMotorForce = 20.0f;      // Max force
-    const float maxSteerAngle = 0.5f;       // Max steering
+    const float maxSteerAngle = 0.4f;       // Max steering
     const float lateralGripFactor = 1.0f;   // Grip
 
     float steer = 0.0f;

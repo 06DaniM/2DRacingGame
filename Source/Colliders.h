@@ -9,7 +9,7 @@
 class Colliders : public Listener
 {
 public:
-    Colliders(float x, float y, int* points, int size, ColliderType type, Listener* listener)
+    Colliders(float x, float y, int* points, int size, ColliderType type, Listener* listener, std::vector<PhysBody*>& trackPhys)
     {
         body = App->physics->CreateChain(
             x, y,
@@ -20,6 +20,8 @@ public:
             type,
             STATIC
         );
+
+        trackPhys.push_back(body);
     }
 
     ~Colliders() {}
