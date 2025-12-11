@@ -9,9 +9,17 @@ AICar::~AICar() {}
 void AICar::Start(Vector2 spawnPoint)
 {
     Car::Start(spawnPoint);
+
     pbody->ctype = ColliderType::AICAR;
     pbody->listener = this;
-    //canMove = false;
+
+    lap = 0;
+    checkPoint = 0;
+
+    fastestLapTime = 0.0f;
+    currentLapTime = 0.0f;
+
+    canMove = false;
 
     LOG("AI Car Start");
 }

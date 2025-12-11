@@ -197,7 +197,6 @@ void ModuleGame::GameplayStart()
 
     // Creation of the cars after car is selected
     player.Start({ 5500, 2340});
-    player.canMove = false;
     player.pbody->id = playerIdSelected;
 
     lightsOut = false;
@@ -261,7 +260,7 @@ void ModuleGame::GameplayStart()
 void ModuleGame::TrafficLight()
 {
     if (lightsOut) return;
-    player.canMove = true; // QUITAR
+    //player.canMove = true; // QUITAR
     lightTimer += GetFrameTime();
 
     if (lightTimer > 1.0f)
@@ -274,7 +273,8 @@ void ModuleGame::TrafficLight()
     if (lightTimer > 4.0f)
     {
         lightsOut = true;
-        player.canMove = true;
+        for (auto car : allCars)
+            car->canMove = true;
         lightTimer = 0.0f;
     }
 }
@@ -292,7 +292,8 @@ void ModuleGame::GameManager(float dt)
     {
         if (player.lap > 0)
         {
-            player.currentLapTime += GetFrameTime();
+            for (auto car : allCars)
+                car->currentLapTime += dt;
             showLap = player.lap;
 
             UpdatePosition();
@@ -389,6 +390,7 @@ void ModuleGame::DrawUI()
         DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), 20, 70, 20, BLACK);
         DrawText(TextFormat("Fastest Lap Time: %.2f", player.fastestLapTime), 20, 120, 20, BLACK);
 
+        DrawText(TextFormat("C: %d", player.checkpoint), 20, SCREEN_HEIGHT-20, 20, BLACK);
         // Draw the current number of laps & the total
         std::string lapText = TextFormat("Lap: %d/%d", showLap, player.totalLaps);
         int lapWidth = MeasureText(lapText.c_str(), 20);
@@ -575,10 +577,10 @@ void ModuleGame::CreateCheckpoints()
     checkpoints.push_back((std::make_unique<Checkpoint>(2680, 1660, 20, 400, 17, 90 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2832, 1350, 20, 350, 18, 95 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2560, 1174, 20, 420, 19, 100, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2400, 1472, 20, 400, 20, 45 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(1934, 1600, 20, 400, 21, 0  , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(1465, 1390, 20, 400, 22, 70 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(880 , 750 , 20, 400, 23, 85 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2400, 1472, 20, 400, 20, 120, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(1934, 1600, 20, 400, 21, 10 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(1465, 1390, 20, 400, 22, 40 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(880 , 750 , 20, 400, 23, 70 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(330 , 850 , 20, 350, 24, 70 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(680 , 1303, 20, 400, 25, 45 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(1732, 1830, 20, 400, 26, 20 , this)));
@@ -674,7 +676,7 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
         else if (physA->ctype == ColliderType::CHECKPOINT)
         {
             if (player.checkpoint + 1 == physA->n)
-                player.checkpoint++;
+                player.checkpoint = physA->n;
         }
 
         else if (physA->ctype == ColliderType::DIRT)
@@ -694,7 +696,6 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
                 car->lap++;
                 car->checkpoint = 0;
 
-                car->previousLapTime = car->currentLapTime;
                 if (car->fastestLapTime > car->currentLapTime || car->lap == 2)
                     car->fastestLapTime = car->currentLapTime;
                 car->currentLapTime = 0.0f;

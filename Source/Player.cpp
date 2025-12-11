@@ -8,6 +8,7 @@ Player::~Player() {}
 void Player::Start(Vector2 spawnPoint)
 {
     Car::Start(spawnPoint);
+
     pbody->ctype = ColliderType::PLAYER;
     pbody->listener = this;
 
@@ -17,6 +18,8 @@ void Player::Start(Vector2 spawnPoint)
     previousLapTime = 0.0f;
     fastestLapTime = 0.0f;
     currentLapTime = 0.0f;
+
+    canMove = true;
 
     motor = 0;
 
