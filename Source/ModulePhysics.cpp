@@ -62,13 +62,16 @@ update_status ModulePhysics::PreUpdate()
 	return UPDATE_CONTINUE;
 }
 
-PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, float angle, bool isSensor, Listener* listener, ColliderType ctype, bodyType type)
+PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, float angle, bool isSensor, Listener* listener, ColliderType ctype, bodyType type, uint16 categoryBits, uint16 maskBits)
 {
+	PhysBody* pbody = new PhysBody();
+
 	b2BodyDef bodyDef;
 	if (type == DYNAMIC) bodyDef.type = b2_dynamicBody;
 	else if (type == KINEMATIC) bodyDef.type = b2_kinematicBody;
 	else bodyDef.type = b2_staticBody;
 	bodyDef.position.Set(PIXELS_TO_METERS(x), PIXELS_TO_METERS(y));
+	bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 	bodyDef.angle = angle * PI / 180;
 
 	b2Body* b = world->CreateBody(&bodyDef);
@@ -82,9 +85,13 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, fl
 	fixtureDef.friction = 0;
 	fixtureDef.density = 1.0f;
 
+	fixtureDef.filter.categoryBits = categoryBits;
+	fixtureDef.filter.maskBits = maskBits;
+	pbody->categoryBits = categoryBits;
+	pbody->maskBits = maskBits;
+
 	b->CreateFixture(&fixtureDef);
 
-	PhysBody* pbody = new PhysBody();
 	pbody->body = b;
 	pbody->ctype = ctype;
 	pbody->listener = listener;
@@ -127,12 +134,15 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, bool isSensor, L
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size, bool isSensor, Listener* listener, ColliderType ctype, bodyType type)
+PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size, bool isSensor, Listener* listener, ColliderType ctype, bodyType type, uint16 categoryBits, uint16 maskBits)
 {
+	PhysBody* pbody = new PhysBody();
+
 	b2BodyDef bodyDef;
 	if (type == DYNAMIC) bodyDef.type = b2_dynamicBody;
 	else if (type == KINEMATIC) bodyDef.type = b2_kinematicBody;
 	else bodyDef.type = b2_staticBody;
+	bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 
 	bodyDef.position.Set(PIXELS_TO_METERS(x), PIXELS_TO_METERS(y));
 	b2Body* b = world->CreateBody(&bodyDef);
@@ -153,9 +163,13 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size, bool i
 	fixtureDef.isSensor = isSensor;
 	fixtureDef.density = 1.0f;
 
+	fixtureDef.filter.categoryBits = categoryBits;
+	fixtureDef.filter.maskBits = maskBits;
+	pbody->categoryBits = categoryBits;
+	pbody->maskBits = maskBits;
+
 	b->CreateFixture(&fixtureDef);
 
-	PhysBody* pbody = new PhysBody();
 	pbody->body = b;
 	pbody->ctype = ctype;
 	pbody->listener = listener;
@@ -168,7 +182,7 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size, bool i
 PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*>& carParts, std::vector<b2RevoluteJoint*>& carJoints)
 {
     // === CHASSIS ===
-    PhysBody* chassis = CreateRectangle(x, y, width, height, 0.0f, false, nullptr, ColliderType::UNKNOWN, DYNAMIC);
+    PhysBody* chassis = CreateRectangle(x, y, width, height, 0.0f, false, nullptr, ColliderType::CAR, DYNAMIC, PhysicCategory::CAR_A, CAR_A | ABOVE | DEFAULT);
     chassis->body->SetAngularDamping(3.0f);
     chassis->body->SetLinearDamping(0.5f);
 
@@ -210,6 +224,41 @@ PhysBody* ModulePhysics::CreateCar(float x, float y, float width, float height, 
     carParts.push_back(wheelBR);
 
     return chassis;
+}
+
+void ModulePhysics::ChangeCategoryMask(PhysBody* sensor, PhysBody* car)
+{
+	if (!car || !sensor) return;
+
+	for (b2Fixture* f = car->body->GetFixtureList(); f; f = f->GetNext())
+	{
+		b2Filter filter = f->GetFilterData();
+
+		// CAR_A to CAR_B 
+		if (car->categoryBits == PhysicCategory::CAR_A)
+		{
+			filter.categoryBits = PhysicCategory::CAR_B;
+			filter.maskBits = PhysicCategory::CAR_B | PhysicCategory::BELOW | PhysicCategory::DEFAULT;
+
+			car->categoryBits = PhysicCategory::CAR_B;
+			car->maskBits = filter.maskBits;
+
+			LOG("Car changed from CAR_A to CAR_B")
+		}
+
+		// CAR_B to CAR_A
+		else
+		{
+			filter.categoryBits = PhysicCategory::CAR_A;
+			filter.maskBits = PhysicCategory::CAR_A | PhysicCategory::ABOVE | PhysicCategory::DEFAULT;
+
+			car->categoryBits = PhysicCategory::CAR_A;
+			car->maskBits = filter.maskBits;
+
+			LOG("Car changed from CAR_B to CAR_A")
+		}
+		f->SetFilterData(filter);
+	}
 }
 
 void ModulePhysics::SetBodyPosition(PhysBody* pbody, int x, int y, bool resetRotation)

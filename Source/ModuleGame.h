@@ -20,6 +20,7 @@ class PhysicEntity;
 
 enum GameState
 {
+	Opening,
 	InitialMenu,
 	Gameplay,
 	EndGame
@@ -150,6 +151,7 @@ private:
 	Texture2D tW11;
 	Texture2D tRB21;
 
+	Texture2D openingScreen;
 	Texture2D initialMenuScreen;
 	Texture2D endScreen;
 

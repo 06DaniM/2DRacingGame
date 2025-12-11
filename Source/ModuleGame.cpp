@@ -4,10 +4,12 @@
 #include "ModuleGame.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
+#include "PhysicCategory.h"
 #include <vector>
 #include <algorithm>
 #include <memory>
 #include <fstream>
+
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled) {}
 ModuleGame::~ModuleGame() {}
@@ -35,6 +37,7 @@ bool ModuleGame::Start()
     mc22Stats = LoadTexture("Assets/Textures/Stats/mc22_stats.png");
     rb21Stats = LoadTexture("Assets/Textures/Stats/rb21_stats.png");
 
+    openingScreen = LoadTexture("Assets/Textures/UI/Start.png");
     initialMenuScreen = LoadTexture("Assets/Textures/UI/Main_menu.png");
     endScreen = LoadTexture("Assets/Textures/UI/Endgame.png");
 
@@ -53,7 +56,7 @@ bool ModuleGame::Start()
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
-    gameState = GameState::InitialMenu;
+    gameState = GameState::Opening;
 
     return true;
 }
@@ -130,7 +133,8 @@ void ModuleGame::EndGameMenu(float dt)
     if (timeToNextState >= 5.0f)
     {
         allCars.clear();
-        gameState = GameState::InitialMenu;
+        gameState = GameState::Opening;
+        timeToNextState = 0;
     }
 }
 
@@ -232,8 +236,8 @@ void ModuleGame::GameplayStart()
     CreateColliders();
     CreateCheckpoints();
 
-    sensorAbove = App->physics->CreateRectangle(3050, 2245, 20, 400, 0.0f, true, this, ColliderType::SENSOR, STATIC);
-    sensorBelow = App->physics->CreateRectangle(2720, 1900, 350, 20, 0.0f, true, this, ColliderType::SENSOR, STATIC);
+    sensorAbove = App->physics->CreateRectangle(2508, 2138, 20, 400, 0, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::ABOVE, 0xFFFF);
+    sensorBelow = App->physics->CreateRectangle(2750, 2478, 350, 20, 5, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::BELOW, 0xFFFF);
     App->physics->CreateCircle(1000, 1220, 50, true, this, ColliderType::DIRT, STATIC);
 
     std::sort(allCars.begin(), allCars.end(),
@@ -358,12 +362,28 @@ void ModuleGame::DrawGameplay()
 
 void ModuleGame::DrawUI()
 {
-    if (gameState == GameState::InitialMenu)
+    if (gameState == GameState::Opening)
+    {
+        // Draw the title screen
+        DrawTexture(openingScreen, 0, 0, WHITE);
+
+        timeToNextState += GetFrameTime();
+        if (timeToNextState > 2)
+        {
+            gameState = GameState::InitialMenu;
+            timeToNextState = 0;
+        }
+
+        return;
+    }
+
+    else if (gameState == GameState::InitialMenu)
     {
         // Draw the initial menu
         DrawInitialMenu();
         return;
     }
+
     else if (gameState == GameState::Gameplay)
     {
         // Draw the traffic light
@@ -390,7 +410,6 @@ void ModuleGame::DrawUI()
         DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), 20, 70, 20, BLACK);
         DrawText(TextFormat("Fastest Lap Time: %.2f", player.fastestLapTime), 20, 120, 20, BLACK);
 
-        DrawText(TextFormat("C: %d", player.checkpoint), 20, SCREEN_HEIGHT-20, 20, BLACK);
         // Draw the current number of laps & the total
         std::string lapText = TextFormat("Lap: %d/%d", showLap, player.totalLaps);
         int lapWidth = MeasureText(lapText.c_str(), 20);
@@ -398,6 +417,7 @@ void ModuleGame::DrawUI()
 
         return;
     }
+
     else
     {
         // Draw the background
@@ -525,7 +545,9 @@ void ModuleGame::CreateColliders()
             sensorTrackPointsAboveRight.data(),
             sensorTrackPointsAboveRight.size(),
             ColliderType::WALL, this,
-            trackPhys);
+            trackPhys,
+            PhysicCategory::ABOVE,
+            CAR_A);
 
     if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsAboveLeft.txt", sensorTrackPointsAboveLeft))
         sensorAboveLeft = new Colliders(
@@ -533,7 +555,9 @@ void ModuleGame::CreateColliders()
             sensorTrackPointsAboveLeft.data(),
             sensorTrackPointsAboveLeft.size(),
             ColliderType::WALL, this,
-            trackPhys);
+            trackPhys,
+            PhysicCategory::ABOVE,
+            CAR_A);
 
     if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsBelowUp.txt", sensorTrackPointsBelowUp))
         sensorBelowUp = new Colliders(
@@ -541,7 +565,9 @@ void ModuleGame::CreateColliders()
             sensorTrackPointsBelowUp.data(),
             sensorTrackPointsBelowUp.size(),
             ColliderType::WALL, this,
-            trackPhys);
+            trackPhys,
+            PhysicCategory::BELOW,
+            CAR_B);
 
     if (LoadChainFromFile("Assets/ColliderPoints/SensorTrackPointsBelowDown.txt", sensorTrackPointsBelowDown))
         sensorBelowDown = new Colliders(
@@ -549,7 +575,9 @@ void ModuleGame::CreateColliders()
             sensorTrackPointsBelowDown.data(),
             sensorTrackPointsBelowDown.size(),
             ColliderType::WALL, this,
-            trackPhys);
+            trackPhys,
+            PhysicCategory::BELOW,
+            CAR_B);
 }
 
 void ModuleGame::CreateCheckpoints()
@@ -655,92 +683,84 @@ bool ModuleGame::CleanUp()
 
 void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 {
-    switch (physB->ctype)
+    if (physB->ctype != ColliderType::CAR)
+        return;
+
+    Player* playerPtr = dynamic_cast<Player*>(physB->listener);
+    AICar* aiPtr = dynamic_cast<AICar*>(physB->listener);
+
+    if (physA->ctype == ColliderType::CHECKEREDFLAG)
     {
-    case ColliderType::PLAYER:
-        if (physA->ctype == ColliderType::CHECKEREDFLAG)
+        if (playerPtr)
         {
-            LOG("Checkered flag detected");
-            if (player.checkpoint == checkpoints.size() || player.lap == 0)
+            LOG("Checkered flag detected (player)");
+            if (playerPtr->checkpoint == checkpoints.size() || playerPtr->lap == 0)
             {
-                player.lap++;
-                player.checkpoint = 0;
+                playerPtr->lap++;
+                playerPtr->checkpoint = 0;
 
-                player.previousLapTime = player.currentLapTime;
-                if (player.fastestLapTime > player.currentLapTime || player.lap == 2 ) 
-                    player.fastestLapTime = player.currentLapTime;
-                player.currentLapTime = 0.0f;
+                playerPtr->previousLapTime = playerPtr->currentLapTime;
+                if (playerPtr->fastestLapTime > playerPtr->currentLapTime || playerPtr->lap == 2)
+                    playerPtr->fastestLapTime = playerPtr->currentLapTime;
+
+                playerPtr->currentLapTime = 0.0f;
             }
         }
 
-        else if (physA->ctype == ColliderType::CHECKPOINT)
+        else if (aiPtr)
         {
-            if (player.checkpoint + 1 == physA->n)
-                player.checkpoint = physA->n;
-        }
-
-        else if (physA->ctype == ColliderType::DIRT)
-        {
-            player.inDirt = true;
-        }
-        break;
-
-    case ColliderType::AICAR:
-        if (physA->ctype == ColliderType::CHECKEREDFLAG)
-        {
-            LOG("Checkered flag detected");
-
-            auto car = dynamic_cast<AICar*>(physB->listener);
-            if (car->checkpoint == checkpoints.size() || car->lap == 0)
+            LOG("Checkered flag detected (AI)");
+            if (aiPtr->checkpoint == checkpoints.size() || aiPtr->lap == 0)
             {
-                car->lap++;
-                car->checkpoint = 0;
+                aiPtr->lap++;
+                aiPtr->checkpoint = 0;
 
-                if (car->fastestLapTime > car->currentLapTime || car->lap == 2)
-                    car->fastestLapTime = car->currentLapTime;
-                car->currentLapTime = 0.0f;
+                if (aiPtr->fastestLapTime > aiPtr->currentLapTime || aiPtr->lap == 2)
+                    aiPtr->fastestLapTime = aiPtr->currentLapTime;
+
+                aiPtr->currentLapTime = 0.0f;
             }
         }
+    }
 
-        else if (physA->ctype == ColliderType::CHECKPOINT)
+    else if (physA->ctype == ColliderType::SENSOR)
+    {
+        LOG("Sensor detected");
+        App->physics->ChangeCategoryMask(physA, physB);
+    }
+
+    else if (physA->ctype == ColliderType::CHECKPOINT)
+    {
+        if (playerPtr)
         {
-            auto car = dynamic_cast<AICar*>(physB->listener);
-            if (car != NULL)
-                if (car->checkpoint + 1 == physA->n)
-                    car->checkpoint++;
+            if (playerPtr->checkpoint + 1 == physA->n)
+                playerPtr->checkpoint = physA->n;
         }
-
-        else if (physA->ctype == ColliderType::DIRT)
+        else if (aiPtr)
         {
-            auto car = dynamic_cast<AICar*>(physB->listener);
-            if (car != NULL) car->inDirt = true;
+            if (aiPtr->checkpoint + 1 == physA->n)
+                aiPtr->checkpoint++;
         }
-        break;
+    }
 
-    default:
-        break;
+    else if (physA->ctype == ColliderType::DIRT)
+    {
+        if (playerPtr) playerPtr->inDirt = true;
+        if (aiPtr) aiPtr->inDirt = true;
     }
 }
 
 void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
 {
-    switch (physB->ctype)
+    if (physB->ctype != ColliderType::CAR)
+        return;
+
+    Player* playerPtr = dynamic_cast<Player*>(physB->listener);
+    AICar* aiPtr = dynamic_cast<AICar*>(physB->listener);
+
+    if (physA->ctype == ColliderType::DIRT)
     {
-    case ColliderType::PLAYER:
-        if (physA->ctype == ColliderType::DIRT)
-        {
-            player.inDirt = false;
-        }
-
-    case ColliderType::AICAR:
-        if (physA->ctype == ColliderType::DIRT)
-        {
-            auto car = dynamic_cast<AICar*>(physB->listener);
-            if (car != NULL) car->inDirt = false;
-        }
-        break;
-
-    default:
-        break;
+        if (playerPtr) playerPtr->inDirt = false;
+        if (aiPtr) aiPtr->inDirt = false;
     }
 }

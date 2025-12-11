@@ -5,6 +5,7 @@
 #include "ModulePhysics.h"
 #include "ModuleRender.h"
 #include "Listener.h"
+#include "PhysicCategory.h"
 
 class Checkpoint
 {

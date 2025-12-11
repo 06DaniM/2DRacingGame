@@ -3,6 +3,7 @@
 #include "Module.h"
 #include "Globals.h"
 #include "Listener.h"
+#include "PhysicCategory.h"
 #include "box2d/box2d.h"
 #include <vector>
 #include <string>
@@ -14,8 +15,7 @@ enum bodyType {
 };
 
 enum class ColliderType {
-    PLAYER,
-    AICAR,
+    CAR,
     WHEEL,
     DIRT,
     UI,
@@ -100,6 +100,10 @@ public:
     int n;
 
     bool selectable = true;
+
+    uint16 categoryBits = 0;
+    uint16 maskBits = 0;
+
 };
 
 // Module --------------------------------------
@@ -114,10 +118,12 @@ public:
     update_status PostUpdate() override;
     bool CleanUp() override;
 
-    PhysBody* CreateRectangle(int x, int y, int width, int height, float angle, bool isSensor, Listener* listener, ColliderType ctype, bodyType type);
+    PhysBody* CreateRectangle(int x, int y, int width, int height, float angle, bool isSensor, Listener* listener, ColliderType ctype, bodyType type, uint16 categoryBits = PhysicCategory::DEFAULT, uint16 maskBits = 0xFFFF);
     PhysBody* CreateCircle(int x, int y, int radius, bool isSensor, Listener* listener, ColliderType ctype = ColliderType::UNKNOWN, bodyType type = bodyType::DYNAMIC);
-    PhysBody* CreateChain(int x, int y, int* points, int size, bool isSensor, Listener* listener, ColliderType ctype = ColliderType::UNKNOWN, bodyType type = bodyType::STATIC);
+    PhysBody* CreateChain(int x, int y, int* points, int size, bool isSensor, Listener* listener, ColliderType ctype = ColliderType::UNKNOWN, bodyType type = bodyType::STATIC, uint16 categoryBits = PhysicCategory::DEFAULT, uint16 maskBits = 0xFFFF);
     PhysBody* CreateCar(float x, float y, float width, float height, float wheelRadius, std::vector<PhysBody*>& carParts, std::vector<b2RevoluteJoint*>& carJoints);
+
+    void ChangeCategoryMask(PhysBody* sensor, PhysBody* car);
 
     void SetBodyPosition(PhysBody* pbody, int x, int y, bool resetRotation);
     std::vector<b2Fixture*> GetFixtures();
