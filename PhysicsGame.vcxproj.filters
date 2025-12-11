@@ -90,6 +90,9 @@
     <ClInclude Include="Source\Colliders.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Source\PhysicCategory.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">

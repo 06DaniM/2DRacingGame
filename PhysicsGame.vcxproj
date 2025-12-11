@@ -194,6 +194,7 @@
     <ClInclude Include="Source\Coroutine.h" />
     <ClInclude Include="Source\Listener.h" />
     <ClInclude Include="Source\ModuleGame.h" />
+    <ClInclude Include="Source\PhysicCategory.h" />
     <ClInclude Include="Source\Player.h" />
     <ClInclude Include="Source\Timer.h" />
   </ItemGroup>

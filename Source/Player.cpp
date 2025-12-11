@@ -9,7 +9,6 @@ void Player::Start(Vector2 spawnPoint)
 {
     Car::Start(spawnPoint);
 
-    pbody->ctype = ColliderType::PLAYER;
     pbody->listener = this;
 
     lap = 0;

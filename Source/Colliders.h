@@ -5,20 +5,23 @@
 #include "ModulePhysics.h"
 #include "ModuleRender.h"
 #include "Listener.h"
+#include "PhysicCategory.h"
 
 class Colliders : public Listener
 {
 public:
-    Colliders(float x, float y, int* points, int size, ColliderType type, Listener* listener, std::vector<PhysBody*>& trackPhys)
+    Colliders(float x, float y, int* points, int size, ColliderType type, Listener* listener, std::vector<PhysBody*>& trackPhys, uint16 categoryBits = PhysicCategory::DEFAULT, uint16 maskBits = 0xFFFF)
     {
         body = App->physics->CreateChain(
             x, y,
             points, 
             size,
-            true,
+            false,
             this,
             type,
-            STATIC
+            STATIC,
+            categoryBits,
+            maskBits
         );
 
         trackPhys.push_back(body);
