@@ -588,9 +588,8 @@ void ModuleGame::CreateCheckpoints()
     checkpoints.push_back((std::make_unique<Checkpoint>(3805, 1654, 20, 350, 30, 100, this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(3856, 1500, 20, 350, 31, 90 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(4087, 1504, 20, 360, 32, 55 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4364, 1524, 20, 350, 33, -10, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4811, 1542, 20, 400, 34, 30 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5202, 2000, 20, 400, 35, 60 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4400, 1500, 20, 350, 33, -10, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4830, 1600, 20, 400, 34, 50 , this)));
 }
 
 bool ModuleGame::LoadChainFromFile(const char* path, std::vector<int>& outPoints)
