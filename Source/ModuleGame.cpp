@@ -44,6 +44,9 @@ bool ModuleGame::Start()
     leftArrow = LoadTexture("Assets/Textures/UI/Car_Selection1.png");
     rightArrow = LoadTexture("Assets/Textures/UI/Car_Selection2.png");
 
+    TexCone = LoadTexture("Assets/Textures/Obstacles/cone.png");
+    obstaclesManager.SetConeTexture(TexCone);
+
     carList.push_back({ tAMR23,     "AMR23",    amr23Stats });
     carList.push_back({ tGP2Engine, "MCL33",    gp2Stats });
     carList.push_back({ tW11,       "W11" ,     w11Stats });
@@ -75,6 +78,8 @@ update_status ModuleGame::Update()
     case GameState::Gameplay:    Gameplay(dt); break;
     case GameState::EndGame:     EndGameMenu(dt); break;
     }
+
+    obstaclesManager.Update(dt);
 
     return UPDATE_CONTINUE;
 }
@@ -240,6 +245,10 @@ void ModuleGame::GameplayStart()
     sensorBelow = App->physics->CreateRectangle(2750, 2478, 350, 20, 5, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::BELOW, 0xFFFF);
     App->physics->CreateCircle(1000, 1220, 50, true, this, ColliderType::DIRT, STATIC);
 
+    //cone
+    obstaclesManager.SpawnCone({ 5550.0f, 2320.0f });
+    
+
     std::sort(allCars.begin(), allCars.end(),
         [](Car* a, Car* b)
         {
@@ -318,6 +327,13 @@ void ModuleGame::GameManager(float dt)
             aiCars.clear();
             player.Destroy();
 
+            // Destruir los obstáculos creados
+            for (auto o : obstacles)
+            {
+                if (o) { o->CleanUp(); delete o; }
+            }
+            obstacles.clear();
+
             for (auto phys : trackPhys)
                 App->physics->DestroyBody(phys);
 
@@ -358,6 +374,8 @@ void ModuleGame::DrawGameplay()
 
     // Draw the cars
     CarsDraw();
+
+    obstaclesManager.Draw();
 }
 
 void ModuleGame::DrawUI()
@@ -651,6 +669,8 @@ bool ModuleGame::CleanUp()
     }
     aiCars.clear();
     allCars.clear();
+
+    obstaclesManager.CleanUp();
 
     pAMR23      = NULL;
     pR25        = NULL;

@@ -23,6 +23,7 @@ enum class ColliderType {
     SENSOR,
     CHECKEREDFLAG,
     CHECKPOINT,
+    OBSTACLE,
     UNKNOWN
 };
 

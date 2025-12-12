@@ -40,6 +40,9 @@
     <ClCompile Include="Source\Coroutine.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Obstacles.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source/p2Point.h">
@@ -91,6 +94,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\PhysicCategory.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Obstacles.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
