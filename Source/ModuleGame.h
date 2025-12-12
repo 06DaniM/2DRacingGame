@@ -7,6 +7,7 @@
 #include "AICar.h"
 #include "Listener.h"
 #include "Colliders.h"
+#include "Obstacles.h"
 
 #include "p2Point.h"
 #include "Coroutine.h"
@@ -101,6 +102,7 @@ private:
 
 	std::vector<PhysBody*> uiPhys;			 // Vector physic bodies of the ui for the initial menu
 	std::vector<PhysBody*> trackPhys;	     // Vector physic bodies of the track
+	std::vector<Obstacle*> obstacles;		 // Vector of obstacles
 
 	std::string playerIdSelected;			 // The id of the player
 
@@ -169,6 +171,10 @@ private:
 
 	Texture2D track;	// Texture of the track
 
+
+	//Obstacles
+	Texture2D TexCone;
+
 	bool initialMenuStart = false;	// Declare if did the start of initial menu
 	bool gamePlayStart = false;		// Declare if did the start of the gameplay state 
 	bool lightsOut = false;			// Declare if the race has started
@@ -178,4 +184,6 @@ private:
 	int showLap = 1;				// The lap to show
 
 	Camera2D camera = { 0 };		// The camera
+
+	ObstaclesManager obstaclesManager;
 };
