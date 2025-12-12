@@ -18,6 +18,16 @@ bool ModuleGame::Start()
 {
     SetTargetFPS(60);
 
+    f1anthem = LoadSound("Assets/SFX/F1_Opening.wav");
+    amr23Win = LoadSound("Assets/SFX/This_is_life.wav");
+    r25Win = LoadSound("Assets/SFX/Nano.wav");
+    rb21Win = LoadSound("Assets/SFX/TUTUTURU.wav");
+    rp20Win = LoadSound("Assets/SFX/Checo_Perez.wav");
+    mc33Win = LoadSound("Assets/SFX/Fernando_Alonso.wav");
+    w11Win = LoadSound("Assets/SFX/Osama_Bin_Russell.wav");
+    sf75Win = LoadSound("Assets/SFX/Smooth_Operator.wav");
+    lMcQueenWin = LoadSound("Assets/SFX/Life_is_a_highway.wav");
+
     tAMR23 = LoadTexture("Assets/Textures/Cars/AMR23.png");
     tR25 = LoadTexture("Assets/Textures/Cars/R25.png");
     tGP2Engine = LoadTexture("Assets/Textures/Cars/GP2Engine.png");
@@ -26,7 +36,6 @@ bool ModuleGame::Start()
     tPinkMerc = LoadTexture("Assets/Textures/Cars/PinkMerc.png");
     tW11 = LoadTexture("Assets/Textures/Cars/W11.png");
     tRB21 = LoadTexture("Assets/Textures/Cars/RedBull(Tututuru).png");
-    track = LoadTexture("Assets/Textures/Track.png");
 
     amr23Stats = LoadTexture("Assets/Textures/Stats/amr23_stats.png");
     r25Stats = LoadTexture("Assets/Textures/Stats/r25_stats.png");
@@ -41,20 +50,23 @@ bool ModuleGame::Start()
     initialMenuScreen = LoadTexture("Assets/Textures/UI/Main_menu.png");
     endScreen = LoadTexture("Assets/Textures/UI/Endgame.png");
 
+    track = LoadTexture("Assets/Textures/Track.png");
+    leaderBoard = LoadTexture("Assets/Textures/UI/Leaderboard.png");
+
     leftArrow = LoadTexture("Assets/Textures/UI/Car_Selection1.png");
     rightArrow = LoadTexture("Assets/Textures/UI/Car_Selection2.png");
 
     TexCone = LoadTexture("Assets/Textures/Obstacles/cone.png");
     obstaclesManager.SetConeTexture(TexCone);
 
-    carList.push_back({ tAMR23,     "AMR23",    amr23Stats });
-    carList.push_back({ tGP2Engine, "MCL33",    gp2Stats });
-    carList.push_back({ tW11,       "W11" ,     w11Stats });
-    carList.push_back({ tPinkMerc,  "RP20",     pinkMercStats });
-    carList.push_back({ tR25,       "R25",      r25Stats });
-    carList.push_back({ tMp4,       "MP4-4",    mc4Stats });
-    carList.push_back({ tMp22,      "MP4-22",   mc22Stats });
-    carList.push_back({ tRB21,      "RB21",     rb21Stats });
+    carList.push_back({ tAMR23,     "AMR23",    amr23Stats,     amr23Win    });
+    carList.push_back({ tGP2Engine, "MCL33",    gp2Stats,       mc33Win     });
+    carList.push_back({ tW11,       "W11" ,     w11Stats,       w11Win      });
+    carList.push_back({ tPinkMerc,  "RP20",     pinkMercStats,  rp20Win     });
+    carList.push_back({ tR25,       "R25",      r25Stats,       r25Win      });
+    carList.push_back({ tMp4,       "MP4-4",    mc4Stats,       sf75Win     });
+    carList.push_back({ tMp22,      "MP4-22",   mc22Stats,      lMcQueenWin });
+    carList.push_back({ tRB21,      "RB21",     rb21Stats,      rb21Win     });
 
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
@@ -70,13 +82,17 @@ update_status ModuleGame::Update()
     if (IsKeyPressed(KEY_F5)) player.lap = 99999;
     float dt = GetFrameTime();
 
-    coroutineManager.Update(dt);
-
     switch (gameState)
     {
     case GameState::InitialMenu: InitialMenu(dt); break;
     case GameState::Gameplay:    Gameplay(dt); break;
     case GameState::EndGame:     EndGameMenu(dt); break;
+    }
+
+    if (gameState != GameState::Gameplay && gameState != GameState::EndGame && !f1anthemPlayed)
+    {
+        PlaySound(f1anthem);
+        f1anthemPlayed = true;
     }
 
     obstaclesManager.Update(dt);
@@ -135,7 +151,7 @@ void ModuleGame::Gameplay(float dt)
 void ModuleGame::EndGameMenu(float dt)
 {
     timeToNextState += dt;
-    if (timeToNextState >= 5.0f)
+    if (timeToNextState >= 16.0f)
     {
         allCars.clear();
         gameState = GameState::Opening;
@@ -186,6 +202,8 @@ void ModuleGame::InitialMenuStart()
     righttArrowLap->id = "UI";
     righttArrowLap->isLeft = false;
 
+    winSoundPlayed = false;
+
     uiPhys.push_back(menuCar);
     uiPhys.push_back(leftArrowCar);
     uiPhys.push_back(rightArrowCar);
@@ -207,6 +225,7 @@ void ModuleGame::GameplayStart()
     // Creation of the cars after car is selected
     player.Start({ 5500, 2340});
     player.pbody->id = playerIdSelected;
+    player.winSong = carList[currentCarIndex].winSong;
 
     lightsOut = false;
     allCars.push_back(&player);
@@ -247,7 +266,6 @@ void ModuleGame::GameplayStart()
 
     //cone
     obstaclesManager.SpawnCone({ 5550.0f, 2320.0f });
-    
 
     std::sort(allCars.begin(), allCars.end(),
         [](Car* a, Car* b)
@@ -266,14 +284,16 @@ void ModuleGame::GameplayStart()
 
     timeToNextState = 0.0f;
 
+    f1anthemPlayed = false;
     gamePlayStart = true;
     initialMenuStart = false;
+
+    StopSound(f1anthem);
 }
 
 void ModuleGame::TrafficLight()
 {
     if (lightsOut) return;
-    //player.canMove = true; // QUITAR
     lightTimer += GetFrameTime();
 
     if (lightTimer > 1.0f)
@@ -382,11 +402,13 @@ void ModuleGame::DrawUI()
 {
     if (gameState == GameState::Opening)
     {
+        if (GetFrameTime() > 1) return;
+
         // Draw the title screen
         DrawTexture(openingScreen, 0, 0, WHITE);
 
         timeToNextState += GetFrameTime();
-        if (timeToNextState > 2)
+        if (timeToNextState > 5)
         {
             gameState = GameState::InitialMenu;
             timeToNextState = 0;
@@ -407,9 +429,15 @@ void ModuleGame::DrawUI()
         // Draw the traffic light
         TrafficLight();
 
-        int startX = 20;
-        int startY = 180;
-        int lineSpacing = 22;
+        int startX = 40;
+        int startY = 200;
+        int lineSpacing = 26;
+
+        // Draw gameplay UI
+        DrawTexture(leaderBoard, 0, 0, {255, 255, 255, 140});
+        DrawText(TextFormat("Lap Time: %.2f", player.currentLapTime), startX, 90, 20, BLACK);
+        DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), startX, 120, 20, BLACK);
+        DrawText(TextFormat("Fastest Lap Time: %.2f", player.fastestLapTime), startX, 150, 20, BLACK);
 
         for (size_t i = 0; i < allCars.size(); i++)
         {
@@ -422,11 +450,6 @@ void ModuleGame::DrawUI()
                 20,
                 BLACK);
         }
-
-        // Draw gameplay UI
-        DrawText(TextFormat("Lap Time: %.2f", player.currentLapTime), 20, 50, 20, BLACK);
-        DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), 20, 70, 20, BLACK);
-        DrawText(TextFormat("Fastest Lap Time: %.2f", player.fastestLapTime), 20, 120, 20, BLACK);
 
         // Draw the current number of laps & the total
         std::string lapText = TextFormat("Lap: %d/%d", showLap, player.totalLaps);
@@ -452,7 +475,7 @@ void ModuleGame::DrawUI()
         int fastLapX = 210;
         int lineSpacing = 50;
 
-        for (size_t i = 0; i < allCars.size(); i++)
+        for (int i = 0; i < allCars.size(); i++)
         {
             Car* car = allCars[i];
             const char* placeText = (i == 0) ? " " : TextFormat("%d", (int)i + 1);
@@ -467,6 +490,14 @@ void ModuleGame::DrawUI()
             // Fast lap
             DrawText(TextFormat("Fast lap: %.2f", car->fastestLapTime),
                 fastLapX, y, 20, BLACK);
+        }
+
+        for (int i = 0; i < 3; i++)
+            DrawTextureEx(allCars[i]->texture, podiumSlot[i], -90, 6, WHITE);
+
+        if (!winSoundPlayed) {
+            PlaySound(allCars[0]->winSong);
+            winSoundPlayed = true;
         }
 
         return;
@@ -521,6 +552,7 @@ void ModuleGame::AssignAICars()
 
         ai->texture = carList[idx].texture;
         ai->pbody->id = carList[idx].id;
+        ai->winSong = carList[idx].winSong;
     }
 }
 

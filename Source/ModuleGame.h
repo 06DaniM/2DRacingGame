@@ -81,6 +81,7 @@ private:
 		Texture2D texture;
 		std::string id;
 		Texture2D imageToShow;
+		Sound winSong;
 	};
 
 	std::vector<CarInfo> carList;
@@ -89,6 +90,13 @@ private:
 	Car car;
 	Player player;				// The players car
 	std::vector<AICar*> aiCars; // The vector with the ai car
+
+	Vector2 podiumSlot[3] =
+	{
+		{706, 500},
+		{947, 556},
+		{465, 604}
+	};
 
 	CoroutineManager coroutineManager;	// Coroutine
 
@@ -170,14 +178,26 @@ private:
 	Texture2D rightArrow;
 
 	Texture2D track;	// Texture of the track
-
+	Texture2D leaderBoard;
 
 	//Obstacles
 	Texture2D TexCone;
 
+	Sound f1anthem;
+	Sound amr23Win;
+	Sound r25Win;
+	Sound rb21Win;
+	Sound rp20Win;
+	Sound mc33Win;
+	Sound w11Win;
+	Sound sf75Win;
+	Sound lMcQueenWin;
+
 	bool initialMenuStart = false;	// Declare if did the start of initial menu
 	bool gamePlayStart = false;		// Declare if did the start of the gameplay state 
 	bool lightsOut = false;			// Declare if the race has started
+	bool f1anthemPlayed = false;
+	bool winSoundPlayed = false;
 	
 	float lightTimer = 0.0f;		// Set the time for starting the race
 

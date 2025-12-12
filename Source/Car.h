@@ -86,6 +86,7 @@ public:
     PhysBody* pbody = nullptr;
 
     Texture2D texture;
+    Sound winSong;
 
     bool canMove = true;
 
