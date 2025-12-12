@@ -70,22 +70,7 @@ void Player::CleanUp()
     LOG("Cleaning up Player");
 }
 
-void Player::Draw()
-{
-    if (!pbody) return;
-
-    int x, y;
-    pbody->GetPosition(x, y);
-
-    // Rotation in angles
-    float rotation = pbody->body->GetAngle() * RAD2DEG;
-
-    Rectangle sourceRec = { 0.0f, 0.0f, (float)texW, (float)texH };
-    Rectangle destRec = { (float)x, (float)y, (float)texW, (float)texH };
-    Vector2 origin = { texW / 2.0f, texH / 2.0f };
-
-    DrawTexturePro(texture, sourceRec, destRec, origin, rotation, WHITE);
-}
+void Player::Draw() { return Car::Draw(); }
 
 void Player::OnCollision(PhysBody* physA, PhysBody* physB) {}
 void Player::EndCollision(PhysBody* physA, PhysBody* physB) {}
