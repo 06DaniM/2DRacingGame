@@ -18,6 +18,10 @@ bool ModuleGame::Start()
 {
     SetTargetFPS(60);
 
+    coconutMall = LoadMusicStream("Assets/SFX/Coconut-Mall-Mario-Kart-Wii-OST.wav");
+
+    engine = LoadSound("Assets/SFX/F1_Motor.wav");
+
     f1anthem = LoadSound("Assets/SFX/F1_Opening.wav");
     amr23Win = LoadSound("Assets/SFX/This_is_life.wav");
     r25Win = LoadSound("Assets/SFX/Nano.wav");
@@ -146,6 +150,8 @@ void ModuleGame::Gameplay(float dt)
     GameplayStart();
     CarsUpdate(dt);
     GameManager(dt);
+
+    UpdateMusicStream(coconutMall);
 }
 
 void ModuleGame::EndGameMenu(float dt)
@@ -305,6 +311,8 @@ void ModuleGame::TrafficLight()
 
     if (lightTimer > 4.0f)
     {
+        PlayMusicStream(coconutMall);
+
         lightsOut = true;
         for (auto car : allCars)
             car->canMove = true;
@@ -362,6 +370,8 @@ void ModuleGame::GameManager(float dt)
             App->physics->DestroyBody(checkeredFlag);
 
             timeToNextState = 0;
+
+            StopMusicStream(coconutMall);
 
             gameState = GameState::EndGame;
         }
@@ -438,6 +448,7 @@ void ModuleGame::DrawUI()
         DrawText(TextFormat("Lap Time: %.2f", player.currentLapTime), startX, 90, 20, BLACK);
         DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), startX, 120, 20, BLACK);
         DrawText(TextFormat("Fastest Lap Time: %.2f", player.fastestLapTime), startX, 150, 20, BLACK);
+        DrawText(TextFormat("C: %d", player.checkpoint), 20, SCREEN_HEIGHT - 20, 20, BLACK);
 
         for (size_t i = 0; i < allCars.size(); i++)
         {
@@ -636,30 +647,30 @@ void ModuleGame::CreateCheckpoints()
     checkeredFlag = App->physics->CreateRectangle(5670, 2670, 20, 280, 60, true, this, ColliderType::CHECKEREDFLAG, STATIC);
 
     // Creation of the checkpoints
-    checkpoints.push_back((std::make_unique<Checkpoint>(6362, 3632, 20, 280, 1 , 60 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5992, 4146, 20, 400, 2 , 50 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(6362, 3632, 20, 350, 1 , 60 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(6053, 4091, 20, 400, 2 , 50 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(5735, 3805, 20, 400, 3 , 90 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5535, 3550, 20, 400, 4 , 0  , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(5285, 3385, 20, 400, 5 , 80 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5435, 3550, 20, 600, 4 , 0  , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(5285, 3285, 20, 600, 5 , 80 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(5144, 3015, 20, 400, 6 , 50 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4842, 2926, 20, 400, 7 , 35 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(4614, 2596, 20, 400, 8 , 90 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4708, 2841, 20, 400, 7 , 40 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(4676, 2462, 20, 600, 8 , 90 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(4744, 2214, 20, 400, 9 , 90 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(4380, 1895, 20, 400, 10, 0  , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(3974, 1982, 20, 400, 11, -10, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(3734, 2192, 20, 320, 12, -50, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3974, 1982, 20, 450, 11, -10, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(3734, 2192, 20, 400, 12, -50, this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(3626, 2530, 20, 400, 13, 310, this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(3380, 2715, 20, 400, 14, 0  , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2990, 2715, 20, 400, 15, 0  , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2742, 2332, 20, 400, 16, 85 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2680, 1660, 20, 400, 17, 90 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2832, 1350, 20, 350, 18, 95 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2560, 1174, 20, 420, 19, 100, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(2400, 1472, 20, 400, 20, 120, this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(1934, 1600, 20, 400, 21, 10 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(1465, 1390, 20, 400, 22, 40 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(880 , 750 , 20, 400, 23, 70 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(330 , 850 , 20, 350, 24, 70 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2560, 1174, 20, 600, 19, 100, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(2400, 1472, 20, 600, 20, 120, this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(1934, 1600, 20, 600, 21, 10 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(1465, 1390, 20, 600, 22, 40 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(880 , 750 , 20, 600, 23, 70 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(330 , 850 , 20, 400, 24, 70 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(680 , 1303, 20, 400, 25, 45 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(1732, 1830, 20, 400, 26, 20 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(2266, 2030, 20, 350, 27, 20 , this)));
@@ -756,6 +767,7 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
                     playerPtr->fastestLapTime = playerPtr->currentLapTime;
 
                 playerPtr->currentLapTime = 0.0f;
+                playerPtr->canAbility = true;
             }
         }
 
@@ -771,6 +783,7 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
                     aiPtr->fastestLapTime = aiPtr->currentLapTime;
 
                 aiPtr->currentLapTime = 0.0f;
+                aiPtr->canAbility = true;
             }
         }
     }

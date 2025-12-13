@@ -11,16 +11,14 @@ void Player::Start(Vector2 spawnPoint)
 
     pbody->listener = this;
 
-    lap = 0;
-    checkPoint = 0;
-
     previousLapTime = 0.0f;
     fastestLapTime = 0.0f;
     currentLapTime = 0.0f;
 
-    canMove = true;
+    canMove = true; // Cambiar a false
 
     motor = 0;
+    velocity = 0;
 
     LOG("Player Start");
 }
@@ -28,9 +26,15 @@ void Player::Start(Vector2 spawnPoint)
 void Player::Update(float dt)
 {
     if (!pbody) return;
+
     Move();
 
-    return Car::Update(dt);
+    if (IsKeyPressed(KEY_SPACE) && canAbility && !doingAbility)
+    {
+        ActivateAbility();
+    }
+
+    Car::Update(dt);
 }
 
 void Player::Move()
@@ -58,7 +62,6 @@ void Player::Move()
         if (fabs(velocity) < 0.1f)
             velocity = 0;
     }
-
     if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  steer = -1.0f;
     if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) steer = 1.0f;
 
