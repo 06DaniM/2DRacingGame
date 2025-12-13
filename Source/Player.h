@@ -22,4 +22,5 @@ private:
 public:
 
 private:
+    Sound engine;
 };

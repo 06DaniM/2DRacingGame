@@ -20,6 +20,8 @@ void Player::Start(Vector2 spawnPoint)
     motor = 0;
     velocity = 0;
 
+    engine = LoadSound("Assets/SFX/F1_Motor.wav");
+
     LOG("Player Start");
 }
 
@@ -32,6 +34,12 @@ void Player::Update(float dt)
     if (IsKeyPressed(KEY_SPACE) && canAbility && !doingAbility)
     {
         ActivateAbility();
+    }
+    LOG("%f", velocity);
+    if (!IsSoundPlaying(engine) && velocity > 5)
+    {
+        //SetSoundVolume()
+        PlaySound(engine);
     }
 
     Car::Update(dt);

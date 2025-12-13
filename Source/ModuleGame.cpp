@@ -20,8 +20,6 @@ bool ModuleGame::Start()
 
     coconutMall = LoadMusicStream("Assets/SFX/Coconut-Mall-Mario-Kart-Wii-OST.wav");
 
-    engine = LoadSound("Assets/SFX/F1_Motor.wav");
-
     f1anthem = LoadSound("Assets/SFX/F1_Opening.wav");
     amr23Win = LoadSound("Assets/SFX/This_is_life.wav");
     r25Win = LoadSound("Assets/SFX/Nano.wav");
@@ -68,8 +66,8 @@ bool ModuleGame::Start()
     carList.push_back({ tW11,       "W11" ,     w11Stats,       w11Win      });
     carList.push_back({ tPinkMerc,  "RP20",     pinkMercStats,  rp20Win     });
     carList.push_back({ tR25,       "R25",      r25Stats,       r25Win      });
-    carList.push_back({ tMp4,       "MP4-4",    mc4Stats,       sf75Win     });
-    carList.push_back({ tMp22,      "MP4-22",   mc22Stats,      lMcQueenWin });
+    carList.push_back({ tMp4,       "SF-75",    mc4Stats,       sf75Win     });
+    carList.push_back({ tMp22,      "McQueen",   mc22Stats,     lMcQueenWin });
     carList.push_back({ tRB21,      "RB21",     rb21Stats,      rb21Win     });
 
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
