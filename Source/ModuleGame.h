@@ -101,6 +101,7 @@ private:
 	CoroutineManager coroutineManager;	// Coroutine
 
 	Colliders* trackExt			 = NULL;
+	Colliders* trackInt			 = NULL;
 	Colliders* trackIntS1		 = NULL;
 	Colliders* trackIntS2		 = NULL;
 	Colliders* sensorAboveRight  = NULL;
@@ -116,6 +117,7 @@ private:
 	std::vector<Car*> allCars;				 // Vector of all the cars
 
 	std::vector<int> externalTrackPoints;	 // External barriers
+	std::vector<int> internalTrackPoints;	 // Internal dirt
 
 	std::vector<int> internalTrackPointsS1;	 // Internal barriers of sector 1
 	std::vector<int> internalTrackPointsS2;  // Internal barriers of sector 2

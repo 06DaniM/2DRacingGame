@@ -73,7 +73,7 @@ bool ModuleGame::Start()
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
-    gameState = GameState::Opening;
+    gameState = GameState::InitialMenu;
 
     return true;
 }
@@ -266,7 +266,6 @@ void ModuleGame::GameplayStart()
 
     sensorAbove = App->physics->CreateRectangle(2508, 2138, 20, 400, 0, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::ABOVE, 0xFFFF);
     sensorBelow = App->physics->CreateRectangle(2750, 2478, 350, 20, 5, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::BELOW, 0xFFFF);
-    App->physics->CreateCircle(1000, 1220, 50, true, this, ColliderType::DIRT, STATIC);
 
     //cone
     obstaclesManager.SpawnCone({ 5550.0f, 2320.0f });
@@ -573,7 +572,17 @@ void ModuleGame::CreateColliders()
             0, 0,
             externalTrackPoints.data(),
             externalTrackPoints.size(),
+            false,
             ColliderType::WALL, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_Internal_Points.txt", internalTrackPoints))
+        trackInt = new Colliders(
+            0, 0,
+            internalTrackPoints.data(),
+            internalTrackPoints.size(),
+            true,
+            ColliderType::DIRT, this,
             trackPhys);
 
     if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS1.txt", internalTrackPointsS1))
@@ -581,6 +590,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             internalTrackPointsS1.data(),
             internalTrackPointsS1.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys);
 
@@ -589,6 +599,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             internalTrackPointsS2.data(),
             internalTrackPointsS2.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys);
 
@@ -597,6 +608,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             sensorTrackPointsAboveRight.data(),
             sensorTrackPointsAboveRight.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys,
             PhysicCategory::ABOVE,
@@ -607,6 +619,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             sensorTrackPointsAboveLeft.data(),
             sensorTrackPointsAboveLeft.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys,
             PhysicCategory::ABOVE,
@@ -617,6 +630,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             sensorTrackPointsBelowUp.data(),
             sensorTrackPointsBelowUp.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys,
             PhysicCategory::BELOW,
@@ -627,6 +641,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             sensorTrackPointsBelowDown.data(),
             sensorTrackPointsBelowDown.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys,
             PhysicCategory::BELOW,
@@ -802,8 +817,17 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 
     else if (physA->ctype == ColliderType::DIRT)
     {
-        if (playerPtr) playerPtr->inDirt = true;
-        if (aiPtr) aiPtr->inDirt = true;
+        LOG("Dirt detected");
+        if (playerPtr)
+        {
+            playerPtr->dirtContacts++;
+            playerPtr->inDirt = true;
+        }
+        if (aiPtr)
+        {
+            aiPtr->dirtContacts++;
+            aiPtr->inDirt = true;
+        }
     }
 }
 
@@ -817,7 +841,24 @@ void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
 
     if (physA->ctype == ColliderType::DIRT)
     {
-        if (playerPtr) playerPtr->inDirt = false;
-        if (aiPtr) aiPtr->inDirt = false;
+        LOG("Dirt end detection");
+        if (playerPtr)
+        {
+            playerPtr->dirtContacts--;
+            if (playerPtr->dirtContacts <= 0)
+            {
+                playerPtr->dirtContacts = 0;
+                playerPtr->inDirt = false;
+            }
+        }
+        if (aiPtr)
+        {
+            aiPtr->dirtContacts--;
+            if (aiPtr->dirtContacts <= 0)
+            {
+                aiPtr->dirtContacts = 0;
+                aiPtr->inDirt = false;
+            }
+        }
     }
 }

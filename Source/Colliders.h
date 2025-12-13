@@ -10,14 +10,14 @@
 class Colliders : public Listener
 {
 public:
-    Colliders(float x, float y, int* points, int size, ColliderType type, Listener* listener, std::vector<PhysBody*>& trackPhys, uint16 categoryBits = PhysicCategory::DEFAULT, uint16 maskBits = 0xFFFF)
+    Colliders(float x, float y, int* points, int size, bool sensor, ColliderType type, Listener* listener, std::vector<PhysBody*>& trackPhys, uint16 categoryBits = PhysicCategory::DEFAULT, uint16 maskBits = 0xFFFF)
     {
         body = App->physics->CreateChain(
             x, y,
             points, 
             size,
-            false,
-            this,
+            sensor,
+            listener,
             type,
             STATIC,
             categoryBits,

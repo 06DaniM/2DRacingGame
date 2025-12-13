@@ -63,7 +63,7 @@ void Car::ApplyPhysic()
 
     float maxSp = maxSpeed;
 
-    if (inDirt) maxSp /= 2;
+    if (inDirt) maxSp = 5;
 
     if (velocity > maxSp) velocity = maxSp;
     if (velocity < -maxSp * 0.4f) velocity = -maxSp * 0.4f;

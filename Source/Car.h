@@ -118,4 +118,5 @@ public:
     float targetAccel = 0.0f;
 
     bool canAbility = false;
+    int dirtContacts = 0;
 };
