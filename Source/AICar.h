@@ -28,4 +28,5 @@ private:
 
     float checkpointOffset = 0.0f;  // Horizontal offset
     int lastCheckpoint = -1;        // To know if needs a new point
+    bool canRandomize = true;
 };

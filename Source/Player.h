@@ -22,5 +22,4 @@ private:
 public:
 
 private:
-
 };

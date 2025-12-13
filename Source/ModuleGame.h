@@ -182,6 +182,8 @@ private:
 	//Obstacles
 	Texture2D TexCone;
 
+	Music coconutMall;
+	Sound engine;
 	Sound f1anthem;
 	Sound amr23Win;
 	Sound r25Win;

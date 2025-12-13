@@ -32,6 +32,12 @@ void Car::Start(Vector2 spawnPoint)
     b2Vec2 pos = chassis->body->GetPosition();
     chassis->body->SetTransform(pos, startAngleRad);
 
+    baseMaxSpeed = maxSpeed;
+    baseAccelRate = accelRate;
+
+    lap = 0;
+    checkpoint = 0;
+
     LOG("Car Start");
 }
 
@@ -45,6 +51,8 @@ void Car::Update(float dt)
         b2Vec2(carX, carY),
         b2Vec2(cpX, cpY)
     );
+
+    UpdateAbility(dt);
 }
 
 void Car::ApplyPhysic()
@@ -61,7 +69,7 @@ void Car::ApplyPhysic()
     if (velocity < -maxSp * 0.4f) velocity = -maxSp * 0.4f;
 
     // Normalize speed between 0 - 1
-    float speed01 = fabs(velocity) / maxSp;
+    float speed01 = fabs(velocity) / baseMaxSpeed;
     if (speed01 > 0.8f) speed01 = 0.8f;
 
     // Faster it goes less it turns
@@ -82,7 +90,7 @@ void Car::ApplyPhysic()
 
     std::vector<PhysBody*> allWheels = { wheelFL, wheelFR, wheelBL, wheelBR };
 
-    float motorForceNormalized = velocity / maxSp;
+    float motorForceNormalized = velocity / baseMaxSpeed;
 
     ApplyCarForces(
         chassis,
@@ -180,6 +188,37 @@ void Car::GetCarAndCheckPos(float& carX, float& carY, float& cpX, float& cpY) co
 
     cpX = (float)cpx;
     cpY = (float)cpy;
+}
+
+void Car::ActivateAbility()
+{
+    LOG("in");
+    doingAbility = true;
+    canAbility = false;
+    abilityTimer = 0.0f;
+
+    maxSpeed = 30;
+    accelRate = baseAccelRate * 2;
+}
+
+void Car::UpdateAbility(float dt)
+{
+    if (!doingAbility) return;
+
+    abilityTimer += dt;
+
+    if (abilityTimer >= 4.0f)
+    {
+        EndAbility();
+    }
+}
+
+void Car::EndAbility()
+{
+    doingAbility = false;
+
+    maxSpeed = baseMaxSpeed;
+    accelRate = baseAccelRate;
 }
 
 void Car::CleanUp()
