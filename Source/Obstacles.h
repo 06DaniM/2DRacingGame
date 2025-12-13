@@ -51,7 +51,6 @@ public:
     // Spawn utilities
     Obstacle* SpawnCone(const Vector2& pos);
     void SpawnFromList(const std::vector<Vector2>& positions);
-    void Clear();
 
 private:
     std::vector<Obstacle*> obstacles;

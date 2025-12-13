@@ -110,7 +110,6 @@ private:
 
 	std::vector<PhysBody*> uiPhys;			 // Vector physic bodies of the ui for the initial menu
 	std::vector<PhysBody*> trackPhys;	     // Vector physic bodies of the track
-	std::vector<Obstacle*> obstacles;		 // Vector of obstacles
 
 	std::string playerIdSelected;			 // The id of the player
 

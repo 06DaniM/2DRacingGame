@@ -95,10 +95,6 @@ void ObstaclesManager::SpawnFromList(const std::vector<Vector2>& positions)
         SpawnCone(p);
 }
 
-void ObstaclesManager::Clear()
-{
-    CleanUp();
-}
 
 // ---------------- Cone ----------------
 Cone::Cone()

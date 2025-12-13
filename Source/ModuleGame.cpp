@@ -347,12 +347,6 @@ void ModuleGame::GameManager(float dt)
             aiCars.clear();
             player.Destroy();
 
-            // Destruir los obstáculos creados
-            for (auto o : obstacles)
-            {
-                if (o) { o->CleanUp(); delete o; }
-            }
-            obstacles.clear();
 
             for (auto phys : trackPhys)
                 App->physics->DestroyBody(phys);
