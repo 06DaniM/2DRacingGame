@@ -312,7 +312,7 @@ void ModuleGame::TrafficLight()
 
         lightsOut = true;
         for (auto car : allCars)
-            car->canMove = true;
+            //car->canMove = false;
         lightTimer = 0.0f;
     }
 }
