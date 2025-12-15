@@ -226,6 +226,7 @@ void Car::CleanUp()
     LOG("Cleaning up Car");
 
     pbody = NULL;
+    App->physics->DestroyBody(pbody);
     UnloadTexture(texture);
 }
 

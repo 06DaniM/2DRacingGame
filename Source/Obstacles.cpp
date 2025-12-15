@@ -11,6 +11,7 @@ void Obstacle::Start(const Vector2& spawnPoint)
 
 void Obstacle::Update(float dt)
 {
+    
 }
 
 void Obstacle::CleanUp()
@@ -29,18 +30,21 @@ void Obstacle::Draw()
     int x, y;
     body->GetPosition(x, y);
 
-    if (texture.id != 0)
+    
+    float rotation = body->body->GetAngle() * RAD2DEG;
+
+    if (texture.id != 0 && texture.width > 0 && texture.height > 0)
     {
         Rectangle sourceRec = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
-        Rectangle destRec = { (float)(x - width / 2.0f), (float)(y - height / 2.0f), width, height };
-        Vector2 origin = { (float)texture.width / 2.0f, (float)texture.height / 2.0f };
+        Rectangle destRec = { (float)x, (float)y, width, height };
+        Vector2 origin = { width * 0.5f, height * 0.5f };
 
-        float rotation = body->GetRotation();
         DrawTexturePro(texture, sourceRec, destRec, origin, rotation, WHITE);
         return;
     }
 
-    DrawRectangle(x - (int)(width / 2.0f), y - (int)(height / 2.0f), (int)width, (int)height, RED);
+    // Fallback
+    DrawRectangle((int)(x - width * 0.5f), (int)(y - height * 0.5f), (int)width, (int)height, RED);
 }
 
 // ---------------- ObstaclesManager ----------------
@@ -120,6 +124,23 @@ void Cone::Start(const Vector2& spawnPoint)
         DYNAMIC
     );
 
+    if (!body || !body->body) return;
+
+    b2Body* b = body->body;
+    b2Fixture* fixture = b->GetFixtureList();
+
+    if (fixture) {
+        fixture->SetDensity(3.0f);
+        fixture->SetFriction(0.8f);
+        fixture->SetRestitution(0.05f); //rebote
+    }
+
+    b->ResetMassData();
+
+    
+    b->SetLinearDamping(1.5f);
+    b->SetAngularDamping(0.8f);
+
 }
 
 void Cone::OnCollision(PhysBody* physA, PhysBody* physB)
@@ -127,11 +148,16 @@ void Cone::OnCollision(PhysBody* physA, PhysBody* physB)
     switch (physB->ctype) {
     case ColliderType::CAR:
         LOG("Collided with Car");
+        physA->body->ApplyLinearImpulseToCenter(1.1f * physB->body->GetLinearVelocity(), true);
         break;
     }
 }
 
 void Cone::EndCollision(PhysBody* physA, PhysBody* physB)
 {
-    //para que pollas sirve esto?!!
+    switch (physB->ctype) {
+    case ColliderType::CAR:
+        LOG("Collided with Car");
+        break;
+    }
 }
