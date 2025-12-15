@@ -224,10 +224,10 @@ void Car::EndAbility()
 void Car::CleanUp()
 {
     LOG("Cleaning up Car");
-
-    pbody = NULL;
-    App->physics->DestroyBody(pbody);
     UnloadTexture(texture);
+
+    App->physics->DestroyBody(pbody);
+    pbody = NULL;
 }
 
 void Car::Draw() 

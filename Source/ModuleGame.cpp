@@ -403,7 +403,7 @@ void ModuleGame::DrawUI()
 {
     if (gameState == GameState::Opening)
     {
-        if (GetFrameTime() > 1) return;
+        if (GetFrameTime() > 0.5f) return;
 
         // Draw the title screen
         DrawTexture(openingScreen, 0, 0, WHITE);
@@ -471,7 +471,7 @@ void ModuleGame::DrawUI()
         int lapsWidth = MeasureText(lapsText.c_str(), 50);
         DrawText(lapsText.c_str(), 200 - lapsWidth / 2, 70, 20, BLACK);
 
-        int nameX = 120;
+        int nameX = 110;
         int startX = 80;
         int startY = 130;
         int fastLapX = 210;
@@ -576,11 +576,38 @@ void ModuleGame::CreateColliders()
             ColliderType::WALL, this,
             trackPhys);
 
-    if (LoadChainFromFile("Assets/ColliderPoints/Track_Internal_Points.txt", internalTrackPoints))
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_Internal_PointsS1_1.txt", internalTrackPointsS1_1))
         trackInt = new Colliders(
             0, 0,
-            internalTrackPoints.data(),
-            internalTrackPoints.size(),
+            internalTrackPointsS1_1.data(),
+            internalTrackPointsS1_1.size(),
+            true,
+            ColliderType::DIRT, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_Internal_PointsS1_2.txt", internalTrackPointsS1_2))
+        trackInt = new Colliders(
+            0, 0,
+            internalTrackPointsS1_2.data(),
+            internalTrackPointsS1_2.size(),
+            true,
+            ColliderType::DIRT, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_Internal_PointsS2.txt", internalTrackPointsS2_1))
+        trackInt = new Colliders(
+            0, 0,
+            internalTrackPointsS2_1.data(),
+            internalTrackPointsS2_1.size(),
+            true,
+            ColliderType::DIRT, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_External_Points_Dirt.txt", externalTrackPointsDirt))
+        trackExtDirt = new Colliders(
+            0, 0,
+            externalTrackPointsDirt.data(),
+            externalTrackPointsDirt.size(),
             true,
             ColliderType::DIRT, this,
             trackPhys);
@@ -720,6 +747,8 @@ bool ModuleGame::CleanUp()
     aiCars.clear();
     allCars.clear();
 
+    delete sensorAbove;
+
     obstaclesManager.CleanUp();
 
     pAMR23      = NULL;
@@ -753,7 +782,7 @@ bool ModuleGame::CleanUp()
 
 void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 {
-    if (physB->ctype != ColliderType::CAR)
+    if (physB->ctype != ColliderType::CAR && physB->ctype != ColliderType::WHEEL)
         return;
 
     Player* playerPtr = dynamic_cast<Player*>(physB->listener);
@@ -833,7 +862,7 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 
 void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
 {
-    if (physB->ctype != ColliderType::CAR)
+    if (physB->ctype != ColliderType::CAR && physB->ctype != ColliderType::WHEEL)
         return;
 
     Player* playerPtr = dynamic_cast<Player*>(physB->listener);
