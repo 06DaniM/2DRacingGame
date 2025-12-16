@@ -1,29 +1,49 @@
-# {Project Name}
+# Crazy F1
 
-## Description
+A fun pixel art F1 game with a top-down view where you race around a single track. Simple controls, retro graphics, and plenty of chaos as you try to set the fastest lap time without spinning out at every corner!
 
 {project description}
 
-## Key Features
+## Implementations
 
- - {Feature01}
- - {Feature02}
- - {Feature03}
- - {Feature04}
+### List
+| Name | Type | Description | 
+|:--------|:----| :----|
+| Pokemon Egg | Colision | Goes side to side and rests points |
+| Pelipper | Event | Has a chance to instantly end the game |
+| Shop | Event | Upgrades 1 tier your pokeball wich comes with a multiplier |
+| Plusle & Minum | Button | Sums and Rests points |
+| Whailord | Event | Gives 15 seconds of multiplier |
+
  
 ## Controls
 
- - {ControlsScheme}
+### Gameplay Controls
+| Action | Key |
+|:--------|:----|
+| Left Flipper | Left arrow |
+| Right Flipper | Right arrow |
+| Kicker | Down arrow |
+| F2 | 60 FPS |
+| F3 | 120 FPS |
+| F4 | 240 FPS |
+| 1 | Gravity 5 |
+| 2 | Gravity 10 |
+| 3 | Gravity 15 |
+| R | -0.2 to Restitution Coeficient |
 
 ## Developers
 
- - {Dev01} - {Role(s)}
- - {Dev02} - {Role(s)}
- - {Dev03} - {Role(s)}
- - {Dev04} - {Role(s)}
+ - Daniel Martínez - {Main Programmer}
+ - Adria Puerto - {Main Programmer}
+ - Héctor Tarroja - {Main Adapter/Designer}
+ - Adam Molina - {Main Re-Drawer}
 
 ## License
 
 This project is licensed under an unmodified MIT license, which is an OSI-certified license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
 
 {AdditionalLicenses}
+
+## Github Link
+https://github.com/06DaniM/Pinball/tree/main
