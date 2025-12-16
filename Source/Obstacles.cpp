@@ -105,7 +105,6 @@ Obstacle* ObstaclesManager::SpawnExplosive(const Vector2& pos)
     if (explosiveTexture.id != 0)
         explosive->SetTexture(explosiveTexture);
 
-    // No iniciar la explosión aquí; la explosion se inicia por colisión o por llamada externa.
     obstacles.push_back(explosive);
     return explosive;
 }
@@ -248,7 +247,12 @@ void Explosive::Start(const Vector2& spawnPoint)
     b2Body* b = body->body;
     b2Fixture* fixture = b->GetFixtureList();
 
-    // Valores iniciales de explosión
+    explosionTexture = LoadTexture("Assets/Textures/Obstacles/Explosion_Sheet.png");
+
+    explosiveAnim = Animator(&explosionTexture, 176, 160);
+    explosiveAnim.AddAnim("explosion", 0, 3, 1.0f, false);
+
+    // Valores iniciales de explosiï¿½n
     state = State::Idle;
     explosionRadius = 0.0f;
     explosionElapsed = 0.0f;
@@ -295,7 +299,7 @@ void Explosive::TriggerExplosion()
     explosionElapsed = 0.0f;
     affectedCars.clear();
     affectedSet.clear();
-    //body pos
+
     int bx, by;
     if (body && body->body)
     {
@@ -303,7 +307,7 @@ void Explosive::TriggerExplosion()
         explosionCenter.x = (float)bx;
         explosionCenter.y = (float)by;
 
-        //marcar para destrucción en Update
+        // Marcar para destrucciï¿½n en Update
         pendingBodyDestroy = true;
     }
     else
@@ -317,7 +321,6 @@ void Explosive::UpdateExplosion(float dt)
 {
     if (state != State::Exploding) return;
 
-    // actualizar tiempo y radio
     explosionElapsed += dt;
     explosionRadius = 1.0f + explosionSpeed * explosionElapsed;
     if (explosionRadius > explosionMaxRadius) explosionRadius = explosionMaxRadius;
@@ -349,9 +352,8 @@ void Explosive::UpdateExplosion(float dt)
             float factor = 1.0f - (dist / maxR_m);
             if (factor < 0.0f) factor = 0.0f;
 
-            // Escalar el impulso por la masa del cuerpo para que el efecto sea perceptible.
             float bodyMass = car->pbody->body->GetMass();
-            // Protección: masa razonable
+
             if (bodyMass <= 0.0f) bodyMass = 1.0f;
 
             b2Vec2 impulse = explosionForce * bodyMass * factor * dir;
@@ -398,23 +400,24 @@ void Explosive::Draw()
     {
         DrawRectangle((int)(explosionCenter.x - width * 0.5f), (int)(explosionCenter.y - height * 0.5f), (int)width, (int)height, ORANGE);
     }
-    //Draw provisional (he pensado en meter un gif y ya está)
+
     if (state == State::Exploding || explosionRadius > 0.0f)
     {
-        int cx = (int)explosionCenter.x;
-        int cy = (int)explosionCenter.y;
+        float cx = explosionCenter.x;
+        float cy = explosionCenter.y;
 
-        DrawCircleLines(cx, cy, explosionRadius, YELLOW);
-        Color lleyow = { 255, 140, 0, 80 };
-        DrawCircle(cx, cy, explosionRadius, lleyow);
+        explosiveAnim.Play("explosion");
+        explosiveAnim.Draw({ cx,cy }, 2);
     }
 }
 
 void Explosive::CleanUp()
 {
-
-    App->physics->DestroyBody(body);
-    body = nullptr;
+    if (body)
+    {
+        App->physics->DestroyBody(body);
+        body = nullptr;
+    }
 
     affectedCars.clear();
     affectedSet.clear();
@@ -422,7 +425,6 @@ void Explosive::CleanUp()
     explosionRadius = 0.0f;
     toBeRemoved = true;
 }
-
 
 // ---------------- Puddle ----------------
 Puddle::Puddle()

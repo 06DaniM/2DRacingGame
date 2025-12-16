@@ -13,13 +13,16 @@ void Player::Start(Vector2 spawnPoint)
     fastestLapTime = 0.0f;
     currentLapTime = 0.0f;
 
-    canMove = true; // Cambiar a false
+    //canMove = true;
+
+    maxSpeed = 23;
+    accelRate = 17;
 
     motor = 0;
     velocity = 0;
 
     engine = LoadSound("Assets/SFX/F1_Motor.wav");
-    SetSoundVolume(engine, 0.3f);
+    SetSoundVolume(engine, 0.5f);
 
     LOG("Player Start");
 }
@@ -33,10 +36,18 @@ void Player::Update(float dt)
     if (IsKeyPressed(KEY_SPACE) && canAbility && !doingAbility)
         ActivateAbility();
 
-    if (!IsSoundPlaying(engine) && velocity > 5)
-        PlaySound(engine);
+    // Set the volume of the engine depending on the velocity
+    if (velocity > 1.0f)
+    {
+        if (!IsSoundPlaying(engine))
+            PlaySound(engine);
 
-    if (velocity < 5)
+        float t = velocity / baseMaxSpeed;
+        if (t > 1.0f) t = 1.0f;
+
+        SetSoundVolume(engine, t * 0.5f);
+    }
+    else
         StopSound(engine);
 
     Car::Update(dt);

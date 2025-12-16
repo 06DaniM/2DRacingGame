@@ -108,7 +108,7 @@ public:
     Texture2D texture;
     Sound winSong;
 
-    bool canMove = true;
+    bool canMove = false;
 
     int totalLaps = 3;
     int lap = 1;

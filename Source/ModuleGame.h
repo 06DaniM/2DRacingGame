@@ -10,7 +10,7 @@
 #include "Obstacles.h"
 
 #include "p2Point.h"
-#include "Coroutine.h"
+#include "Animation.h"
 
 #include "raylib.h"
 #include <vector>
@@ -40,7 +40,6 @@ public:
 	void OnCollision(PhysBody* physA, PhysBody* physB) override;
 	void EndCollision(PhysBody* physA, PhysBody* physB) override;
 
-	// Getter para acceder a la lista de coches desde otras clases (p. ej. Explosive)
 	const std::vector<Car*>& GetAllCars() const { return allCars; }
 
 private:
@@ -101,7 +100,17 @@ private:
 		{465, 604}
 	};
 
-	CoroutineManager coroutineManager;	// Coroutine
+	Vector2 startSlot[8] =
+	{
+		{5651, 2595},
+		{5579, 2607},
+		{5599, 2535},
+		{5531, 2551},
+		{5547, 2475},
+		{5479, 2487},
+		{5495, 2415},
+		{5427, 2431}
+	};
 
 	Colliders* trackExt			 = NULL;
 	Colliders* trackExtDirt		 = NULL;
@@ -188,12 +197,15 @@ private:
 
 	Texture2D track;	// Texture of the track
 	Texture2D leaderBoard;
+	Texture2D nitro;
 
 	//Obstacles
 	Texture2D TexCone;
+	Texture2D TexExplosive;
 
 	Music coconutMall;
 	Sound f1anthem;
+	Sound lightOut;
 	Sound amr23Win;
 	Sound r25Win;
 	Sound rb21Win;
@@ -203,11 +215,15 @@ private:
 	Sound sf75Win;
 	Sound lMcQueenWin;
 
+	Texture2D lightTexture;
+	Animator lightAnim;
+
 	bool initialMenuStart = false;	// Declare if did the start of initial menu
 	bool gamePlayStart = false;		// Declare if did the start of the gameplay state 
 	bool lightsOut = false;			// Declare if the race has started
 	bool f1anthemPlayed = false;
 	bool winSoundPlayed = false;
+	bool lightOutPlayed = false;
 	
 	float lightTimer = 0.0f;		// Set the time for starting the race
 

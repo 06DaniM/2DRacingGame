@@ -3,6 +3,9 @@
 #include "Player.h"
 #include <raylib.h>
 
+#define WORLD_WIDTH  7000
+#define WORLD_HEIGHT 4500
+
 ModuleRender::ModuleRender(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
     background = RAYWHITE;
@@ -32,11 +35,31 @@ update_status ModuleRender::Update()
     BeginDrawing();
     ClearBackground(background);
 
+    // Set the camera inside the map
     if (player)
     {
         int px, py;
         player->pbody->GetPosition(px, py);
-        camera.target = { (float)px, (float)py };
+
+        float targetX = (float)px;
+        float targetY = (float)py;
+
+        float halfScreenWidth = SCREEN_WIDTH * 0.5f / camera.zoom;
+        float halfScreenHeight = SCREEN_HEIGHT * 0.5f / camera.zoom;
+
+        // Clamp X
+        if (targetX < halfScreenWidth)
+            targetX = halfScreenWidth;
+        else if (targetX > WORLD_WIDTH - halfScreenWidth)
+            targetX = WORLD_WIDTH - halfScreenWidth;
+
+        // Clamp Y
+        if (targetY < halfScreenHeight)
+            targetY = halfScreenHeight;
+        else if (targetY > WORLD_HEIGHT - halfScreenHeight)
+            targetY = WORLD_HEIGHT - halfScreenHeight;
+
+        camera.target = { targetX, targetY };
     }
 
     if (DrawInsideCamera)
