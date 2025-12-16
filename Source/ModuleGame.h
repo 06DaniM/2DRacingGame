@@ -40,6 +40,9 @@ public:
 	void OnCollision(PhysBody* physA, PhysBody* physB) override;
 	void EndCollision(PhysBody* physA, PhysBody* physB) override;
 
+	// Getter para acceder a la lista de coches desde otras clases (p. ej. Explosive)
+	const std::vector<Car*>& GetAllCars() const { return allCars; }
+
 private:
 	void DrawGameplay();
 	void DrawInitialMenu();

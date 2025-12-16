@@ -272,7 +272,8 @@ void ModuleGame::GameplayStart()
 
     //cone
     obstaclesManager.SpawnCone({ 5550.0f, 2320.0f });
-
+    //explosive
+    obstaclesManager.SpawnExplosive({ 1000, 1220 });
     std::sort(allCars.begin(), allCars.end(),
         [](Car* a, Car* b)
         {

@@ -1,8 +1,12 @@
 #pragma once
-
-#include "Globals.h"
-#include "Listener.h"
 #include <vector>
+#include <unordered_set>
+#include "Listener.h"
+#include "Globals.h"
+
+struct PhysBody;
+class Car;
+
 
 class Obstacle : public Listener
 {
@@ -18,54 +22,84 @@ public:
     virtual void OnCollision(PhysBody* physA, PhysBody* physB) override {}
     virtual void EndCollision(PhysBody* physA, PhysBody* physB) override {}
 
-    // Permitir asignar textura desde el exterior (ModuleGame / Manager)
-    void SetTexture(const Texture2D& tex) { texture = tex; }
-
-
+    void SetTexture(Texture tex) { texture = tex; }
+    bool IsDead() const { return toBeRemoved; }
 
 protected:
     PhysBody* body = nullptr;
-    Vector2 position = { 0, 0 };
-
-    Texture2D texture = { 0 };
+    Vector2 position = { 0.0f, 0.0f };
+    Texture texture = { 0 };
     float width = 0.0f;
     float height = 0.0f;
-    float radius = 0.0f;
-    bool isHitted = false;
+    bool toBeRemoved = false;
 };
 
-// Manager para crear/almacenar/gestionar obstaculos desde una lista de posiciones
+// Manager
 class ObstaclesManager
 {
 public:
-    ObstaclesManager() = default;
     ~ObstaclesManager();
-
-    void Start() {}
     void Update(float dt);
     void Draw();
     void CleanUp();
 
-    
-    void SetConeTexture(const Texture2D& tex) { coneTexture = tex; }
-
-    // Spawn utilities
     Obstacle* SpawnCone(const Vector2& pos);
     void SpawnFromList(const std::vector<Vector2>& positions);
+    Obstacle* SpawnExplosive(const Vector2& pos);
+
+    // Setters para texturas 
+    void SetConeTexture(const Texture& tex);
+    void SetExplosiveTexture(const Texture& tex);
+
+    Texture coneTexture = { 0 };
+    Texture explosiveTexture = { 0 };
 
 private:
     std::vector<Obstacle*> obstacles;
-    Texture2D coneTexture = { 0 };
 };
 
-//Obstaculo que si te das un golpe con el te relentiza del golpe y sale disparado (como un cono)
+// Cone
 class Cone : public Obstacle
 {
 public:
     Cone();
+    void Start(const Vector2& spawnPoint) override;
+    void OnCollision(PhysBody* physA, PhysBody* physB) override;
+    void EndCollision(PhysBody* physA, PhysBody* physB) override;
+    void Draw() override;
+};
+
+// Explosive
+class Explosive : public Obstacle
+{
+public:
+    Explosive();
 
     void Start(const Vector2& spawnPoint) override;
+    void Update(float dt) override;
+    void CleanUp() override;
+    void Draw() override;
 
     void OnCollision(PhysBody* physA, PhysBody* physB) override;
     void EndCollision(PhysBody* physA, PhysBody* physB) override;
+
+    void TriggerExplosion();
+    void UpdateExplosion(float dt);
+
+private:
+    enum class State { Idle, Exploding, Done };
+    State state = State::Idle;
+
+
+    float explosionSpeed = 500.0f; //px/s
+    float explosionMaxRadius = 200.0f; //px
+    float explosionForce = 100.0f;
+
+    float explosionRadius = 0.0f;          //px
+    float explosionElapsed = 0.0f;         // time since start
+    Vector2 explosionCenter = { 0.0f, 0.0f };
+    std::vector<Car*> affectedCars;
+    std::unordered_set<Car*> affectedSet;
+
+    bool pendingBodyDestroy = false;
 };
