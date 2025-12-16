@@ -268,10 +268,21 @@ void ModuleGame::GameplayStart()
     sensorBelow = App->physics->CreateRectangle(2750, 2478, 350, 20, 5, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::BELOW, 0xFFFF);
 
     // Cone
-    obstaclesManager.SpawnCone({ 5550.0f, 2400.0f });
+    obstaclesManager.SpawnCone({ 2844, 926 });
+    obstaclesManager.SpawnCone({ 2826, 974 });
+    obstaclesManager.SpawnCone({ 2812, 1013 });
+    obstaclesManager.SpawnCone({ 2790, 1062 });
+    obstaclesManager.SpawnCone({ 406, 484 });
+    obstaclesManager.SpawnCone({ 2977, 2243 });
+    obstaclesManager.SpawnCone({ 2977, 2348 });
+    obstaclesManager.SpawnCone({ 3740, 1074 });
 
     // Explosive
-    obstaclesManager.SpawnExplosive({ 5550.0f, 2400.0f });
+    obstaclesManager.SpawnExplosive({ 4023, 1462 });
+    obstaclesManager.SpawnExplosive({ 4248, 1421 });
+    obstaclesManager.SpawnExplosive({ 3470, 2592 });
+    obstaclesManager.SpawnExplosive({ 2716, 1201 });
+    obstaclesManager.SpawnExplosive({ 566, 607});
 
     std::sort(allCars.begin(), allCars.end(),
         [](Car* a, Car* b)
