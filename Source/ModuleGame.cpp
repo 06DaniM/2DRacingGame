@@ -87,7 +87,7 @@ bool ModuleGame::Start()
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
-    gameState = GameState::InitialMenu;
+    gameState = GameState::Opening;
     SetMusicVolume(coconutMall, 0.6f);
 
     return true;
@@ -729,7 +729,7 @@ void ModuleGame::CreateCheckpoints()
     checkeredFlag = App->physics->CreateRectangle(5670, 2670, 20, 280, 63.5f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
 
     // Creation of the checkpoints
-    checkpoints.push_back((std::make_unique<Checkpoint>(6362, 3632, 20, 350, 1 , 60 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(6428, 3788, 20, 350, 1 , 70 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(6022, 4133, 20, 500, 2 , 50 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(5735, 3805, 20, 400, 3 , 90 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(5435, 3550, 20, 600, 4 , 0  , this)));
