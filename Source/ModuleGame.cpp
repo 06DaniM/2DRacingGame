@@ -6,9 +6,9 @@
 #include "ModulePhysics.h"
 #include "PhysicCategory.h"
 #include <vector>
-#include <algorithm>
 #include <memory>
 #include <fstream>
+#include <random>
 
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled) {}
@@ -21,6 +21,8 @@ bool ModuleGame::Start()
     coconutMall = LoadMusicStream("Assets/SFX/Coconut-Mall-Mario-Kart-Wii-OST.wav");
 
     f1anthem = LoadSound("Assets/SFX/F1_Opening.wav");
+    lightOut = LoadSound("Assets/SFX/Semaforo_F1.wav");
+
     amr23Win = LoadSound("Assets/SFX/This_is_life.wav");
     r25Win = LoadSound("Assets/SFX/Nano.wav");
     rb21Win = LoadSound("Assets/SFX/TUTUTURU.wav");
@@ -54,12 +56,21 @@ bool ModuleGame::Start()
 
     track = LoadTexture("Assets/Textures/Track.png");
     leaderBoard = LoadTexture("Assets/Textures/UI/Leaderboard.png");
+    nitro = LoadTexture("Assets/Textures/UI/Nitro_System.png");
 
     leftArrow = LoadTexture("Assets/Textures/UI/Car_Selection1.png");
     rightArrow = LoadTexture("Assets/Textures/UI/Car_Selection2.png");
 
     TexCone = LoadTexture("Assets/Textures/Obstacles/cone.png");
     obstaclesManager.SetConeTexture(TexCone);
+
+    TexExplosive = LoadTexture("Assets/Textures/Obstacles/Barril.png");
+    obstaclesManager.SetExplosiveTexture(TexExplosive);
+
+    lightTexture = LoadTexture("Assets/Textures/UI/Semaforo-Sheet.png");
+
+    lightAnim = Animator(&lightTexture, 244, 130);
+    lightAnim.AddAnim("lightsOut", 0, 7, 1.0f, false);
 
     carList.push_back({ tAMR23,     "AMR23",    amr23Stats,     amr23Win    });
     carList.push_back({ tGP2Engine, "MCL33",    gp2Stats,       mc33Win     });
@@ -74,13 +85,12 @@ bool ModuleGame::Start()
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
     gameState = GameState::InitialMenu;
-
+    SetMusicVolume(coconutMall, 0.6f);
     return true;
 }
 
 update_status ModuleGame::Update()
 {
-    // === HACER CLASES CON LOS DIFERENTES ESTADOS DEL JUEGO ===
     if (IsKeyPressed(KEY_F5)) player.lap = 99999;
     float dt = GetFrameTime();
 
@@ -165,7 +175,6 @@ void ModuleGame::EndGameMenu(float dt)
 
 void ModuleGame::InitialMenuStart()
 {
-    // OPTIMIZAR / HACER CLASE / MEJORAR DE ALGUNA FORMA
     if (initialMenuStart) return;
     gamePlayStart = false;
     currentCarIndex = 0;
@@ -227,7 +236,20 @@ void ModuleGame::GameplayStart()
     uiPhys.clear();
 
     // Creation of the cars after car is selected
-    player.Start({ 5500, 2340});
+    for (int i = 0; i < 7; ++i)
+    {
+        AICar* ai = new AICar();
+
+        Vector2 spawnPos = {
+            startSlot[i]
+        };
+
+        ai->Start(spawnPos);
+        aiCars.push_back(ai);
+        allCars.push_back(ai);
+    }
+
+    player.Start(startSlot[7]);
     player.pbody->id = playerIdSelected;
     player.winSong = carList[currentCarIndex].winSong;
 
@@ -237,28 +259,6 @@ void ModuleGame::GameplayStart()
     // Sets the player for the camera
     App->renderer->SetPlayer(&player);
 
-    float startAngle = -150.0f;
-    float startAngleRad = startAngle * DEG2RAD;
-
-    float dirX = cosf(startAngleRad);
-    float dirY = sinf(startAngleRad);
-
-    float spacing = 100.0f;
-
-    for (int i = 0; i < 7; ++i)
-    {
-        AICar* ai = new AICar();
-
-        Vector2 spawnPos = {
-            5550.0f + dirX * spacing * i,
-            2320.0f + dirY * spacing * i
-        };
-
-        ai->Start(spawnPos);
-        aiCars.push_back(ai);
-        allCars.push_back(ai);
-    }
-
     AssignAICars();
 
     CreateColliders();
@@ -267,10 +267,12 @@ void ModuleGame::GameplayStart()
     sensorAbove = App->physics->CreateRectangle(2508, 2138, 20, 400, 0, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::ABOVE, 0xFFFF);
     sensorBelow = App->physics->CreateRectangle(2750, 2478, 350, 20, 5, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::BELOW, 0xFFFF);
 
-    //cone
-    obstaclesManager.SpawnCone({ 5550.0f, 2320.0f });
-    //explosive
+    // Cone
+    obstaclesManager.SpawnCone({ 5550.0f, 2400.0f });
+
+    // Explosive
     obstaclesManager.SpawnExplosive({ 1000, 1220 });
+
     std::sort(allCars.begin(), allCars.end(),
         [](Car* a, Car* b)
         {
@@ -298,22 +300,32 @@ void ModuleGame::GameplayStart()
 void ModuleGame::TrafficLight()
 {
     if (lightsOut) return;
-    lightTimer += GetFrameTime();
+    if (!lightOutPlayed && lightTimer > 0.4f)
+    {
+        PlaySound(lightOut);
+        lightOutPlayed = true;
+    }
 
-    if (lightTimer > 1.0f)
-        DrawCircle(SCREEN_WIDTH / 2, 100, 20, RED);
-    if (lightTimer > 2.0f)
-        DrawCircle(SCREEN_WIDTH / 2, 150, 20, RED);
-    if (lightTimer > 3.0f)
-        DrawCircle(SCREEN_WIDTH / 2, 200, 20, RED);
+    float dt = GetFrameTime();
 
-    if (lightTimer > 4.0f)
+    lightTimer += dt;
+
+    lightAnim.Update(dt);
+    lightAnim.Play("lightsOut");
+    lightAnim.Draw({ SCREEN_WIDTH / 2, 200 }, 1);
+
+    if (lightTimer > 6.0f)
     {
         PlayMusicStream(coconutMall);
 
-        lightsOut = true;
         for (auto car : allCars)
-            //car->canMove = false;
+            car->canMove = true;
+    }
+
+    if (lightTimer > 7.0f)
+    {
+        lightsOut = true;
+        lightOutPlayed = false;
         lightTimer = 0.0f;
     }
 }
@@ -343,7 +355,6 @@ void ModuleGame::GameManager(float dt)
     {
         timeToNextState += dt;
         player.canMove = false;
-        // Activar modo IA una vez acabada la carrera?
 
         if (timeToNextState >= 1.0f)
         {
@@ -352,7 +363,6 @@ void ModuleGame::GameManager(float dt)
 
             aiCars.clear();
             player.Destroy();
-
 
             for (auto phys : trackPhys)
                 App->physics->DestroyBody(phys);
@@ -363,6 +373,7 @@ void ModuleGame::GameManager(float dt)
 
             timeToNextState = 0;
 
+            StopSound(player.engine);
             StopMusicStream(coconutMall);
 
             gameState = GameState::EndGame;
@@ -436,11 +447,11 @@ void ModuleGame::DrawUI()
         int lineSpacing = 26;
 
         // Draw gameplay UI
-        DrawTexture(leaderBoard, 0, 0, {255, 255, 255, 140});
+        DrawTexture(leaderBoard, 0, 0, {255, 255, 255, 170});
+        if (player.canAbility) DrawTexture(nitro, SCREEN_WIDTH - 40, 20, WHITE);
         DrawText(TextFormat("Lap Time: %.2f", player.currentLapTime), startX, 90, 20, BLACK);
         DrawText(TextFormat("Previous Lap Time: %.2f", player.previousLapTime), startX, 120, 20, BLACK);
         DrawText(TextFormat("Fastest Lap Time: %.2f", player.fastestLapTime), startX, 150, 20, BLACK);
-        DrawText(TextFormat("C: %d", player.checkpoint), 20, SCREEN_HEIGHT - 20, 20, BLACK);
 
         for (size_t i = 0; i < allCars.size(); i++)
         {
@@ -457,7 +468,7 @@ void ModuleGame::DrawUI()
         // Draw the current number of laps & the total
         std::string lapText = TextFormat("Lap: %d/%d", showLap, player.totalLaps);
         int lapWidth = MeasureText(lapText.c_str(), 20);
-        DrawText(lapText.c_str(), SCREEN_WIDTH - lapWidth - 20, 50, 20, BLACK);
+        DrawText(lapText.c_str(), 215 - lapWidth - 20, 50, 20, BLACK);
 
         return;
     }
@@ -534,7 +545,8 @@ void ModuleGame::DrawInitialMenu()
 
 void ModuleGame::AssignAICars()
 {
-    // Hacer clase?? Tengo que mejorar la estructura del código
+    static std::mt19937 rng(std::random_device{}());
+
     std::vector<int> available;
 
     for (int i = 0; i < carList.size(); i++)
@@ -543,7 +555,7 @@ void ModuleGame::AssignAICars()
             available.push_back(i);
     }
 
-    std::random_shuffle(available.begin(), available.end());
+    std::shuffle(available.begin(), available.end(), rng);
 
     int indexAI = 0;
 
@@ -679,7 +691,7 @@ void ModuleGame::CreateColliders()
 void ModuleGame::CreateCheckpoints()
 {
     // Creation of the checkered flags
-    checkeredFlag = App->physics->CreateRectangle(5670, 2670, 20, 280, 60, true, this, ColliderType::CHECKEREDFLAG, STATIC);
+    checkeredFlag = App->physics->CreateRectangle(5670, 2670, 20, 280, 63.5f, true, this, ColliderType::CHECKEREDFLAG, STATIC);
 
     // Creation of the checkpoints
     checkpoints.push_back((std::make_unique<Checkpoint>(6362, 3632, 20, 350, 1 , 60 , this)));
@@ -738,19 +750,46 @@ bool ModuleGame::LoadChainFromFile(const char* path, std::vector<int>& outPoints
 bool ModuleGame::CleanUp()
 {
     // Clean up
-    player.CleanUp();
-
     for (auto ai : aiCars)
-    {
-        ai->CleanUp();
         delete ai;
-    }
+
     aiCars.clear();
     allCars.clear();
 
-    delete sensorAbove;
-
     obstaclesManager.CleanUp();
+
+    delete trackExt;
+    delete trackExtDirt;
+    delete trackInt;
+    delete trackIntS1;
+    delete trackIntS2;
+    delete sensorAbove;
+    delete sensorAboveLeft;
+    delete sensorAboveRight;
+    delete sensorBelow;
+    delete sensorBelowDown;
+    delete sensorBelowUp;
+
+    trackExt = NULL;
+    trackExtDirt = NULL;
+    trackInt = NULL;
+    trackIntS1 = NULL;
+    trackIntS2 = NULL;
+    sensorAboveRight = NULL;
+    sensorAboveLeft = NULL;
+    sensorBelowUp = NULL;
+    sensorBelowDown = NULL;
+
+    sensorAbove = NULL;
+    sensorBelow = NULL;
+
+    leftArrowLap = NULL;
+    righttArrowLap = NULL;
+
+    menuCar = NULL;
+
+    leftArrowCar = NULL;
+    rightArrowCar = NULL;
 
     pAMR23      = NULL;
     pR25        = NULL;

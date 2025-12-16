@@ -20,7 +20,7 @@ private:
     void Move();
 
 public:
+    Sound engine;
 
 private:
-    Sound engine;
 };

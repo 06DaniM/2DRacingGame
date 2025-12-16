@@ -300,7 +300,6 @@ void Explosive::UpdateExplosion(float dt)
 {
     if (state != State::Exploding) return;
 
-    // actualizar tiempo y radio
     explosionElapsed += dt;
     explosionRadius = 1.0f + explosionSpeed * explosionElapsed;
     if (explosionRadius > explosionMaxRadius) explosionRadius = explosionMaxRadius;
@@ -332,9 +331,8 @@ void Explosive::UpdateExplosion(float dt)
             float factor = 1.0f - (dist / maxR_m);
             if (factor < 0.0f) factor = 0.0f;
 
-            // Escalar el impulso por la masa del cuerpo para que el efecto sea perceptible.
             float bodyMass = car->pbody->body->GetMass();
-            // Protección: masa razonable
+
             if (bodyMass <= 0.0f) bodyMass = 1.0f;
 
             b2Vec2 impulse = explosionForce * bodyMass * factor * dir;

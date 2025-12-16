@@ -29,7 +29,7 @@ void Car::Start(Vector2 spawnPoint)
         part->listener = this;
 
     // Start angle
-    float startAngle = -150.0f;
+    float startAngle = -145.0f;
     float startAngleRad = startAngle * DEG2RAD;
 
     b2Vec2 pos = chassis->body->GetPosition();
