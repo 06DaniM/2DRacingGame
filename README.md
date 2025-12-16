@@ -9,11 +9,11 @@ A fun pixel art F1 game with a top-down view where you race around a single trac
 ### List
 | Name | Type | Description | 
 |:--------|:----| :----|
-| Pokemon Egg | Colision | Goes side to side and rests points |
-| Pelipper | Event | Has a chance to instantly end the game |
-| Shop | Event | Upgrades 1 tier your pokeball wich comes with a multiplier |
-| Plusle & Minum | Button | Sums and Rests points |
-| Whailord | Event | Gives 15 seconds of multiplier |
+| Sand | Surface | Slows the car |
+| Oil | Surface | Makes that the car has no grip |
+| Nitro | Boost | Speeds the car |
+| Explosive Husk | Obstacle | EXPLOSION!!! |
+| Cone | Obstacle | Regular colision obstacle |
 
  
 ## Controls
@@ -21,16 +21,14 @@ A fun pixel art F1 game with a top-down view where you race around a single trac
 ### Gameplay Controls
 | Action | Key |
 |:--------|:----|
-| Left Flipper | Left arrow |
-| Right Flipper | Right arrow |
-| Kicker | Down arrow |
-| F2 | 60 FPS |
-| F3 | 120 FPS |
-| F4 | 240 FPS |
-| 1 | Gravity 5 |
-| 2 | Gravity 10 |
-| 3 | Gravity 15 |
-| R | -0.2 to Restitution Coeficient |
+| Forward | Up arrow |
+| Backward | Down arrow |
+| Left | Left arrow |
+| Right | Right arrow |
+| Forward | W |
+| Backward | S|
+| Left | A |
+| Right | D |
 
 ## Developers
 
