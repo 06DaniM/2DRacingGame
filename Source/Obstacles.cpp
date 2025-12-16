@@ -105,7 +105,6 @@ Obstacle* ObstaclesManager::SpawnExplosive(const Vector2& pos)
     if (explosiveTexture.id != 0)
         explosive->SetTexture(explosiveTexture);
 
-    // No iniciar la explosión aquí; la explosion se inicia por colisión o por llamada externa.
     obstacles.push_back(explosive);
     return explosive;
 }
@@ -231,6 +230,11 @@ void Explosive::Start(const Vector2& spawnPoint)
     b2Body* b = body->body;
     b2Fixture* fixture = b->GetFixtureList();
 
+    explosionTexture = LoadTexture("Assets/Textures/Obstacles/Explosion_Sheet.png");
+
+    explosiveAnim = Animator(&explosionTexture, 176, 160);
+    explosiveAnim.AddAnim("explosion", 0, 3, 1.0f, false);
+
     // Valores iniciales de explosión
     state = State::Idle;
     explosionRadius = 0.0f;
@@ -278,7 +282,7 @@ void Explosive::TriggerExplosion()
     explosionElapsed = 0.0f;
     affectedCars.clear();
     affectedSet.clear();
-    //body pos
+
     int bx, by;
     if (body && body->body)
     {
@@ -286,7 +290,7 @@ void Explosive::TriggerExplosion()
         explosionCenter.x = (float)bx;
         explosionCenter.y = (float)by;
 
-        //marcar para destrucción en Update
+        // Marcar para destrucción en Update
         pendingBodyDestroy = true;
     }
     else
@@ -379,23 +383,24 @@ void Explosive::Draw()
     {
         DrawRectangle((int)(explosionCenter.x - width * 0.5f), (int)(explosionCenter.y - height * 0.5f), (int)width, (int)height, ORANGE);
     }
-    //Draw provisional (he pensado en meter un gif y ya está)
+
     if (state == State::Exploding || explosionRadius > 0.0f)
     {
-        int cx = (int)explosionCenter.x;
-        int cy = (int)explosionCenter.y;
+        float cx = explosionCenter.x;
+        float cy = explosionCenter.y;
 
-        DrawCircleLines(cx, cy, explosionRadius, YELLOW);
-        Color lleyow = { 255, 140, 0, 80 };
-        DrawCircle(cx, cy, explosionRadius, lleyow);
+        explosiveAnim.Play("explosion");
+        explosiveAnim.Draw({ cx,cy }, 2);
     }
 }
 
 void Explosive::CleanUp()
 {
-
-    App->physics->DestroyBody(body);
-    body = nullptr;
+    if (body)
+    {
+        App->physics->DestroyBody(body);
+        body = nullptr;
+    }
 
     affectedCars.clear();
     affectedSet.clear();
@@ -403,5 +408,3 @@ void Explosive::CleanUp()
     explosionRadius = 0.0f;
     toBeRemoved = true;
 }
-
-

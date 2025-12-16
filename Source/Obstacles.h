@@ -3,10 +3,10 @@
 #include <unordered_set>
 #include "Listener.h"
 #include "Globals.h"
+#include "Animation.h"
 
 struct PhysBody;
 class Car;
-
 
 class Obstacle : public Listener
 {
@@ -34,7 +34,6 @@ protected:
     bool toBeRemoved = false;
 };
 
-// Manager
 class ObstaclesManager
 {
 public:
@@ -58,7 +57,6 @@ private:
     std::vector<Obstacle*> obstacles;
 };
 
-// Cone
 class Cone : public Obstacle
 {
 public:
@@ -69,7 +67,6 @@ public:
     void Draw() override;
 };
 
-// Explosive
 class Explosive : public Obstacle
 {
 public:
@@ -90,13 +87,15 @@ private:
     enum class State { Idle, Exploding, Done };
     State state = State::Idle;
 
+    Texture2D explosionTexture;
+    Animator explosiveAnim;
 
-    float explosionSpeed = 500.0f; //px/s
-    float explosionMaxRadius = 200.0f; //px
+    float explosionSpeed = 500.0f;
+    float explosionMaxRadius = 200.0f;
     float explosionForce = 100.0f;
 
-    float explosionRadius = 0.0f;          //px
-    float explosionElapsed = 0.0f;         // time since start
+    float explosionRadius = 0.0f;
+    float explosionElapsed = 0.0f;
     Vector2 explosionCenter = { 0.0f, 0.0f };
     std::vector<Car*> affectedCars;
     std::unordered_set<Car*> affectedSet;

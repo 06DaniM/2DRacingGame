@@ -271,7 +271,7 @@ void ModuleGame::GameplayStart()
     obstaclesManager.SpawnCone({ 5550.0f, 2400.0f });
 
     // Explosive
-    obstaclesManager.SpawnExplosive({ 1000, 1220 });
+    obstaclesManager.SpawnExplosive({ 5550.0f, 2400.0f });
 
     std::sort(allCars.begin(), allCars.end(),
         [](Car* a, Car* b)
@@ -363,6 +363,8 @@ void ModuleGame::GameManager(float dt)
 
             aiCars.clear();
             player.Destroy();
+
+            obstaclesManager.CleanUp();
 
             for (auto phys : trackPhys)
                 App->physics->DestroyBody(phys);
@@ -695,7 +697,7 @@ void ModuleGame::CreateCheckpoints()
 
     // Creation of the checkpoints
     checkpoints.push_back((std::make_unique<Checkpoint>(6362, 3632, 20, 350, 1 , 60 , this)));
-    checkpoints.push_back((std::make_unique<Checkpoint>(6053, 4091, 20, 400, 2 , 50 , this)));
+    checkpoints.push_back((std::make_unique<Checkpoint>(6022, 4133, 20, 500, 2 , 50 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(5735, 3805, 20, 400, 3 , 90 , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(5435, 3550, 20, 600, 4 , 0  , this)));
     checkpoints.push_back((std::make_unique<Checkpoint>(5285, 3285, 20, 600, 5 , 80 , this)));
