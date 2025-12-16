@@ -234,6 +234,9 @@ void ModuleGame::GameplayStart()
     lightsOut = false;
     allCars.push_back(&player);
 
+    // Sets the player for the camera
+    App->renderer->SetPlayer(&player);
+
     float startAngle = -150.0f;
     float startAngleRad = startAngle * DEG2RAD;
 
@@ -255,9 +258,6 @@ void ModuleGame::GameplayStart()
         aiCars.push_back(ai);
         allCars.push_back(ai);
     }
-
-    // Sets the player for the camera
-    App->renderer->SetPlayer(&player);
 
     AssignAICars();
 

@@ -9,8 +9,6 @@ void Player::Start(Vector2 spawnPoint)
 {
     Car::Start(spawnPoint);
 
-    pbody->listener = this;
-
     previousLapTime = 0.0f;
     fastestLapTime = 0.0f;
     currentLapTime = 0.0f;

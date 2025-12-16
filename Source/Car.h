@@ -30,7 +30,7 @@ public:
     int index;
 };
 
-class Car
+class Car : public Listener
 {
 public:
     Car();
