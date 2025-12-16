@@ -25,6 +25,9 @@ void Car::Start(Vector2 spawnPoint)
     PhysBody* wheelFL = this->parts[WHEEL_BL_INDEX];  // BL current → FL real
     PhysBody* wheelBL = this->parts[WHEEL_BR_INDEX];  // BR current → BL real
 
+    for (PhysBody* part : parts)
+        part->listener = this;
+
     // Start angle
     float startAngle = -150.0f;
     float startAngleRad = startAngle * DEG2RAD;
@@ -63,7 +66,7 @@ void Car::ApplyPhysic()
 
     float maxSp = maxSpeed;
 
-    if (inDirt) maxSp /= 2;
+    if (inDirt) maxSp = 5;
 
     if (velocity > maxSp) velocity = maxSp;
     if (velocity < -maxSp * 0.4f) velocity = -maxSp * 0.4f;
@@ -192,7 +195,6 @@ void Car::GetCarAndCheckPos(float& carX, float& carY, float& cpX, float& cpY) co
 
 void Car::ActivateAbility()
 {
-    LOG("in");
     doingAbility = true;
     canAbility = false;
     abilityTimer = 0.0f;
@@ -224,10 +226,12 @@ void Car::EndAbility()
 void Car::CleanUp()
 {
     LOG("Cleaning up Car");
-
-    pbody = NULL;
-    App->physics->DestroyBody(pbody);
     UnloadTexture(texture);
+    for (PhysBody* part : parts)
+    {
+        App->physics->DestroyBody(part);
+        part = NULL;
+    }
 }
 
 void Car::Draw() 

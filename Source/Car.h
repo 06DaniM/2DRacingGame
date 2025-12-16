@@ -30,7 +30,7 @@ public:
     int index;
 };
 
-class Car
+class Car : public Listener
 {
 public:
     Car();
@@ -118,4 +118,5 @@ public:
     float targetAccel = 0.0f;
 
     bool canAbility = false;
+    int dirtContacts = 0;
 };

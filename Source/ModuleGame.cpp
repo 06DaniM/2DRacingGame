@@ -20,8 +20,6 @@ bool ModuleGame::Start()
 
     coconutMall = LoadMusicStream("Assets/SFX/Coconut-Mall-Mario-Kart-Wii-OST.wav");
 
-    engine = LoadSound("Assets/SFX/F1_Motor.wav");
-
     f1anthem = LoadSound("Assets/SFX/F1_Opening.wav");
     amr23Win = LoadSound("Assets/SFX/This_is_life.wav");
     r25Win = LoadSound("Assets/SFX/Nano.wav");
@@ -68,14 +66,14 @@ bool ModuleGame::Start()
     carList.push_back({ tW11,       "W11" ,     w11Stats,       w11Win      });
     carList.push_back({ tPinkMerc,  "RP20",     pinkMercStats,  rp20Win     });
     carList.push_back({ tR25,       "R25",      r25Stats,       r25Win      });
-    carList.push_back({ tMp4,       "MP4-4",    mc4Stats,       sf75Win     });
-    carList.push_back({ tMp22,      "MP4-22",   mc22Stats,      lMcQueenWin });
+    carList.push_back({ tMp4,       "SF-75",    mc4Stats,       sf75Win     });
+    carList.push_back({ tMp22,      "McQueen",   mc22Stats,     lMcQueenWin });
     carList.push_back({ tRB21,      "RB21",     rb21Stats,      rb21Win     });
 
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
-    gameState = GameState::Opening;
+    gameState = GameState::InitialMenu;
 
     return true;
 }
@@ -236,6 +234,9 @@ void ModuleGame::GameplayStart()
     lightsOut = false;
     allCars.push_back(&player);
 
+    // Sets the player for the camera
+    App->renderer->SetPlayer(&player);
+
     float startAngle = -150.0f;
     float startAngleRad = startAngle * DEG2RAD;
 
@@ -258,9 +259,6 @@ void ModuleGame::GameplayStart()
         allCars.push_back(ai);
     }
 
-    // Sets the player for the camera
-    App->renderer->SetPlayer(&player);
-
     AssignAICars();
 
     CreateColliders();
@@ -268,7 +266,6 @@ void ModuleGame::GameplayStart()
 
     sensorAbove = App->physics->CreateRectangle(2508, 2138, 20, 400, 0, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::ABOVE, 0xFFFF);
     sensorBelow = App->physics->CreateRectangle(2750, 2478, 350, 20, 5, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::BELOW, 0xFFFF);
-    App->physics->CreateCircle(1000, 1220, 50, true, this, ColliderType::DIRT, STATIC);
 
     //cone
     obstaclesManager.SpawnCone({ 5550.0f, 2320.0f });
@@ -316,7 +313,7 @@ void ModuleGame::TrafficLight()
 
         lightsOut = true;
         for (auto car : allCars)
-            car->canMove = true;
+            //car->canMove = false;
         lightTimer = 0.0f;
     }
 }
@@ -407,7 +404,7 @@ void ModuleGame::DrawUI()
 {
     if (gameState == GameState::Opening)
     {
-        if (GetFrameTime() > 1) return;
+        if (GetFrameTime() > 0.5f) return;
 
         // Draw the title screen
         DrawTexture(openingScreen, 0, 0, WHITE);
@@ -475,7 +472,7 @@ void ModuleGame::DrawUI()
         int lapsWidth = MeasureText(lapsText.c_str(), 50);
         DrawText(lapsText.c_str(), 200 - lapsWidth / 2, 70, 20, BLACK);
 
-        int nameX = 120;
+        int nameX = 110;
         int startX = 80;
         int startY = 130;
         int fastLapX = 210;
@@ -576,7 +573,44 @@ void ModuleGame::CreateColliders()
             0, 0,
             externalTrackPoints.data(),
             externalTrackPoints.size(),
+            false,
             ColliderType::WALL, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_Internal_PointsS1_1.txt", internalTrackPointsS1_1))
+        trackInt = new Colliders(
+            0, 0,
+            internalTrackPointsS1_1.data(),
+            internalTrackPointsS1_1.size(),
+            true,
+            ColliderType::DIRT, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_Internal_PointsS1_2.txt", internalTrackPointsS1_2))
+        trackInt = new Colliders(
+            0, 0,
+            internalTrackPointsS1_2.data(),
+            internalTrackPointsS1_2.size(),
+            true,
+            ColliderType::DIRT, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_Internal_PointsS2.txt", internalTrackPointsS2_1))
+        trackInt = new Colliders(
+            0, 0,
+            internalTrackPointsS2_1.data(),
+            internalTrackPointsS2_1.size(),
+            true,
+            ColliderType::DIRT, this,
+            trackPhys);
+
+    if (LoadChainFromFile("Assets/ColliderPoints/Track_External_Points_Dirt.txt", externalTrackPointsDirt))
+        trackExtDirt = new Colliders(
+            0, 0,
+            externalTrackPointsDirt.data(),
+            externalTrackPointsDirt.size(),
+            true,
+            ColliderType::DIRT, this,
             trackPhys);
 
     if (LoadChainFromFile("Assets/ColliderPoints/InternalTrackPointsS1.txt", internalTrackPointsS1))
@@ -584,6 +618,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             internalTrackPointsS1.data(),
             internalTrackPointsS1.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys);
 
@@ -592,6 +627,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             internalTrackPointsS2.data(),
             internalTrackPointsS2.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys);
 
@@ -600,6 +636,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             sensorTrackPointsAboveRight.data(),
             sensorTrackPointsAboveRight.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys,
             PhysicCategory::ABOVE,
@@ -610,6 +647,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             sensorTrackPointsAboveLeft.data(),
             sensorTrackPointsAboveLeft.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys,
             PhysicCategory::ABOVE,
@@ -620,6 +658,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             sensorTrackPointsBelowUp.data(),
             sensorTrackPointsBelowUp.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys,
             PhysicCategory::BELOW,
@@ -630,6 +669,7 @@ void ModuleGame::CreateColliders()
             0, 0,
             sensorTrackPointsBelowDown.data(),
             sensorTrackPointsBelowDown.size(),
+            false,
             ColliderType::WALL, this,
             trackPhys,
             PhysicCategory::BELOW,
@@ -708,6 +748,8 @@ bool ModuleGame::CleanUp()
     aiCars.clear();
     allCars.clear();
 
+    delete sensorAbove;
+
     obstaclesManager.CleanUp();
 
     pAMR23      = NULL;
@@ -741,7 +783,7 @@ bool ModuleGame::CleanUp()
 
 void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 {
-    if (physB->ctype != ColliderType::CAR)
+    if (physB->ctype != ColliderType::CAR && physB->ctype != ColliderType::WHEEL)
         return;
 
     Player* playerPtr = dynamic_cast<Player*>(physB->listener);
@@ -805,14 +847,22 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 
     else if (physA->ctype == ColliderType::DIRT)
     {
-        if (playerPtr) playerPtr->inDirt = true;
-        if (aiPtr) aiPtr->inDirt = true;
+        if (playerPtr)
+        {
+            playerPtr->dirtContacts++;
+            playerPtr->inDirt = true;
+        }
+        if (aiPtr)
+        {
+            aiPtr->dirtContacts++;
+            aiPtr->inDirt = true;
+        }
     }
 }
 
 void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
 {
-    if (physB->ctype != ColliderType::CAR)
+    if (physB->ctype != ColliderType::CAR && physB->ctype != ColliderType::WHEEL)
         return;
 
     Player* playerPtr = dynamic_cast<Player*>(physB->listener);
@@ -820,7 +870,23 @@ void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
 
     if (physA->ctype == ColliderType::DIRT)
     {
-        if (playerPtr) playerPtr->inDirt = false;
-        if (aiPtr) aiPtr->inDirt = false;
+        if (playerPtr)
+        {
+            playerPtr->dirtContacts--;
+            if (playerPtr->dirtContacts <= 0)
+            {
+                playerPtr->dirtContacts = 0;
+                playerPtr->inDirt = false;
+            }
+        }
+        if (aiPtr)
+        {
+            aiPtr->dirtContacts--;
+            if (aiPtr->dirtContacts <= 0)
+            {
+                aiPtr->dirtContacts = 0;
+                aiPtr->inDirt = false;
+            }
+        }
     }
 }
