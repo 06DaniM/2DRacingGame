@@ -846,7 +846,6 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
 
     else if (physA->ctype == ColliderType::DIRT)
     {
-        LOG("Dirt detected");
         if (playerPtr)
         {
             playerPtr->dirtContacts++;
@@ -870,7 +869,6 @@ void ModuleGame::EndCollision(PhysBody* physA, PhysBody* physB)
 
     if (physA->ctype == ColliderType::DIRT)
     {
-        LOG("Dirt end detection");
         if (playerPtr)
         {
             playerPtr->dirtContacts--;
