@@ -46,13 +46,16 @@ public:
     Obstacle* SpawnCone(const Vector2& pos);
     void SpawnFromList(const std::vector<Vector2>& positions);
     Obstacle* SpawnExplosive(const Vector2& pos);
+    Obstacle* SpawnPuddle(const Vector2& pos);
 
     // Setters para texturas 
     void SetConeTexture(const Texture& tex);
     void SetExplosiveTexture(const Texture& tex);
+    void SetPuddleTexture(const Texture& tex);
 
     Texture coneTexture = { 0 };
     Texture explosiveTexture = { 0 };
+    Texture puddleTexture = { 0 };
 
 private:
     std::vector<Obstacle*> obstacles;
@@ -102,4 +105,18 @@ private:
     std::unordered_set<Car*> affectedSet;
 
     bool pendingBodyDestroy = false;
+};
+
+// Puddle
+class Puddle : public Obstacle
+{
+public:
+    Puddle();
+
+    void Start(const Vector2& spawnPoint) override;
+    void OnCollision(PhysBody* physA, PhysBody* physB) override;
+    void Draw() override;
+
+private:
+    float radius = 30.0f;           // px
 };

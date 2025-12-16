@@ -54,7 +54,25 @@ void Car::Update(float dt)
         b2Vec2(carX, carY),
         b2Vec2(cpX, cpY)
     );
+    if (puddleTimer > 0.0f)
+    {
+        puddleTimer -= dt;
 
+        // Mientras está en el charco
+        inPuddle = true;
+
+        if (puddleTimer <= 0.0f)
+        {
+            // Volver a la normalidad
+            puddleTimer = 0.0f;
+            gripMultiplier = 1.0f;
+            inPuddle = false;
+        }
+    }
+    else
+    {
+        inPuddle = false;
+    }
     UpdateAbility(dt);
 }
 
@@ -95,6 +113,7 @@ void Car::ApplyPhysic()
 
     float motorForceNormalized = velocity / baseMaxSpeed;
 
+    float finalGrip = lateralGripFactor * gripMultiplier;
     ApplyCarForces(
         chassis,
         allWheels,
@@ -102,7 +121,7 @@ void Car::ApplyPhysic()
         steer,
         maxMotorForce,
         currentSteer,
-        lateralGripFactor
+        finalGrip
     );
 
     chassis->body->SetAngularDamping(2.0f);
@@ -145,7 +164,13 @@ void Car::ApplyCarForces(PhysBody* chassis, std::vector<PhysBody*>& wheels, floa
             forwardVector = chassis->body->GetWorldVector(b2Vec2(-1, 0));
 
         b2Vec2 velocity = wheelBody->GetLinearVelocity();
+        if (inPuddle)
+        {
+            float force = 0.12;
+            b2Vec2 side = b2Cross(1.0f, forwardVector);
 
+            wheelBody->ApplyLinearImpulse(force * side,wheelBody->GetWorldCenter(),true);
+        }
         // Apply lateral friction
         b2Vec2 lateralVector = b2Cross(1.0f, forwardVector);
         float lateralSpeed = b2Dot(velocity, lateralVector);

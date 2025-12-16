@@ -97,8 +97,6 @@ update_status ModuleGame::Update()
         f1anthemPlayed = true;
     }
 
-    obstaclesManager.Update(dt);
-
     return UPDATE_CONTINUE;
 }
 
@@ -148,8 +146,20 @@ void ModuleGame::Gameplay(float dt)
     GameplayStart();
     CarsUpdate(dt);
     GameManager(dt);
-
+    obstaclesManager.Update(dt);
     UpdateMusicStream(coconutMall);
+    //Al clicar -> Printear la posición del mouse (para pillar la posición de donde vana ir los obstacles o cualquier cosa) Luego se puede quitar esto
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+        Vector2 mouse = GetMousePosition();
+        Vector2 worldMouse = GetScreenToWorld2D(mouse, App->renderer->GetCamera());
+        b2Vec2 pMousePos = { PIXELS_TO_METERS(worldMouse.x), PIXELS_TO_METERS(worldMouse.y) };
+
+        // Imprime pantalla(px) / mundo(px) / mundo(m)
+        LOG("MOUSE SCREEN: {%.2f, %.2f}  WORLD(px): {%.2f, %.2f}  WORLD(m): {%.4f, %.4f}",
+            mouse.x, mouse.y, worldMouse.x, worldMouse.y, pMousePos.x, pMousePos.y);
+        //IMPORTANTE!!!!!! cuando spawneamos objetos lo hacemos con las coordenadas del wordl así que la que importa es la de world
+    }
 }
 
 void ModuleGame::EndGameMenu(float dt)
@@ -267,10 +277,12 @@ void ModuleGame::GameplayStart()
     sensorAbove = App->physics->CreateRectangle(2508, 2138, 20, 400, 0, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::ABOVE, 0xFFFF);
     sensorBelow = App->physics->CreateRectangle(2750, 2478, 350, 20, 5, true, this, ColliderType::SENSOR, STATIC, PhysicCategory::BELOW, 0xFFFF);
 
-    //cone
-    obstaclesManager.SpawnCone({ 5550.0f, 2320.0f });
-    //explosive
-    obstaclesManager.SpawnExplosive({ 1000, 1220 });
+    //cones
+    obstaclesManager.SpawnCone({ 5780, 2802 });
+    //explosives
+    obstaclesManager.SpawnExplosive({ 6052, 4187 });
+    //puddles
+    obstaclesManager.SpawnPuddle({ 6364, 3567 });
     std::sort(allCars.begin(), allCars.end(),
         [](Car* a, Car* b)
         {

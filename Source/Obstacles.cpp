@@ -110,6 +110,18 @@ Obstacle* ObstaclesManager::SpawnExplosive(const Vector2& pos)
     return explosive;
 }
 
+Obstacle* ObstaclesManager::SpawnPuddle(const Vector2& pos)
+{
+    Puddle* puddle = new Puddle();
+    puddle->Start(pos);
+
+    if (puddleTexture.id != 0)
+        puddle->SetTexture(puddleTexture);
+
+    obstacles.push_back(puddle);
+    return puddle;
+}
+
 void ObstaclesManager::SetConeTexture(const Texture& tex)
 {
     coneTexture = tex;
@@ -118,6 +130,11 @@ void ObstaclesManager::SetConeTexture(const Texture& tex)
 void ObstaclesManager::SetExplosiveTexture(const Texture& tex)
 {
     explosiveTexture = tex;
+}
+
+void ObstaclesManager::SetPuddleTexture(const Texture& tex)
+{
+    puddleTexture = tex;
 }
 
 // ---------------- Cone ----------------
@@ -407,3 +424,54 @@ void Explosive::CleanUp()
 }
 
 
+// ---------------- Puddle ----------------
+Puddle::Puddle()
+{
+}
+
+void Puddle::Start(const Vector2& spawnPoint)
+{
+    radius = 30.0f;
+    position = spawnPoint;
+    
+    body = App->physics->CreateCircle(
+        (int)spawnPoint.x,
+        (int)spawnPoint.y,
+        (int)radius,
+        true,   // SENSOR
+        this,
+        ColliderType::OBSTACLE,
+        STATIC
+    );
+
+    toBeRemoved = false;
+}
+
+void Puddle::OnCollision(PhysBody* physA, PhysBody* physB)
+{
+    PhysBody* other = (physA->ctype == ColliderType::OBSTACLE) ? physB : physA;
+
+    if (other->ctype != ColliderType::CAR &&
+        other->ctype != ColliderType::WHEEL)
+        return;
+
+    Car* car = dynamic_cast<Car*>(other->listener);
+    if (!car) return;
+
+    car->SetGripMultiplier(0.15f);
+    car->SetPuddleTimer(1.0f);
+    car->SetInPuddle(true);
+}
+
+void Puddle::Draw()
+{
+    if (body && body->body)
+    {
+        int x, y;
+        body->GetPosition(x, y);
+
+        DrawCircleLines(x, y, radius, BLUE);
+        Color fill = { 0, 120, 255, 90 };
+        DrawCircle(x, y, radius, fill);
+    }
+}

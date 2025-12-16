@@ -44,8 +44,12 @@ public:
     virtual void OnCollision(PhysBody* physA, PhysBody* physB) {}
     virtual void EndCollision(PhysBody* physA, PhysBody* physB) {}
 
-    void Destroy();
+    void SetPuddleTimer(float puddleTimer) { this->puddleTimer = puddleTimer; }
+    void SetGripMultiplier(float gripMultiplier) { this->gripMultiplier = gripMultiplier; }
 
+    void Destroy();
+    void SetInPuddle(bool inPuddle) { this->inPuddle = inPuddle; }
+    
 protected:
     void ApplyPhysic();
     void ApplyCarForces(PhysBody* chassis, std::vector<PhysBody*>& wheels, float motor, float steer, float maxMotorForce, float maxSteerAngle, float lateralGripFactor);
@@ -54,6 +58,7 @@ protected:
     void ActivateAbility();
     void UpdateAbility(float dt);
     void EndAbility();
+
 
 protected:
 
@@ -78,6 +83,10 @@ protected:
     const float maxMotorForce = 20.0f;      // Max force
     const float maxSteerAngle = 0.4f;       // Max steering
     const float lateralGripFactor = 1.0f;   // Grip
+    //oil puddle
+    float gripMultiplier = 1.0f; // current multiplier: esto cambiará cuando el coche pise aceite
+    float puddleTimer = 0.0f;
+    bool inPuddle = false;
 
     bool doingAbility = false;
     float abilityTimer = 0.0f;
