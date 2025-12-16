@@ -216,6 +216,9 @@ private:
 	Sound sf75Win;
 	Sound lMcQueenWin;
 
+	Sound plusOneLap;
+	Sound endRace;
+
 	Texture2D lightTexture;
 	Animator lightAnim;
 
@@ -225,6 +228,7 @@ private:
 	bool f1anthemPlayed = false;
 	bool winSoundPlayed = false;
 	bool lightOutPlayed = false;
+	bool lightStarted = false;
 	
 	float lightTimer = 0.0f;		// Set the time for starting the race
 

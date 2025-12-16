@@ -32,6 +32,9 @@ bool ModuleGame::Start()
     sf75Win = LoadSound("Assets/SFX/Smooth_Operator.wav");
     lMcQueenWin = LoadSound("Assets/SFX/Life_is_a_highway.wav");
 
+    plusOneLap = LoadSound("Assets/SFX/Radio_Sound.wav");
+    endRace = LoadSound("Assets/SFX/Victory.wav");
+
     tAMR23 = LoadTexture("Assets/Textures/Cars/AMR23.png");
     tR25 = LoadTexture("Assets/Textures/Cars/R25.png");
     tGP2Engine = LoadTexture("Assets/Textures/Cars/GP2Engine.png");
@@ -89,6 +92,7 @@ bool ModuleGame::Start()
 
     gameState = GameState::Opening;
     SetMusicVolume(coconutMall, 0.6f);
+    SetSoundVolume(plusOneLap, 1.5f);
 
     return true;
 }
@@ -327,6 +331,9 @@ void ModuleGame::GameplayStart()
     gamePlayStart = true;
     initialMenuStart = false;
 
+    lightStarted = false;
+    showLap = 1;
+
     StopSound(f1anthem);
 }
 
@@ -339,12 +346,17 @@ void ModuleGame::TrafficLight()
         lightOutPlayed = true;
     }
 
+    if (!lightStarted)
+    {
+        lightAnim.Play("lightsOut", true);
+        lightStarted = true;
+    }
+
     float dt = GetFrameTime();
 
     lightTimer += dt;
 
     lightAnim.Update(dt);
-    lightAnim.Play("lightsOut");
     lightAnim.Draw({ SCREEN_WIDTH / 2, 200 }, 1);
 
     if (lightTimer > 6.0f)
@@ -870,6 +882,9 @@ void ModuleGame::OnCollision(PhysBody* physA, PhysBody* physB)
             LOG("Checkered flag detected (player)");
             if (playerPtr->checkpoint == checkpoints.size() || playerPtr->lap == 0)
             {
+                if (playerPtr->lap != player.totalLaps) PlaySound(plusOneLap);
+                else PlaySound(endRace);
+
                 playerPtr->lap++;
                 playerPtr->checkpoint = 0;
 
