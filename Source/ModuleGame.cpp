@@ -64,6 +64,9 @@ bool ModuleGame::Start()
     TexCone = LoadTexture("Assets/Textures/Obstacles/cone.png");
     obstaclesManager.SetConeTexture(TexCone);
 
+    TexPuddle = LoadTexture("Assets/Textures/Obstacles/Puddle.png");
+    obstaclesManager.SetPuddleTexture(TexPuddle);
+
     TexExplosive = LoadTexture("Assets/Textures/Obstacles/Barril.png");
     obstaclesManager.SetExplosiveTexture(TexExplosive);
 
@@ -295,8 +298,13 @@ void ModuleGame::GameplayStart()
     obstaclesManager.SpawnExplosive({ 2716, 1201 });
     obstaclesManager.SpawnExplosive({ 566, 607});
 
-    //puddles
-    obstaclesManager.SpawnPuddle({ 6364, 3567 });
+    // Puddles
+    obstaclesManager.SpawnPuddle({ 6364, 3557 });
+    obstaclesManager.SpawnPuddle({ 4959, 2861 });
+    obstaclesManager.SpawnPuddle({ 1982, 1510 });
+    obstaclesManager.SpawnPuddle({ 254, 873 });
+    obstaclesManager.SpawnPuddle({ 4641, 1408 });
+    obstaclesManager.SpawnPuddle({ 3176, 2298 });
     
     std::sort(allCars.begin(), allCars.end(),
         [](Car* a, Car* b)

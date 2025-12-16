@@ -202,6 +202,7 @@ private:
 	//Obstacles
 	Texture2D TexCone;
 	Texture2D TexExplosive;
+	Texture2D TexPuddle;
 
 	Music coconutMall;
 	Sound f1anthem;

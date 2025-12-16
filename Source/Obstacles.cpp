@@ -215,7 +215,7 @@ void Cone::Draw()
         return;
     }
 
-    DrawRectangle((int)(x - width * 0.5f), (int)(y - height * 0.5f), (int)width, (int)height, RED);
+    //DrawRectangle((int)(x - width * 0.5f), (int)(y - height * 0.5f), (int)width, (int)height, RED);
 }
 
 // ---------------- Explosive ----------------
@@ -346,7 +346,7 @@ void Explosive::UpdateExplosion(float dt)
         if (dist <= explosionRadius_m)
         {
             b2Vec2 dir;
-            if (dist <= 0.0001f) dir = b2Vec2(0.0f, -1.0f);
+            if (dist <= 0.0005f) dir = b2Vec2(0.0f, -1.0f);
             else dir = b2Vec2(dx / dist, dy / dist);
 
             float factor = 1.0f - (dist / maxR_m);
@@ -472,8 +472,6 @@ void Puddle::Draw()
         int x, y;
         body->GetPosition(x, y);
 
-        DrawCircleLines(x, y, radius, BLUE);
-        Color fill = { 0, 120, 255, 90 };
-        DrawCircle(x, y, radius, fill);
+        DrawTextureEx(texture, { (float)x - texture.width, (float)y - texture.height}, 0.0f, 2, WHITE);
     }
 }
