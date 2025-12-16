@@ -259,7 +259,7 @@ void Explosive::Start(const Vector2& spawnPoint)
         false,
         this,
         ColliderType::OBSTACLE,
-        DYNAMIC
+        STATIC
     );
 
     if (!body || !body->body) return;
