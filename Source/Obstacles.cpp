@@ -177,13 +177,26 @@ void Cone::Start(const Vector2& spawnPoint)
     b->SetAngularDamping(0.8f);
 }
 
+
+
 void Cone::OnCollision(PhysBody* physA, PhysBody* physB)
 {
-    switch (physB->ctype) {
-    case ColliderType::CAR:
-        LOG("Collided with Car");
-        physA->body->ApplyLinearImpulseToCenter(1.1f * physB->body->GetLinearVelocity(), true);
-        break;
+    if (physB->ctype == ColliderType::CAR)
+    {
+        b2Vec2 carVel = physB->body->GetLinearVelocity();
+
+        // Direction
+        b2Vec2 dir = carVel;
+        if (dir.LengthSquared() > 0.0f)
+            dir.Normalize();
+
+        float coneMass = physA->body->GetMass();
+
+        // Intensity
+        float strength = 3.0f;
+
+        impulseToApply = strength * coneMass * dir;
+        pendingImpulse = true;
     }
 }
 
@@ -195,7 +208,14 @@ void Cone::EndCollision(PhysBody* physA, PhysBody* physB)
         break;
     }
 }
-
+void Cone::Update(float dt)
+{
+    if (pendingImpulse && body && body->body)
+    {
+        body->body->ApplyLinearImpulseToCenter(impulseToApply, true);
+        pendingImpulse = false;
+    }
+}
 void Cone::Draw()
 {
     if (!body) return;
@@ -239,7 +259,7 @@ void Explosive::Start(const Vector2& spawnPoint)
         false,
         this,
         ColliderType::OBSTACLE,
-        DYNAMIC
+        STATIC
     );
 
     if (!body || !body->body) return;
