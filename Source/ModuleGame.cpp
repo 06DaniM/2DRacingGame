@@ -73,7 +73,7 @@ bool ModuleGame::Start()
     App->renderer->DrawInsideCamera = [this]() { if (gameState == GameState::Gameplay) DrawGameplay(); };
     App->renderer->DrawAfterBegin = [this]() { DrawUI(); };
 
-    gameState = GameState::InitialMenu;
+    gameState = GameState::Opening;
 
     return true;
 }
@@ -313,7 +313,7 @@ void ModuleGame::TrafficLight()
 
         lightsOut = true;
         for (auto car : allCars)
-            //car->canMove = false;
+            car->canMove = true;
         lightTimer = 0.0f;
     }
 }
