@@ -4,6 +4,8 @@
 #include "Listener.h"
 #include "Globals.h"
 #include "Animation.h"
+#include <box2d/box2d.h>
+
 
 struct PhysBody;
 class Car;
@@ -65,9 +67,13 @@ class Cone : public Obstacle
 public:
     Cone();
     void Start(const Vector2& spawnPoint) override;
+    void Update(float dt) override;
     void OnCollision(PhysBody* physA, PhysBody* physB) override;
     void EndCollision(PhysBody* physA, PhysBody* physB) override;
     void Draw() override;
+private:
+    bool pendingImpulse = false;
+    b2Vec2 impulseToApply;
 };
 
 class Explosive : public Obstacle
