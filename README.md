@@ -29,13 +29,14 @@ A fun pixel art F1 game with a top-down view where you race around a single trac
 | Backward | S|
 | Left | A |
 | Right | D |
+| Nitro | Space Bar |
 
 ## Developers
 
  - Daniel Martínez - {Main Programmer}
  - Adria Puerto - {Main Programmer}
- - Héctor Tarroja - {Main Adapter/Designer}
- - Adam Molina - {Main Re-Drawer}
+ - Héctor Tarroja - {Main Designer / Artist}
+ - Adam Molina - {Main Envoirment Artist}
 
 ## License
 
@@ -44,4 +45,4 @@ This project is licensed under an unmodified MIT license, which is an OSI-certif
 {AdditionalLicenses}
 
 ## Github Link
-https://github.com/06DaniM/Pinball/tree/main
+https://github.com/06DaniM/2DRacingGame/tree/main
