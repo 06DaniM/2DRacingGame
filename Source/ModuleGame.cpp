@@ -99,7 +99,6 @@ bool ModuleGame::Start()
 
 update_status ModuleGame::Update()
 {
-    if (IsKeyPressed(KEY_F5)) player.lap = 99999;
     float dt = GetFrameTime();
 
     switch (gameState)
@@ -863,6 +862,41 @@ bool ModuleGame::CleanUp()
     UnloadTexture(tPinkMerc);
     UnloadTexture(tR25);
     UnloadTexture(tRB21);
+    UnloadTexture(openingScreen);
+    UnloadTexture(initialMenuScreen);
+    UnloadTexture(endScreen);
+    UnloadTexture(amr23Stats);
+    UnloadTexture(r25Stats);
+    UnloadTexture(w11Stats);
+    UnloadTexture(gp2Stats);
+    UnloadTexture(pinkMercStats);
+    UnloadTexture(mc4Stats);
+    UnloadTexture(mc22Stats);
+    UnloadTexture(rb21Stats);
+    UnloadTexture(leftArrow);
+    UnloadTexture(rightArrow);
+    UnloadTexture(track);
+    UnloadTexture(leaderBoard);
+    UnloadTexture(nitro);
+    UnloadTexture(TexCone);
+    UnloadTexture(TexExplosive);
+    UnloadTexture(TexPuddle);
+    UnloadTexture(lightTexture);
+
+    UnloadMusicStream(coconutMall);
+
+    UnloadSound(f1anthem);
+    UnloadSound(lightOut);
+    UnloadSound(amr23Win);
+    UnloadSound(r25Win);
+    UnloadSound(rb21Win);
+    UnloadSound(rp20Win);
+    UnloadSound(mc33Win);
+    UnloadSound(w11Win);
+    UnloadSound(sf75Win);
+    UnloadSound(lMcQueenWin);
+    UnloadSound(plusOneLap);
+    UnloadSound(endRace);
 
     return true;
 }

@@ -24,6 +24,7 @@ void Obstacle::CleanUp()
         App->physics->DestroyBody(body);
         body = nullptr;
     }
+    UnloadTexture(texture);
 }
 
 void Obstacle::Draw()
